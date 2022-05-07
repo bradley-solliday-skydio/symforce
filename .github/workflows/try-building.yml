@@ -1,0 +1,18 @@
+name: Try building
+on: [push]
+jobs:
+  See-if-I-can-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      #- run: conda install -c conda-forge doxygen gmp pandoc
+      - run: sudo apt-get install doxygen libgmp-dev pandoc
+      # pip must be at least version 20.3 to avoid issues with jinja2 in requirements.txt
+      - run: pip install --upgrade pip
+      - run: pip install -r requirements.txt
+      - run: |
+          mkdir build
+          cd build
+          cmake ..
+          make -j $(nproc)
+          cd ..

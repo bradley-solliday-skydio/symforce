@@ -1,0 +1,11 @@
+name: Check versions
+on: [push]
+jobs:
+  I-believe-this-is-the-name-of-the-job:
+    runs-on: ubuntu-latest
+    steps:
+      - run: pip --version
+      - run: cmake --version
+      - run: python3 --version
+      - run: conda --version
+      - run: ls .

@@ -1,0 +1,15 @@
+name: Which dir
+on: [push]
+jobs:
+  Learn-about-run-command:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      #- run: conda install -c conda-forge doxygen gmp pandoc
+      - run: |
+          pwd
+          mkdir build
+          cd build
+          pwd
+      - run: |
+          pwd

@@ -1,0 +1,11 @@
+name: Learn about matrices
+on: [push]
+jobs:
+  matrix-stuff:
+    runs-on: ubuntu-20.04
+    strategy:
+        matrix:
+          val: ["apple", "bannana", "cherry"]
+    steps:
+      - name: Print matrix val
+        run: echo ${{ matrix.val }}

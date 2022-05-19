@@ -2,10 +2,11 @@ name: pip3-ubuntu-build
 on: [push]
 jobs:
   pip3-ubuntu-build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         compiler: [{C: gcc-7, CXX: g++-7}, {C: gcc-11, CXX: g++-11}]
+      fail-fast: false
     steps:
       - uses: actions/checkout@v3
       #- run: conda install -c conda-forge doxygen gmp pandoc

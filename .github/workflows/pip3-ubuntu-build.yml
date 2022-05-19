@@ -16,7 +16,7 @@ jobs:
         run: |
           mkdir build
           cd build
-          cmake .. -DSYMFORCE_BUILD_EXAMPLES=OFF
+          cmake ..
           make -j $(nproc)
       - name: Run C++ tests
         run: |

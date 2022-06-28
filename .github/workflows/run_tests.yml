@@ -1,0 +1,69 @@
+name: Run Tests
+
+on: [push] # do I want to make this on push to PR or something/
+
+jobs:
+  test-ubuntu:
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [
+          { os: ubuntu-18.04, CXX: g++-7,    python: python3.8},
+          { os: ubuntu-18.04, CXX: g++-12,   python: python3.8 },
+          { os: ubuntu-18.04, CXX: clang-10, python: python3.8 },
+          { os: ubuntu-22.04, CXX: g++-12,   python: python3.10 },
+          { os: ubuntu-22.04, CXX: clang-14, python: python3.10 }
+        ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      #- run: conda install -c conda-forge doxygen gmp pandoc
+      - name: Install Build Dependencies
+        run: |
+            sudo apt-get update
+            sudo apt-get install -y \
+              doxygen \
+              libgmp-dev \
+              pandoc \
+              ${{ matrix.config.CXX }}
+            sudo apt-get install -y \
+              libboost-dev \
+              libboost-serialization-dev \
+              libboost-system-dev \
+              libboost-filesystem-dev \
+              libboost-thread-dev \
+              libboost-program-options-dev \
+              libboost-date-time-dev \
+              libboost-timer-dev \
+              libboost-chrono-dev \
+              libboost-regex-dev \
+              libgoogle-glog-dev \
+              libeigen3-dev
+      # pip must be at least version 20.3 to avoid issues with jinja2 in requirements.txt
+      - name: Update and install python and pip
+        run: |
+          sudo apt-get install ${{ matrix.config.python }}-dev -y
+          ${{ matrix.config.python }} -m pip install --upgrade pip
+          ${{ matrix.config.python }} -m pip install --upgrade setuptools
+          ${{ matrix.config.python }} -m pip --version
+      - name: Install python dependencies
+        run: ${{ matrix.config.python }} -m pip install -r dev_requirements.txt
+      - name: Run cmake build
+        run: |
+          mkdir build
+          cd build
+          cmake .. \
+            -D CMAKE_CXX_COMPILER=${{ matrix.config.CXX }} \
+            -D SYMFORCE_PYTHON_OVERRIDE=${{ matrix.config.python }} \
+            -D SYMFORCE_BUILD_BENCHMARKS=ON
+          make -j $(nproc)
+      - name: Run C++ tests
+        run: |
+          cd build
+          ctest
+      - name: Run python tests
+        run: |
+          ${{ matrix.config.python }} -m pip install build/lcmtypes/python2.7
+          export PYTHON=${{ matrix.config.python }}
+          make -j2 test

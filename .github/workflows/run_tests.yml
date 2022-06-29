@@ -37,23 +37,25 @@ jobs:
               libgoogle-glog-dev \
               libeigen3-dev
       # pip must be at least version 20.3 to avoid issues with jinja2 in requirements.txt
-      - name: Install python dependencies
-        run: pip3 install -r dev_requirements.txt
-      #  uses: py-actions/py-dependency-install@v3
-      - name: Run cmake build
-        run: |
-          mkdir build
-          cd build
-          cmake .. \
-            -D CMAKE_C_COMPILER=${{ matrix.compiler.C }} \
-            -D CMAKE_CXX_COMPILER=${{ matrix.compiler.CXX }} \
-            -D SYMFORCE_BUILD_BENCHMARKS=ON
-          make -j $(nproc)
-      - name: Run C++ tests
-        run: |
-          cd build
-          ctest
-      - name: Run python tests
-        run: |
-          pip3 install build/lcmtypes/python2.7
-          make -j2 test
+      - name: Get pip version
+        run: pip3 --version
+      #- name: Install python dependencies
+      #  run: pip3 install -r dev_requirements.txt
+      ##  uses: py-actions/py-dependency-install@v3
+      #- name: Run cmake build
+      #  run: |
+      #    mkdir build
+      #    cd build
+      #    cmake .. \
+      #      -D CMAKE_C_COMPILER=${{ matrix.compiler.C }} \
+      #      -D CMAKE_CXX_COMPILER=${{ matrix.compiler.CXX }} \
+      #      -D SYMFORCE_BUILD_BENCHMARKS=ON
+      #    make -j $(nproc)
+      #- name: Run C++ tests
+      #  run: |
+      #    cd build
+      #    ctest
+      #- name: Run python tests
+      #  run: |
+      #    pip3 install build/lcmtypes/python2.7
+      #    make -j2 test

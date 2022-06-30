@@ -1,0 +1,72 @@
+name: Run Tests
+
+on: [push] # do I want to make this on push to PR or something/
+
+jobs:
+  test-ubuntu:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-18.04, ubuntu-20.04]
+        compiler: [{C: gcc-7, CXX: g++-7}]
+        #compiler: [{C: gcc-7, CXX: g++-7}, {C: gcc-11, CXX: g++-11}]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      #- run: conda install -c conda-forge doxygen gmp pandoc
+      - name: Install Build Dependencies
+        run: |
+            sudo apt-get install -y \
+              doxygen \
+              libgmp-dev \
+              pandoc \
+              ${{ matrix.compiler.C }} \
+              ${{ matrix.compiler.CXX }}
+            sudo apt-get install -y \
+              libboost-dev \
+              libboost-serialization-dev \
+              libboost-system-dev \
+              libboost-filesystem-dev \
+              libboost-thread-dev \
+              libboost-program-options-dev \
+              libboost-date-time-dev \
+              libboost-timer-dev \
+              libboost-chrono-dev \
+              libboost-regex-dev \
+              libgoogle-glog-dev \
+              libeigen3-dev
+      # pip must be at least version 20.3 to avoid issues with jinja2 in requirements.txt
+      - name: Update and install python and pip
+        run: |
+          sudo apt-get install python3.8-dev -y
+          python3.8 -m pip install --upgrade pip
+          python3.8 -m pip install --upgrade setuptools
+          python3.8 -m pip --version
+      - name: Install python dependencies
+        run: python3.8 -m pip install -r dev_requirements.txt
+      #  uses: py-actions/py-dependency-install@v3
+      - name: install tree
+        run: sudo apt-get install tree -y
+      - name: Check for gen/python/build
+        run: |
+          tree gen/python
+      - name: Run cmake build
+        run: |
+          mkdir build
+          cd build
+          cmake .. \
+            -D CMAKE_C_COMPILER=${{ matrix.compiler.C }} \
+            -D CMAKE_CXX_COMPILER=${{ matrix.compiler.CXX }} \
+            -D SYMFORCE_PYTHON_OVERRIDE=python3.8 \
+            -D SYMFORCE_BUILD_BENCHMARKS=ON
+          make -j $(nproc)
+      - name: Run C++ tests
+        run: |
+          cd build
+          ctest
+      - name: Run python tests
+        run: |
+          python3.8 -m pip install build/lcmtypes/python2.7
+          export PYTHON=python3.8
+          make -j2 test

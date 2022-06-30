@@ -4,13 +4,22 @@ on: [push] # do I want to make this on push to PR or something/
 
 jobs:
   test-ubuntu:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.config.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-18.04, ubuntu-20.04]
-        compiler: [{C: gcc-7, CXX: g++-7}]
-        #compiler: [{C: gcc-7, CXX: g++-7}, {C: gcc-11, CXX: g++-11}]
+        config: [
+          { os: ubuntu-18.04, CXX: g++-7,    python: python3.8 },
+          { os: ubuntu-18.04, CXX: g++-8,    python: python3.8 },
+          { os: ubuntu-18.04, CXX: clang++-10, python: python3.8 },
+          { os: ubuntu-20.04, CXX: g++-7,    python: python3.8 },
+          { os: ubuntu-20.04, CXX: clang++-10, python: python3.8 },
+          { os: ubuntu-20.04, CXX: g++-9,   python: python3.9 },
+          { os: ubuntu-20.04, CXX: clang++-12, python: python3.9 },
+          { os: ubuntu-22.04, CXX: g++-9,    python: python3.8 },
+          { os: ubuntu-22.04, CXX: g++-9,    python: python3.9 },
+          { os: ubuntu-22.04, CXX: g++-9,    python: python3.10 },
+        ]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -21,8 +30,7 @@ jobs:
               doxygen \
               libgmp-dev \
               pandoc \
-              ${{ matrix.compiler.C }} \
-              ${{ matrix.compiler.CXX }}
+              ${{ matrix.config.CXX }}
             sudo apt-get install -y \
               libboost-dev \
               libboost-serialization-dev \
@@ -39,26 +47,18 @@ jobs:
       # pip must be at least version 20.3 to avoid issues with jinja2 in requirements.txt
       - name: Update and install python and pip
         run: |
-          sudo apt-get install python3.8-dev -y
-          python3.8 -m pip install --upgrade pip
-          python3.8 -m pip install --upgrade setuptools
-          python3.8 -m pip --version
+          sudo apt-get install ${{ matrix.config.python }}-dev -y
+          ${{ matrix.config.python }} -m pip install --upgrade pip
+          ${{ matrix.config.python }} -m pip install --upgrade setuptools
       - name: Install python dependencies
-        run: python3.8 -m pip install -r dev_requirements.txt
-      #  uses: py-actions/py-dependency-install@v3
-      - name: install tree
-        run: sudo apt-get install tree -y
-      - name: Check for gen/python/build
-        run: |
-          tree gen/python
+        run: ${{ matrix.config.python }} -m pip install -r dev_requirements.txt
       - name: Run cmake build
         run: |
           mkdir build
           cd build
           cmake .. \
-            -D CMAKE_C_COMPILER=${{ matrix.compiler.C }} \
-            -D CMAKE_CXX_COMPILER=${{ matrix.compiler.CXX }} \
-            -D SYMFORCE_PYTHON_OVERRIDE=python3.8 \
+            -D CMAKE_CXX_COMPILER=${{ matrix.config.CXX }} \
+            -D SYMFORCE_PYTHON_OVERRIDE=${{ matrix.config.python }} \
             -D SYMFORCE_BUILD_BENCHMARKS=ON
           make -j $(nproc)
       - name: Run C++ tests
@@ -67,6 +67,6 @@ jobs:
           ctest
       - name: Run python tests
         run: |
-          python3.8 -m pip install build/lcmtypes/python2.7
-          export PYTHON=python3.8
+          ${{ matrix.config.python }} -m pip install build/lcmtypes/python2.7
+          export PYTHON=${{ matrix.config.python }}
           make -j2 test

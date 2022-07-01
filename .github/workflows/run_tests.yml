@@ -15,10 +15,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      # - Installing software-properties-common adds add-apt-repository
       - name: Update install tools
         run: |
           sudo apt-get update
-          sudo apt-get install -y software-properties-common
+          sudo apt-get install -y software-properties-common curl
 
       # - ppa:ubuntu-toolchain-r/test is needed to have compiler available on all ubuntu versions
       # - Installing g++-x also installs gcc-x
@@ -33,9 +34,9 @@ jobs:
       - name: Install python
         run: |
           sudo add-apt-repository -y ppa:deadsnakes/ppa
-          sudo apt-get install -y ${{ matrix.python }}-dev
-          ${{ matrix.python }} -m pip install --upgrade pip
-          ${{ matrix.python }} -m pip install --upgrade setuptools
+          sudo apt-get install -y ${{ matrix.python }}-dev ${{ matrix.python }}-distutils
+          curl https://bootstrap.pypa.io/get-pip.py | ${{ matrix.python }}
+          pip install --upgrade setuptools
 
       - name: Install general build dependencies
         run: |
@@ -62,7 +63,7 @@ jobs:
 
       # OLD: pip must be at least version 20.3 to avoid issues with jinja2 in requirements.txt
       - name: Install python dependencies
-        run: ${{ matrix.python }} -m pip install -r dev_requirements.txt
+        run: pip install -r dev_requirements.txt
 
       - name: Run cmake build
         run: |
@@ -87,7 +88,7 @@ jobs:
       # - The Makefile uses the python version stored in env var PYTHON
       - name: Run python tests
         run: |
-          ${{ matrix.python }} -m pip install build/lcmtypes/python2.7
+          pip install build/lcmtypes/python2.7
           export PYTHONPATH=$PYTHONPATH:$(pwd); \
           ${{ matrix.python }} test/symforce_requirements_test.py --update; \
           export PYTHON=${{ matrix.python }}

@@ -104,6 +104,8 @@ def _find_symengine() -> ModuleType:
 
     symengine_path_candidates = list(
         symengine_install_dir.glob("lib/python3*/site-packages/symengine/__init__.py")
+    ) + list(
+        symengine_install_dir.glob("local/lib/python3*/dist-packages/symengine/__init__.py")
     )
     if len(symengine_path_candidates) != 1:
         raise ImportError(

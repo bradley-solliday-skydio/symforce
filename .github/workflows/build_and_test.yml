@@ -1,9 +1,11 @@
-name: Run Tests
+name: CI
 
-on: [push] # do I want to make this on push to PR or something/
+on:
+  pull_request:
+    types: [synchronize]
 
 jobs:
-  test-ubuntu:
+  test-on-ubuntu:
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

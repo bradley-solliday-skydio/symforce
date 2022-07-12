@@ -11,8 +11,13 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-18.04, ubuntu-20.04]
-        compiler: [{C: gcc-7, CXX: g++-7}, {C: gcc-11, CXX: g++-11}]
         python: [python3.8, python3.9, python3.10]
+        compiler: [
+          {C: gcc-5, CXX: g++-5, repos: [
+            '"deb http://dk.archive.ubuntu.com/ubuntu/ xenial main"',
+            '"deb http://dk.archive.ubuntu.com/ubuntu/ xenial universe"',
+          ]},
+          {C: gcc-11, CXX: g++-11, repos: ['"ppa:ubuntu-toolchain-r/test"']}]
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -23,11 +28,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y software-properties-common curl
 
-      # - ppa:ubuntu-toolchain-r/test is needed to have compiler available on all ubuntu versions
+      # - Adding matrix.compiler.repos is needed to have compiler available on all ubuntu versions
       # - Installing g++-x also installs gcc-x
       - name: Install C and CXX compilers
         run: |
-          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          for repo in ${{ join(matrix.compiler.repos, ' ') }}
+          do
+            sudo add-apt-repository -y "$repo"
+          done
           sudo apt-get install -y ${{ matrix.compiler.CXX }}
 
       # - ppa:deadsnakes/ppa is needed to have python3.x-dev available on all ubuntu versions

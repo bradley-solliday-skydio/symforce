@@ -13,10 +13,10 @@ jobs:
         os: [ubuntu-18.04, ubuntu-20.04]
         compiler: [
           {C: gcc-5, CXX: g++-5, repos: [
-            "deb http://dk.archive.ubuntu.com/ubuntu/ xenial main",
-            "deb http://dk.archive.ubuntu.com/ubuntu/ xenial universe",
+            '"deb http://dk.archive.ubuntu.com/ubuntu/ xenial main"',
+            '"deb http://dk.archive.ubuntu.com/ubuntu/ xenial universe"',
           ]},
-          {C: gcc-11, CXX: g++-11, repos: ["ppa:ubuntu-toolchain-r/test"]}]
+          {C: gcc-11, CXX: g++-11, repos: ['"ppa:ubuntu-toolchain-r/test"']}]
         python: [python3.8, python3.9, python3.10]
     steps:
       - name: Checkout
@@ -32,7 +32,7 @@ jobs:
       # - Installing g++-x also installs gcc-x
       - name: Install C and CXX compilers
         run: |
-          for repo in ${{ matrix.compiler.repos }}
+          for repo in ${{ join(matrix.compiler.repos, ' ') }}
           do
             sudo add-apt-repository -y "$repo"
           done

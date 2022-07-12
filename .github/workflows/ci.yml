@@ -68,14 +68,12 @@ jobs:
 
       - name: Run cmake build
         run: |
-          mkdir build
-          cd build
-          cmake .. \
+          cmake -B build \
             -D CMAKE_C_COMPILER=${{ matrix.compiler.C }} \
             -D CMAKE_CXX_COMPILER=${{ matrix.compiler.CXX }} \
             -D SYMFORCE_PYTHON_OVERRIDE=${{ matrix.python }} \
             -D SYMFORCE_BUILD_BENCHMARKS=ON
-          make -j $(nproc)
+          cmake --build build -j $(nproc)
 
       - name: Run C++ tests
         run: |

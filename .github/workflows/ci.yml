@@ -11,7 +11,12 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-18.04, ubuntu-20.04]
-        compiler: [{C: gcc-7, CXX: g++-7}, {C: gcc-11, CXX: g++-11}]
+        compiler: [
+          {C: gcc-5, CXX: g++-5, repos: [
+            "deb http://dk.archive.ubuntu.com/ubuntu/ xenial main",
+            "deb http://dk.archive.ubuntu.com/ubuntu/ xenial universe",
+          ]},
+          {C: gcc-11, CXX: g++-11, repos: ["ppa:ubuntu-toolchain-r/test"]}]
         python: [python3.8, python3.9, python3.10]
     steps:
       - name: Checkout
@@ -27,7 +32,10 @@ jobs:
       # - Installing g++-x also installs gcc-x
       - name: Install C and CXX compilers
         run: |
-          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          for repo in ${{ matrix.compiler.repos }}
+          do
+            sudo add-apt-repository -y "$repo"
+          done
           sudo apt-get install -y ${{ matrix.compiler.CXX }}
 
       # - ppa:deadsnakes/ppa is needed to have python3.x-dev available on all ubuntu versions

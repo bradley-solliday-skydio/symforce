@@ -1,0 +1,15 @@
+symforce.benchmarks.matrix\_multiplication package
+==================================================
+
+.. automodule:: symforce.benchmarks.matrix_multiplication
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.benchmarks.matrix_multiplication.generate_matrix_multiplication_benchmark

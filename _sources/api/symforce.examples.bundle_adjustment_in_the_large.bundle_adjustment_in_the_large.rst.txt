@@ -1,0 +1,7 @@
+symforce.examples.bundle\_adjustment\_in\_the\_large.bundle\_adjustment\_in\_the\_large module
+==============================================================================================
+
+.. automodule:: symforce.examples.bundle_adjustment_in_the_large.bundle_adjustment_in_the_large
+   :members:
+   :undoc-members:
+   :show-inheritance:

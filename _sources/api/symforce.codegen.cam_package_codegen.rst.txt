@@ -1,0 +1,7 @@
+symforce.codegen.cam\_package\_codegen module
+=============================================
+
+.. automodule:: symforce.codegen.cam_package_codegen
+   :members:
+   :undoc-members:
+   :show-inheritance:

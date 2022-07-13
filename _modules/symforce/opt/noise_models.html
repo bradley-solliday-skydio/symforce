@@ -1,0 +1,550 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>symforce.opt.noise_models &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for symforce.opt.noise_models</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># SymForce - Copyright 2022, Skydio, Inc.</span>
+<span class="c1"># This source code is under the Apache 2.0 license found in the LICENSE file.</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">abstractmethod</span>
+
+<span class="kn">import</span> <span class="nn">symforce.symbolic</span> <span class="k">as</span> <span class="nn">sf</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">typing</span> <span class="k">as</span> <span class="n">T</span>
+
+
+<div class="viewcode-block" id="NoiseModel"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.NoiseModel">[docs]</a><span class="k">class</span> <span class="nc">NoiseModel</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for whitening unwhitened residuals and/or computing their associated error in a</span>
+<span class="sd">    least-squares problem.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="NoiseModel.whiten"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.NoiseModel.whiten">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">whiten</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unwhitened_residual</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="o">.</span><span class="n">MatrixT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="o">.</span><span class="n">MatrixT</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Whiten the residual vector.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="NoiseModel.reduce"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.NoiseModel.reduce">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">reduce</span><span class="p">(</span><span class="n">whitened_residual</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="o">.</span><span class="n">MatrixT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Take the sum of squares of the residual.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">whitened_residual</span><span class="o">.</span><span class="n">squared_norm</span><span class="p">()</span> <span class="o">/</span> <span class="mi">2</span></div>
+
+<div class="viewcode-block" id="NoiseModel.error"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.NoiseModel.error">[docs]</a>    <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unwhitened_residual</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="o">.</span><span class="n">MatrixT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a scalar error.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">whiten</span><span class="p">(</span><span class="n">unwhitened_residual</span><span class="p">))</span></div></div>
+
+
+<div class="viewcode-block" id="ScalarNoiseModel"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.ScalarNoiseModel">[docs]</a><span class="k">class</span> <span class="nc">ScalarNoiseModel</span><span class="p">(</span><span class="n">NoiseModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Base class for noise models that apply a whitening function to each element of the unwhitened</span>
+<span class="sd">    residual. I.e. if f() is the whiten_scalar function, each element of the whitened residual can be</span>
+<span class="sd">    written as:</span>
+<span class="sd">        whitened_residual[i] = f(unwhitened_residual[i])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ScalarNoiseModel.whiten_scalar"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.ScalarNoiseModel.whiten_scalar">[docs]</a>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">whiten_scalar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span> <span class="n">bounded_away_from_zero</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A scalar-valued whitening function which is applied to each element of the unwhitened</span>
+<span class="sd">        residual.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x: A single element of the unwhitened residual</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="ScalarNoiseModel.whiten"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.ScalarNoiseModel.whiten">[docs]</a>    <span class="k">def</span> <span class="nf">whiten</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unwhitened_residual</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="o">.</span><span class="n">MatrixT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="o">.</span><span class="n">MatrixT</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Whiten the unwhitened residual vector by applying `whiten_scalar` to each element.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">unwhitened_residual</span><span class="o">.</span><span class="n">applyfunc</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">whiten_scalar</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ScalarNoiseModel.whiten_norm"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.ScalarNoiseModel.whiten_norm">[docs]</a>    <span class="k">def</span> <span class="nf">whiten_norm</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">residual</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="o">.</span><span class="n">MatrixT</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">epsilon</span><span class="p">()</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="o">.</span><span class="n">MatrixT</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Whiten the norm of the residual vector.</span>
+
+<span class="sd">        Let f(x) be the whitening function here, and let x be vector of residuals.</span>
+<span class="sd">        We compute the whitened residual vector as w(x) = f(||x||)/||x|| * x.</span>
+<span class="sd">        Then, the overall residual is later computed as ||w(x)|| == f(||x||),</span>
+<span class="sd">        and so we&#39;re minimizing the whitened norm of the full residual</span>
+<span class="sd">        for each point.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">norm</span> <span class="o">=</span> <span class="n">residual</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">epsilon</span><span class="p">)</span>
+
+        <span class="c1"># Because `norm` is sqrt(epsilon) at 0, we tell `whiten_scalar` the function is bounded</span>
+        <span class="c1"># away from zero, allowing for the function to ignore epsilons used to avoid singularities</span>
+        <span class="c1"># at x = 0 if they exist, reducing unneeded ops. The result is also proportional to</span>
+        <span class="c1"># sqrt(epsilon), so the division is safe</span>
+        <span class="n">whitened_norm</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">whiten_scalar</span><span class="p">(</span><span class="n">norm</span><span class="p">,</span> <span class="n">bounded_away_from_zero</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">scale_factor</span> <span class="o">=</span> <span class="n">whitened_norm</span> <span class="o">/</span> <span class="n">norm</span>
+        <span class="k">return</span> <span class="n">scale_factor</span> <span class="o">*</span> <span class="n">residual</span></div></div>
+
+
+<div class="viewcode-block" id="IsotropicNoiseModel"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.IsotropicNoiseModel">[docs]</a><span class="k">class</span> <span class="nc">IsotropicNoiseModel</span><span class="p">(</span><span class="n">ScalarNoiseModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Isotropic noise model; equivalent to multiplying the squared residual by a scalar. The cost</span>
+<span class="sd">    used in the optimization is:</span>
+
+<span class="sd">        cost = 0.5 * information * unwhitened_residual.T * unwhitened_residual</span>
+
+<span class="sd">    such that:</span>
+<span class="sd">        cost = 0.5 * whitened_residual.T * whitened_residual</span>
+
+<span class="sd">    The whitened residual is:</span>
+<span class="sd">        whitened_residual = sqrt(information) * unwhitened_residual</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        scalar_information: Scalar by which the least-squares error will be multiplied. In the</span>
+<span class="sd">            context of probability theory, the information is the inverse of the variance of the</span>
+<span class="sd">            unwhitened residual. The information represents the weight given to a specific</span>
+<span class="sd">            unwhitened residual relative to other residuals used in the least-squares optimization.</span>
+<span class="sd">        scalar_sqrt_information: Square-root of scalar_information. If scalar_sqrt_information is</span>
+<span class="sd">            specified, we avoid needing to take the square root of scalar_information. Note that</span>
+<span class="sd">            only one of scalar_information and scalar_sqrt_information needs to be specified.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="IsotropicNoiseModel.__init__"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.IsotropicNoiseModel.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">scalar_information</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">scalar_sqrt_information</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">scalar_sqrt_information</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># User has given the square root information, so we can avoid taking the square root</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scalar_sqrt_information</span> <span class="o">=</span> <span class="n">scalar_sqrt_information</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">scalar_information</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">),</span> <span class="s1">&#39;Either &quot;scalar_information&quot; or &quot;scalar_sqrt_information&quot; must be provided.&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">scalar_sqrt_information</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">scalar_information</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IsotropicNoiseModel.from_variance"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.IsotropicNoiseModel.from_variance">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_variance</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">variance</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IsotropicNoiseModel</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an IsotropicNoiseModel given a variance. Typically used when we treat the residual</span>
+<span class="sd">        as a random variable with known variance, and wish to weight its cost according to the</span>
+<span class="sd">        information gained by that measurement (i.e. the inverse of the variance).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            variance: Typically the variance of the residual elements. Results in cost</span>
+<span class="sd">                cost = 0.5 * (1 / variance) * unwhitened_residual.T * unwhitened_residual</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">scalar_information</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="n">variance</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IsotropicNoiseModel.from_sigma"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.IsotropicNoiseModel.from_sigma">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_sigma</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">standard_deviation</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">IsotropicNoiseModel</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an IsotropicNoiseModel given a standard deviation. Typically used when we treat the</span>
+<span class="sd">        residual as a random variable with known standard deviation, and wish to weight its cost</span>
+<span class="sd">        according to the information gained by that measurement (i.e. the inverse of the variance).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            standard_deviation: The standard deviation of the residual elements. Results in</span>
+<span class="sd">                cost = 0.5 * (1 / sigma^2) * unwhitened_residual.T * unwhitened_residual</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">IsotropicNoiseModel</span><span class="p">(</span><span class="n">scalar_sqrt_information</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="n">standard_deviation</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="IsotropicNoiseModel.whiten_scalar"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.IsotropicNoiseModel.whiten_scalar">[docs]</a>    <span class="k">def</span> <span class="nf">whiten_scalar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span> <span class="n">bounded_away_from_zero</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Multiplies a single element of the unwhitened residual by `sqrt(information)` so</span>
+<span class="sd">        that the least-squares cost associated with the element is scaled by `information`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x: Single element of the unwhitened residual</span>
+<span class="sd">            bounded_away_from_zero: True if x is guaranteed to not be zero. Typically used to avoid</span>
+<span class="sd">                extra ops incurred by using epsilons to avoid singularities at x = 0 when it&#39;s</span>
+<span class="sd">                known that x != 0. However, this argument is unused because there is no singularity</span>
+<span class="sd">                at x = 0 for this whitening function.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">scalar_sqrt_information</span> <span class="o">*</span> <span class="n">x</span></div></div>
+
+
+<div class="viewcode-block" id="DiagonalNoiseModel"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.DiagonalNoiseModel">[docs]</a><span class="k">class</span> <span class="nc">DiagonalNoiseModel</span><span class="p">(</span><span class="n">NoiseModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Noise model with diagonal weighting matrix. The cost used in the optimization is:</span>
+
+<span class="sd">        cost = 0.5 * unwhitened_residual.T * sf.diag(information_diag) * unwhitened_residual</span>
+<span class="sd">    where `information_diag` is a vector of scalars representing the relative importance of each</span>
+<span class="sd">    element of the unwhitened residual.</span>
+
+<span class="sd">    The total cost is then:</span>
+<span class="sd">        cost = 0.5 * whitened_residual.T * whitened_residual</span>
+
+<span class="sd">    Thus, the whitened residual is:</span>
+<span class="sd">        whitened_residual = sf.diag(sqrt_information_diag) * unwhitened_residual</span>
+<span class="sd">    where `sqrt_information_diag` is the element-wise square root of `information_diag`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        information_diag: List of elements of the diagonal of the information matrix. In the context</span>
+<span class="sd">            of probability theory, this vector represents the inverse of the variance of each</span>
+<span class="sd">            element of the unwhitened residual, assuming that each element is an independent</span>
+<span class="sd">            random variable.</span>
+<span class="sd">        sqrt_information_diag: Element-wise square-root of information_diag. If specified, we avoid</span>
+<span class="sd">            needing to take the square root of each element of information_diag. Note that only one</span>
+<span class="sd">            of information_diag and sqrt_information_diag needs to be specified.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DiagonalNoiseModel.__init__"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.DiagonalNoiseModel.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">information_diag</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sqrt_information_diag</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sqrt_information_diag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># User has given the square root information, so we can avoid taking the square root</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sqrt_information_matrix</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">sqrt_information_diag</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="n">information_diag</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="p">),</span> <span class="s1">&#39;Either &quot;information_diag&quot; or &quot;sqrt_information_diag&quot; must be provided.&#39;</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">sqrt_information_matrix</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">information_diag</span><span class="p">)</span><span class="o">.</span><span class="n">applyfunc</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">sqrt</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DiagonalNoiseModel.from_variances"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.DiagonalNoiseModel.from_variances">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_variances</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">variances</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">DiagonalNoiseModel</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an DiagonalNoiseModel given a list of variances of each element of the unwhitened</span>
+<span class="sd">        residual. Typically used when we treat the unwhitened residual as a sequence of independent</span>
+<span class="sd">        random variables with known variances.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            variances: List of the variances of each element of the unwhitened residual</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">information_diag</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span> <span class="o">/</span> <span class="n">v</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">variances</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="DiagonalNoiseModel.from_sigmas"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.DiagonalNoiseModel.from_sigmas">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_sigmas</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">standard_deviations</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">DiagonalNoiseModel</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns an DiagonalNoiseModel given a list of standard deviations of each element of the</span>
+<span class="sd">        unwhitened residual. Typically used when we treat the unwhitened residual as a sequence of</span>
+<span class="sd">        independent random variables with known standard deviations.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            standard_deviations: List of the standard deviations of each element of the unwhitened</span>
+<span class="sd">                residual</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">sqrt_information_diag</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span> <span class="o">/</span> <span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">standard_deviations</span><span class="p">])</span></div>
+
+<div class="viewcode-block" id="DiagonalNoiseModel.whiten"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.DiagonalNoiseModel.whiten">[docs]</a>    <span class="k">def</span> <span class="nf">whiten</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">unwhitened_residual</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="o">.</span><span class="n">MatrixT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="o">.</span><span class="n">MatrixT</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">T</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="o">.</span><span class="n">MatrixT</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">sqrt_information_matrix</span> <span class="o">*</span> <span class="n">unwhitened_residual</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="PseudoHuberNoiseModel"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.PseudoHuberNoiseModel">[docs]</a><span class="k">class</span> <span class="nc">PseudoHuberNoiseModel</span><span class="p">(</span><span class="n">ScalarNoiseModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A smooth loss function that behaves like the L2 loss for small x and the L1 loss for large x.</span>
+<span class="sd">    The cost used in the least-squares optimization will be:</span>
+<span class="sd">        cost = sum( pseudo_huber_loss(unwhitened_residual[i]) )</span>
+<span class="sd">        cost = 0.5 * whitened_residual.T * whitened_residual</span>
+<span class="sd">    where the sum is taken over the elements of the unwhitened residual.</span>
+
+<span class="sd">    This noise model applies the square-root of the pseudo-huber loss function to each element of</span>
+<span class="sd">    the unwhitened residual such that the resulting cost used in the least-squares problem is the</span>
+<span class="sd">    pseudo-huber loss. The pseudo-huber loss is defined as:</span>
+<span class="sd">        pseudo_huber_loss(x) = delta^2 * ( sqrt( 1 + scalar_information * (x/delta)^2 ) - 1)</span>
+
+<span class="sd">    The whitened residual is then:</span>
+<span class="sd">        whitened_residual[i] = sqrt( 2 * pseudo_huber_loss(unwhitened_residual[i]) )</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        delta: Controls the point at which the loss function transitions from the L2 to L1 loss.</span>
+<span class="sd">            Must be greater than zero.</span>
+<span class="sd">        scalar_information: Constant scalar weight that changes the steepness of the loss function.</span>
+<span class="sd">            Can be considered the inverse of the variance of an element of the unwhitened residual.</span>
+<span class="sd">        epsilon: Small value used to handle singularity at x = 0.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="PseudoHuberNoiseModel.__init__"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.PseudoHuberNoiseModel.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">delta</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span>
+        <span class="n">scalar_information</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span>
+        <span class="n">epsilon</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">epsilon</span><span class="p">(),</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta</span> <span class="o">=</span> <span class="n">delta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scalar_information</span> <span class="o">=</span> <span class="n">scalar_information</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span> <span class="o">=</span> <span class="n">epsilon</span></div>
+
+<div class="viewcode-block" id="PseudoHuberNoiseModel.pseudo_huber_error"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.PseudoHuberNoiseModel.pseudo_huber_error">[docs]</a>    <span class="k">def</span> <span class="nf">pseudo_huber_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the pseudo-huber cost function error for the argument x.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x: argument to return the cost for.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta</span> <span class="o">**</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">scalar_information</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PseudoHuberNoiseModel.whiten_scalar"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.PseudoHuberNoiseModel.whiten_scalar">[docs]</a>    <span class="k">def</span> <span class="nf">whiten_scalar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span> <span class="n">bounded_away_from_zero</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a whitening function to a single element of the unwhitened residual such that the</span>
+<span class="sd">        cost associated with the element in the least-sqaures cost function is the Pseudo-Huber</span>
+<span class="sd">        loss function.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x: Single element of the unwhitened residual</span>
+<span class="sd">            bounded_away_from_zero: True if x is guaranteed to not be zero. Typically used to avoid</span>
+<span class="sd">                extra ops incurred by using epsilons to avoid singularities at x = 0 when it&#39;s</span>
+<span class="sd">                known that x != 0.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">epsilon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">epsilon</span>
+        <span class="k">if</span> <span class="n">bounded_away_from_zero</span><span class="p">:</span>
+            <span class="n">epsilon</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">sf</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">pseudo_huber_error</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">)</span> <span class="o">-</span> <span class="n">sf</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">epsilon</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="BarronNoiseModel"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.BarronNoiseModel">[docs]</a><span class="k">class</span> <span class="nc">BarronNoiseModel</span><span class="p">(</span><span class="n">ScalarNoiseModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Noise model adapted from:</span>
+<span class="sd">        Barron, Jonathan T. &quot;A general and adaptive robust loss function.&quot; Proceedings of the</span>
+<span class="sd">        IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2019.</span>
+
+<span class="sd">    This noise model applies a modified version of the &quot;practical implementation&quot; from Appendix B</span>
+<span class="sd">    of the paper to each scalar element of an unwhitened residual. The Barron loss function is</span>
+<span class="sd">    defined as:</span>
+<span class="sd">        barron_loss(x) = delta^2 * (b/d) * (( scalar_information * (x/delta)^2 / b + 1)^(d/2) - 1)</span>
+<span class="sd">    where</span>
+<span class="sd">        b = |alpha - 2| + epsilon</span>
+<span class="sd">        d = alpha + epsilon if alpha &gt;= 0 else alpha - epsilon</span>
+<span class="sd">    Here delta controls the point at which the loss function transitions from quadratic to robust.</span>
+<span class="sd">    This is different from the original Barron loss function, and is designed to match the pseudo-</span>
+<span class="sd">    huber loss function.</span>
+
+<span class="sd">    Thus, the cost used in the optimization will be:</span>
+<span class="sd">        cost = sum( barron_loss(unwhitened_residual[i]) )</span>
+<span class="sd">        cost = 0.5 * whitened_residual.T * whitened_residual</span>
+<span class="sd">    where the sum is taken over the elements of the unwhitened residual.</span>
+
+<span class="sd">    Thus, the whitened residual is:</span>
+<span class="sd">        whitened_residual[i] = sqrt( 2 * barron_loss(unwhitened_residual[i]) )</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        alpha: Controls shape and convexity of the loss function. Notable values:</span>
+<span class="sd">            alpha = 2 -&gt; L2 loss</span>
+<span class="sd">            alpha = 1 -&gt; Pseudo-huber loss</span>
+<span class="sd">            alpha = 0 -&gt; Cauchy loss</span>
+<span class="sd">            alpha = -2 -&gt; Geman-McClure loss</span>
+<span class="sd">            alpha = -inf -&gt; Welsch loss</span>
+<span class="sd">        delta: Determines the transition point from quadratic to robust. Similar to &quot;delta&quot; as used</span>
+<span class="sd">            by the pseudo-huber loss function.</span>
+<span class="sd">        scalar_information: Scalar representing the inverse of the variance of an element of the</span>
+<span class="sd">            unwhitened residual. Conceptually, we use &quot;scalar_information&quot; to whiten (in a</span>
+<span class="sd">            probabalistic sense) the unwhitened residual before passing it through the Barron loss.</span>
+<span class="sd">        x_epsilon: Small value used for handling the singularity at x == 0.</span>
+<span class="sd">        alpha_epsilon: Small value used for handling singularities around alpha.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="BarronNoiseModel.__init__"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.BarronNoiseModel.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span>
+        <span class="n">scalar_information</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span>
+        <span class="n">x_epsilon</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span>
+        <span class="n">delta</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">alpha_epsilon</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delta</span> <span class="o">=</span> <span class="n">delta</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">scalar_information</span> <span class="o">=</span> <span class="n">scalar_information</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x_epsilon</span> <span class="o">=</span> <span class="n">x_epsilon</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha_epsilon</span> <span class="o">=</span> <span class="n">x_epsilon</span> <span class="k">if</span> <span class="n">alpha_epsilon</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">alpha_epsilon</span></div>
+
+<div class="viewcode-block" id="BarronNoiseModel.compute_alpha_from_mu"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.BarronNoiseModel.compute_alpha_from_mu">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">compute_alpha_from_mu</span><span class="p">(</span><span class="n">mu</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Transform mu, which ranges from 0-&gt;1, to alpha by alpha=2-1/(1-mu). This transformation</span>
+<span class="sd">        means alpha will range from 1 to -inf, so that the noise model starts as a pseudo-huber and</span>
+<span class="sd">        goes to a robust Welsch cost.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            mu: ranges from 0-&gt;1</span>
+<span class="sd">            epsilon: small value to avoid numerical instability</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            sf.Scalar: alpha for use in the BarronNoiseModel construction</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">alpha</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">mu</span> <span class="o">+</span> <span class="n">epsilon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">alpha</span></div>
+
+<div class="viewcode-block" id="BarronNoiseModel.barron_error"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.BarronNoiseModel.barron_error">[docs]</a>    <span class="k">def</span> <span class="nf">barron_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the barron cost function error for the argument x.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x: argument to return the cost for.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Barron loss at value x</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">b</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_epsilon</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">+</span> <span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">sign_no_zero</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">alpha_epsilon</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">delta</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="o">*</span> <span class="p">(</span><span class="n">b</span> <span class="o">/</span> <span class="n">d</span><span class="p">)</span>
+            <span class="o">*</span> <span class="p">(((</span><span class="bp">self</span><span class="o">.</span><span class="n">scalar_information</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">b</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="p">(</span><span class="n">d</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="BarronNoiseModel.whiten_scalar"><a class="viewcode-back" href="../../../api/symforce.opt.noise_models.html#symforce.opt.noise_models.BarronNoiseModel.whiten_scalar">[docs]</a>    <span class="k">def</span> <span class="nf">whiten_scalar</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span> <span class="n">bounded_away_from_zero</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies a whitening function to a single element of the unwhitened residual such that the</span>
+<span class="sd">        cost associated with the element in the least-sqaures cost function is the Barron loss</span>
+<span class="sd">        function (weighted by self.weight).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            x: Single element of the unwhitened residual</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x_epsilon</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">x_epsilon</span>
+        <span class="k">if</span> <span class="n">bounded_away_from_zero</span><span class="p">:</span>
+            <span class="n">x_epsilon</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="n">sf</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">barron_error</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">x_epsilon</span><span class="p">)</span> <span class="o">-</span> <span class="n">sf</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x_epsilon</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  <li><a href="../../symforce.html">symforce</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

@@ -1,0 +1,7 @@
+symforce.examples.bundle\_adjustment\_fixed\_size.build\_values module
+======================================================================
+
+.. automodule:: symforce.examples.bundle_adjustment_fixed_size.build_values
+   :members:
+   :undoc-members:
+   :show-inheritance:

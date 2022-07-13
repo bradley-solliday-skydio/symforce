@@ -1,0 +1,16 @@
+sym.ops.pose3 package
+=====================
+
+.. automodule:: sym.ops.pose3
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   sym.ops.pose3.group_ops
+   sym.ops.pose3.lie_group_ops

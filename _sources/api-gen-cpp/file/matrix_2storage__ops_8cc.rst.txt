@@ -1,0 +1,5 @@
+File storage_ops.cc
+===================
+
+.. doxygenfile:: storage_ops.cc
+   :project: api-gen-cpp

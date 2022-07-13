@@ -1,0 +1,5 @@
+File sparse_cholesky_solver.h
+=============================
+
+.. doxygenfile:: sparse_cholesky_solver.h
+   :project: api-cpp

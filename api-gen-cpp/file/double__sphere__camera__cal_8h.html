@@ -1,0 +1,441 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>File double_sphere_camera_cal.h &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="File double_sphere_reprojection_delta.h" href="double__sphere__reprojection__delta_8h.html" />
+    <link rel="prev" title="File double_sphere_camera_cal.cc" href="double__sphere__camera__cal_8cc.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="file-double-sphere-camera-cal-h">
+<h1>File double_sphere_camera_cal.h<a class="headerlink" href="#file-double-sphere-camera-cal-h" title="Permalink to this headline">¶</a></h1>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv43sym">
+<span class="target" id="namespacesym"></span><span class="k"><span class="pre">namespace</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">sym</span></span></span><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-typedefs">Typedefs</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym22DoubleSphereCameraCaldE">
+<span class="target" id="double__sphere__camera__cal_8h_1af3ad6f4c2f97aa772bb4a1849b8df5e7"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">DoubleSphereCameraCald</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4I0EN3sym21DoubleSphereCameraCalE" title="sym::DoubleSphereCameraCal"><span class="n"><span class="pre">DoubleSphereCameraCal</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">double</span></span><span class="p"><span class="pre">&gt;</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym22DoubleSphereCameraCalfE">
+<span class="target" id="double__sphere__camera__cal_8h_1a8704c9b9bfa176c59932cb612fa7d0a7"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">DoubleSphereCameraCalf</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4I0EN3sym21DoubleSphereCameraCalE" title="sym::DoubleSphereCameraCal"><span class="n"><span class="pre">DoubleSphereCameraCal</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">float</span></span><span class="p"><span class="pre">&gt;</span></span><br /></dt>
+<dd></dd></dl>
+
+</div>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym21DoubleSphereCameraCalE">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ScalarType</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1DoubleSphereCameraCal"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">DoubleSphereCameraCal</span></span></span><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;double_sphere_camera_cal.h&gt;</em></div>
+<p>Autogenerated C++ implementation of &lt;class ‘symforce.cam.double_sphere_camera_cal.DoubleSphereCameraCal’&gt;.</p>
+<p><a class="reference internal" href="camera_8h.html#classsym_1_1Camera"><span class="std std-ref">Camera</span></a> model where a point is consecutively projected onto two unit spheres with centers shifted by <code class="docutils literal notranslate"><span class="pre">xi</span></code>, then projected into the image plane using the pinhole model shifted by <code class="docutils literal notranslate"><span class="pre">alpha</span> <span class="pre">/</span> <span class="pre">(1</span> <span class="pre">-</span> <span class="pre">alpha)</span></code>.</p>
+<p>There are important differences here from the derivation in the paper and in other open-source packages with double sphere models; see notebooks/double_sphere_derivation.ipynb for more information.</p>
+<p>The storage for this class is: [ fx fy cx cy xi alpha ]</p>
+<p>TODO(aaron): Create double_sphere_derivation.ipynb</p>
+<p>TODO(aaron): Probably want to check that values and derivatives are correct (or at least sane) on the valid side of the is_valid boundary</p>
+<p>Reference: <a class="reference external" href="https://vision.in.tum.de/research/vslam/double-sphere">https://vision.in.tum.de/research/vslam/double-sphere</a> </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym21DoubleSphereCameraCal6ScalarE">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1ae48104db9bffb80377ebed66abc65fb6"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Scalar</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4I0EN3sym21DoubleSphereCameraCalE" title="sym::DoubleSphereCameraCal::ScalarType"><span class="n"><span class="pre">ScalarType</span></span></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym21DoubleSphereCameraCal4SelfE">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1a434951a9994f76101c547ac1276924f6"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Self</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4I0EN3sym21DoubleSphereCameraCalE" title="sym::DoubleSphereCameraCal"><span class="n"><span class="pre">DoubleSphereCameraCal</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym21DoubleSphereCameraCal7DataVecE">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1a9dbca146dd486fc7ce6dd43db481f22b"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">DataVec</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">6</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym21DoubleSphereCameraCal21DoubleSphereCameraCalERKN5Eigen6MatrixI6ScalarXL2EEXL1EEEERKN5Eigen6MatrixI6ScalarXL2EEXL1EEEEK6ScalarK6Scalar">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1ab54410a3d65abcfef2308abbc907ca86"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">DoubleSphereCameraCal</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">focal_length</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">principal_point</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">xi</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">alpha</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym21DoubleSphereCameraCal21DoubleSphereCameraCalERK7DataVec">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1ab92b1aaf948803f00c50275de4e032ab"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">explicit</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">DoubleSphereCameraCal</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal7DataVecE" title="sym::DoubleSphereCameraCal::DataVec"><span class="n"><span class="pre">DataVec</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">data</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym21DoubleSphereCameraCal4DataEv">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1af42a3bd3d6b3f1db567fec878db4deb1"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal7DataVecE" title="sym::DoubleSphereCameraCal::DataVec"><span class="n"><span class="pre">DataVec</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">Data</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym21DoubleSphereCameraCal9ToStorageEPC6Scalar">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1a033ac827290eb81794cadb6bd7e83ba0"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ToStorage</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">vec</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym21DoubleSphereCameraCal11FocalLengthEv">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1af073f9e32e12a1eb0ef1a4df0cc3ea73"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">FocalLength</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Return the focal length. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym21DoubleSphereCameraCal14PrincipalPointEv">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1ac5252f81f2a39de54487c1fd3119e013"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PrincipalPoint</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Return the principal point. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym21DoubleSphereCameraCal20PixelFromCameraPointERKN5Eigen6MatrixI6ScalarXL3EEXL1EEEEK6ScalarPC6Scalar">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1a137571aadd6a19bfa8e83acf05fa01a8"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PixelFromCameraPoint</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">point</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">epsilon</span></span>, <a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">is_valid</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">nullptr</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Project a 3D point in the camera frame into 2D pixel coordinates.</p>
+<p>Return: pixel: (x, y) coordinate in pixels if valid is_valid: 1 if the operation is within bounds else 0 </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym21DoubleSphereCameraCal33PixelFromCameraPointWithJacobiansERKN5Eigen6MatrixI6ScalarXL3EEXL1EEEEK6ScalarPC6ScalarPCN5Eigen6MatrixI6ScalarXL2EEXL6EEEEPCN5Eigen6MatrixI6ScalarXL2EEXL3EEEE">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1ab3fbb425594f802a0e759e2d19ce7a48"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PixelFromCameraPointWithJacobians</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">point</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">epsilon</span></span>, <a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">is_valid</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">nullptr</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">6</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">pixel_D_cal</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">nullptr</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">pixel_D_point</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">nullptr</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Project a 3D point in the camera frame into 2D pixel coordinates.</p>
+<p>Return: pixel: (x, y) coordinate in pixels if valid is_valid: 1 if the operation is within bounds else 0 pixel_D_cal: Derivative of pixel with respect to intrinsic calibration parameters pixel_D_point: Derivative of pixel with respect to point </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym21DoubleSphereCameraCal18CameraRayFromPixelERKN5Eigen6MatrixI6ScalarXL2EEXL1EEEEK6ScalarPC6Scalar">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1a381cae56b1c9ad3890649818e213f3a7"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CameraRayFromPixel</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">pixel</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">epsilon</span></span>, <a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">is_valid</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">nullptr</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Backproject a 2D pixel coordinate into a 3D ray in the camera frame.</p>
+<p>TODO(hayk): Add a normalize boolean argument? Like in <code class="docutils literal notranslate"><span class="pre">cam.Camera</span></code></p>
+<p>Return: camera_ray: The ray in the camera frame (NOT normalized) is_valid: 1 if the operation is within bounds else 0 </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym21DoubleSphereCameraCal31CameraRayFromPixelWithJacobiansERKN5Eigen6MatrixI6ScalarXL2EEXL1EEEEK6ScalarPC6ScalarPCN5Eigen6MatrixI6ScalarXL3EEXL6EEEEPCN5Eigen6MatrixI6ScalarXL3EEXL2EEEE">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1adff273bd5922a9a88160a569de66d4aa"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CameraRayFromPixelWithJacobians</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">pixel</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">epsilon</span></span>, <a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">is_valid</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">nullptr</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">6</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">point_D_cal</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">nullptr</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">point_D_pixel</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">nullptr</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Backproject a 2D pixel coordinate into a 3D ray in the camera frame.</p>
+<p>Return: camera_ray: The ray in the camera frame (NOT normalized) is_valid: 1 if the operation is within bounds else 0 point_D_cal: Derivative of point with respect to intrinsic calibration parameters point_D_pixel: Derivation of point with respect to pixel </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym21DoubleSphereCameraCal8IsApproxERK4SelfK6Scalar">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1a8108fac892f30f81d555dfe1f9f39333"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">IsApprox</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal4SelfE" title="sym::DoubleSphereCameraCal::Self"><span class="n"><span class="pre">Self</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">b</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">tol</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0ENK3sym21DoubleSphereCameraCal4CastE21DoubleSphereCameraCalI8ToScalarEv">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ToScalar</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1DoubleSphereCameraCal_1ab2c23678261fc6f74b740ab1e2a2d7d6"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4I0EN3sym21DoubleSphereCameraCalE" title="sym::DoubleSphereCameraCal"><span class="n"><span class="pre">DoubleSphereCameraCal</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4I0ENK3sym21DoubleSphereCameraCal4CastE21DoubleSphereCameraCalI8ToScalarEv" title="sym::DoubleSphereCameraCal::Cast::ToScalar"><span class="n"><span class="pre">ToScalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Cast</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym21DoubleSphereCameraCaleqERK21DoubleSphereCameraCal">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1a8bd6f535be66b0024472c48e67d5c78b"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">==</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4I0EN3sym21DoubleSphereCameraCalE" title="sym::DoubleSphereCameraCal"><span class="n"><span class="pre">DoubleSphereCameraCal</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">rhs</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-static-functions">Public Static Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym21DoubleSphereCameraCal10StorageDimEv">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1a485849a05920c97b90b171ddcfad7a80"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">constexpr</span></span><span class="w"> </span><span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">StorageDim</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym21DoubleSphereCameraCal11FromStorageEPCK6Scalar">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1a1598355352c6c0ff84650422053fae8e"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4I0EN3sym21DoubleSphereCameraCalE" title="sym::DoubleSphereCameraCal"><span class="n"><span class="pre">DoubleSphereCameraCal</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">FromStorage</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal6ScalarE" title="sym::DoubleSphereCameraCal::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">vec</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-attributes">Protected Attributes</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym21DoubleSphereCameraCal5data_E">
+<span class="target" id="classsym_1_1DoubleSphereCameraCal_1abcd97e4761ebabfe89981bc96f3532bd"></span><a class="reference internal" href="../class/classsym_1_1DoubleSphereCameraCal.html#_CPPv4N3sym21DoubleSphereCameraCal7DataVecE" title="sym::DoubleSphereCameraCal::DataVec"><span class="n"><span class="pre">DataVec</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">data_</span></span></span><a class="headerlink" href="#_CPPv4N3sym21DoubleSphereCameraCal5data_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../classlist.html">Class list</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../filelist.html">File list</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="atan__camera__cal_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atan__camera__cal_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atan__camera__cal_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atan__camera__cal_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atan__camera__cal_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atan__camera__cal_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atan__camera__cal_8cc.html">File atan_camera_cal.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atan__camera__cal_8h.html">File atan_camera_cal.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atan__reprojection__delta_8h.html">File atan_reprojection_delta.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="between__factor__matrix31_8h.html">File between_factor_matrix31.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="between__factor__pose2_8h.html">File between_factor_pose2.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="between__factor__pose3_8h.html">File between_factor_pose3.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="between__factor__pose3__position_8h.html">File between_factor_pose3_position.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="between__factor__pose3__rotation_8h.html">File between_factor_pose3_rotation.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="between__factor__pose3__translation__norm_8h.html">File between_factor_pose3_translation_norm.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="between__factor__rot2_8h.html">File between_factor_rot2.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="between__factor__rot3_8h.html">File between_factor_rot3.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="camera_8h.html">File camera.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double__sphere__camera__cal_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double__sphere__camera__cal_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double__sphere__camera__cal_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double__sphere__camera__cal_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double__sphere__camera__cal_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double__sphere__camera__cal_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double__sphere__camera__cal_8cc.html">File double_sphere_camera_cal.cc</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">File double_sphere_camera_cal.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double__sphere__reprojection__delta_8h.html">File double_sphere_reprojection_delta.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epsilon_8cc.html">File epsilon.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epsilon_8h.html">File epsilon.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__camera__cal_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__camera__cal_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__camera__cal_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__camera__cal_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__camera__cal_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__camera__cal_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__camera__cal_8cc.html">File equirectangular_camera_cal.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__camera__cal_8h.html">File equirectangular_camera_cal.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__reprojection__delta_8h.html">File equirectangular_reprojection_delta.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inverse__range__landmark__atan__reprojection__error__factor_8h.html">File inverse_range_landmark_atan_reprojection_error_factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inverse__range__landmark__double__sphere__reprojection__error__factor_8h.html">File inverse_range_landmark_double_sphere_reprojection_error_factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inverse__range__landmark__equirectangular__reprojection__error__factor_8h.html">File inverse_range_landmark_equirectangular_reprojection_error_factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inverse__range__landmark__linear__reprojection__error__factor_8h.html">File inverse_range_landmark_linear_reprojection_error_factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inverse__range__landmark__polynomial__reprojection__error__factor_8h.html">File inverse_range_landmark_polynomial_reprojection_error_factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inverse__range__landmark__prior__factor_8h.html">File inverse_range_landmark_prior_factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inverse__range__landmark__spherical__reprojection__error__factor_8h.html">File inverse_range_landmark_spherical_reprojection_error_factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__camera__cal_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__camera__cal_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__camera__cal_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__camera__cal_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__camera__cal_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__camera__cal_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__camera__cal_8cc.html">File linear_camera_cal.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__camera__cal_8h.html">File linear_camera_cal.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__reprojection__delta_8h.html">File linear_reprojection_delta.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrix_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrix_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrix_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrix_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrix_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrix_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__camera__cal_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__camera__cal_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__camera__cal_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__camera__cal_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__camera__cal_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__camera__cal_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__camera__cal_8cc.html">File polynomial_camera_cal.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__camera__cal_8h.html">File polynomial_camera_cal.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__reprojection__delta_8h.html">File polynomial_reprojection_delta.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose2_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose2_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose2_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose2_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose2_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose2_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose2_8cc.html">File pose2.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose2_8h.html">File pose2.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose3_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose3_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose3_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose3_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose3_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose3_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose3_8cc.html">File pose3.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose3_8h.html">File pose3.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="posed__camera_8h.html">File posed_camera.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prior__factor__matrix31_8h.html">File prior_factor_matrix31.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prior__factor__pose2_8h.html">File prior_factor_pose2.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prior__factor__pose3_8h.html">File prior_factor_pose3.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prior__factor__pose3__position_8h.html">File prior_factor_pose3_position.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prior__factor__pose3__rotation_8h.html">File prior_factor_pose3_rotation.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prior__factor__rot2_8h.html">File prior_factor_rot2.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prior__factor__rot3_8h.html">File prior_factor_rot3.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot2_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot2_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot2_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot2_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot2_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot2_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot2_8cc.html">File rot2.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot2_8h.html">File rot2.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot3_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot3_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot3_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot3_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot3_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot3_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot3_8cc.html">File rot3.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot3_8h.html">File rot3.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalar_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalar_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalar_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalar_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalar_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalar_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spherical__camera__cal_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spherical__camera__cal_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spherical__camera__cal_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spherical__camera__cal_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spherical__camera__cal_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spherical__camera__cal_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spherical__camera__cal_8cc.html">File spherical_camera_cal.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spherical__camera__cal_8h.html">File spherical_camera_cal.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spherical__reprojection__delta_8h.html">File spherical_reprojection_delta.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="type__ops_8h.html">File type_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="typedefs_8h.html">File typedefs.h</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../filelist.html">File list</a><ul>
+      <li>Previous: <a href="double__sphere__camera__cal_8cc.html" title="previous chapter">File double_sphere_camera_cal.cc</a></li>
+      <li>Next: <a href="double__sphere__reprojection__delta_8h.html" title="next chapter">File double_sphere_reprojection_delta.h</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/api-gen-cpp/file/double__sphere__camera__cal_8h.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

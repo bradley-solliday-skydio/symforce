@@ -1,0 +1,7 @@
+symforce.codegen.geo\_factors\_codegen module
+=============================================
+
+.. automodule:: symforce.codegen.geo_factors_codegen
+   :members:
+   :undoc-members:
+   :show-inheritance:

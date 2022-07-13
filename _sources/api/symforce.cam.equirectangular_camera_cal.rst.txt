@@ -1,0 +1,7 @@
+symforce.cam.equirectangular\_camera\_cal module
+================================================
+
+.. automodule:: symforce.cam.equirectangular_camera_cal
+   :members:
+   :undoc-members:
+   :show-inheritance:

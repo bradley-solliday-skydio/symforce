@@ -1,0 +1,5 @@
+File pose3.cc
+=============
+
+.. doxygenfile:: pose3.cc
+   :project: api-gen-cpp

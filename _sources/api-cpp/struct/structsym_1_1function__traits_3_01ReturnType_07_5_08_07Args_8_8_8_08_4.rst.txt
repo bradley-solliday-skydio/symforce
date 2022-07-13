@@ -1,0 +1,5 @@
+Struct sym::function_traits< ReturnType(*)(Args...)>
+====================================================
+
+.. doxygenstruct:: sym::function_traits< ReturnType(*)(Args...)>
+   :project: api-cpp

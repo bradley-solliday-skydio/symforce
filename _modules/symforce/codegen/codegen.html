@@ -1,0 +1,918 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>symforce.codegen.codegen &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for symforce.codegen.codegen</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># SymForce - Copyright 2022, Skydio, Inc.</span>
+<span class="c1"># This source code is under the Apache 2.0 license found in the LICENSE file.</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">import</span> <span class="nn">enum</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">textwrap</span>
+
+<span class="kn">import</span> <span class="nn">symforce.symbolic</span> <span class="k">as</span> <span class="nn">sf</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">jacobian_helpers</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">ops</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">python_util</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">typing</span> <span class="k">as</span> <span class="n">T</span>
+<span class="kn">from</span> <span class="nn">symforce.values</span> <span class="kn">import</span> <span class="n">Values</span>
+<span class="kn">from</span> <span class="nn">symforce.codegen</span> <span class="kn">import</span> <span class="n">template_util</span>
+<span class="kn">from</span> <span class="nn">symforce.codegen</span> <span class="kn">import</span> <span class="n">codegen_util</span>
+<span class="kn">from</span> <span class="nn">symforce.codegen</span> <span class="kn">import</span> <span class="n">codegen_config</span>
+<span class="kn">from</span> <span class="nn">symforce.codegen</span> <span class="kn">import</span> <span class="n">types_package_codegen</span>
+<span class="kn">from</span> <span class="nn">symforce.type_helpers</span> <span class="kn">import</span> <span class="n">symbolic_inputs</span>
+
+<span class="n">CURRENT_DIR</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span>
+
+
+<div class="viewcode-block" id="LinearizationMode"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen.html#symforce.codegen.codegen.LinearizationMode">[docs]</a><span class="k">class</span> <span class="nc">LinearizationMode</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Mode for with_linearization</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Compute jacobians for input arguments stacked into a single jacobian matrix</span>
+    <span class="n">STACKED_JACOBIAN</span> <span class="o">=</span> <span class="s2">&quot;stacked_jacobian&quot;</span>
+
+    <span class="c1"># Compute a full linearization for the output with respect to the given input arguments.  This</span>
+    <span class="c1"># includes the jacobian, hessian (computed as J^T J with only the lower triangle filled out),</span>
+    <span class="c1"># and rhs (J^T b).  In this mode, the original function must return a vector (a sf.Matrix with</span>
+    <span class="c1"># one column).</span>
+    <span class="n">FULL_LINEARIZATION</span> <span class="o">=</span> <span class="s2">&quot;full_linearization&quot;</span></div>
+
+
+<div class="viewcode-block" id="GeneratedPaths"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen.html#symforce.codegen.codegen.GeneratedPaths">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="k">class</span> <span class="nc">GeneratedPaths</span><span class="p">:</span>
+    <span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="n">lcm_type_dir</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="n">function_dir</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="n">python_types_dir</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="n">cpp_types_dir</span><span class="p">:</span> <span class="n">Path</span>
+    <span class="n">generated_files</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="Codegen"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen.html#symforce.codegen.codegen.Codegen">[docs]</a><span class="k">class</span> <span class="nc">Codegen</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Class used for generating code from symbolic expressions or functions.</span>
+
+<span class="sd">    Codegen objects can either be used to generate standalone functions, or</span>
+<span class="sd">    as specifications in a larger code generation pipeline. Each codegen object</span>
+<span class="sd">    defines an input/output relationship between a set of symbolic inputs and</span>
+<span class="sd">    a set of symbolic output expressions written in terms of the inputs.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Codegen.__init__"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen.html#symforce.codegen.codegen.Codegen.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">inputs</span><span class="p">:</span> <span class="n">Values</span><span class="p">,</span>
+        <span class="n">outputs</span><span class="p">:</span> <span class="n">Values</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">codegen_config</span><span class="o">.</span><span class="n">CodegenConfig</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">return_key</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sparse_matrices</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">docstring</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates the Codegen specification.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            inputs: Values object specifying names and symbolic inputs to the function</span>
+<span class="sd">            outputs: Values object specifying names and output expressions (written in terms</span>
+<span class="sd">                     of the symbolic inputs) of the function</span>
+<span class="sd">            config: Programming language and configuration in which the function is to be generated</span>
+<span class="sd">            name: Name of the function to be generated; must be set before the function is</span>
+<span class="sd">                  generated, but need not be set here if it&#39;s going to be set by with_linearization</span>
+<span class="sd">                  or with_jacobians.  Should be snake_case, will be converted to the</span>
+<span class="sd">                  language-specific function name style at generation time</span>
+<span class="sd">            return_key: If specified, the output with this key is returned rather than filled</span>
+<span class="sd">                        in as a named output argument.</span>
+<span class="sd">            sparse_matrices: Outputs with this key will be returned as sparse matrices</span>
+<span class="sd">            docstring: The docstring to be used with the generated function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+        <span class="c1"># Inputs and outputs must be Values objects</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">Values</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">outputs</span><span class="p">,</span> <span class="n">Values</span><span class="p">)</span>
+
+        <span class="c1"># Convert any dataclasses to Values so we can more easily recurse through them</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dataclasses_to_values</span><span class="p">()</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span><span class="o">.</span><span class="n">dataclasses_to_values</span><span class="p">()</span>
+
+        <span class="c1"># All symbols in outputs must be present in inputs.  Convert to Matrix before calling</span>
+        <span class="c1"># free_symbols because it&#39;s much faster to call once</span>
+        <span class="n">input_symbols_list</span> <span class="o">=</span> <span class="n">codegen_util</span><span class="o">.</span><span class="n">flat_symbols_from_values</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="n">input_symbols</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">input_symbols_list</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">sf</span><span class="o">.</span><span class="n">S</span><span class="p">(</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="n">codegen_util</span><span class="o">.</span><span class="n">flat_symbols_from_values</span><span class="p">(</span><span class="n">outputs</span><span class="p">))</span><span class="o">.</span><span class="n">mat</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">free_symbols</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span>
+            <span class="n">input_symbols</span>
+        <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;A symbol in the output expression is missing from inputs. inputs=</span><span class="si">{</span><span class="n">input_symbols</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="c1"># Names given by keys in inputs/outputs must be valid variable names</span>
+        <span class="c1"># TODO(aaron): Also check recursively</span>
+        <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">isidentifier</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">k</span><span class="o">.</span><span class="n">isidentifier</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">outputs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="c1"># Symbols in inputs must be unique</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_symbols</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="n">input_symbols_list</span>
+        <span class="p">),</span> <span class="s2">&quot;Symbols in inputs must be unique. Duplicate symbols = </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">input_symbols_list</span> <span class="k">if</span> <span class="n">input_symbols_list</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Outputs must not have same variable names/keys as inputs</span>
+        <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span> <span class="o">=</span> <span class="n">outputs</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
+
+        <span class="k">if</span> <span class="n">return_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">return_key</span> <span class="ow">in</span> <span class="n">outputs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">return_key</span> <span class="o">=</span> <span class="n">return_key</span>
+
+        <span class="c1"># Mapping between sparse matrix keys and constants needed for static CSC construction</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sparse_mat_data</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">codegen_util</span><span class="o">.</span><span class="n">CSCFormat</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="n">sparse_matrices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="n">key</span> <span class="ow">in</span> <span class="n">outputs</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">sparse_matrices</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">outputs</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">sparse_matrices</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">sparse_matrices</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sparse_mat_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">codegen_util</span><span class="o">.</span><span class="n">CSCFormat</span><span class="o">.</span><span class="n">from_matrix</span><span class="p">(</span><span class="n">outputs</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">docstring</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">docstring</span> <span class="ow">or</span> <span class="n">Codegen</span><span class="o">.</span><span class="n">default_docstring</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">types_included</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">typenames_dict</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">namespaces_dict</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique_namespaces</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">namespace</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="Codegen.function"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen.html#symforce.codegen.codegen.Codegen.function">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">function</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">func</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Callable</span><span class="p">,</span>
+        <span class="n">config</span><span class="p">:</span> <span class="n">codegen_config</span><span class="o">.</span><span class="n">CodegenConfig</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">input_types</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">ElementOrType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">output_names</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">return_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">docstring</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Codegen</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a Codegen object from a symbolic python function.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            func: Python function. Note, variable position and keyword arguments will be ignored.</span>
+<span class="sd">                Additionally, keyword only arguments will be set to their default values and not</span>
+<span class="sd">                included in the signature of the generated function.</span>
+<span class="sd">            input_types: List of types of the inputs to the given function.  This is optional; if</span>
+<span class="sd">                `func` has type annotations, `input_types` can be deduced from those.  Note that</span>
+<span class="sd">                if the type annotation doesn&#39;t match what you want the arguments to be, you need</span>
+<span class="sd">                to specify manually, for instance a function add(x: T.Any, y: T.Any) -&gt; T.Any that</span>
+<span class="sd">                you want to use to generate add(x: sf.Matrix33, y: sf.Matrix33) -&gt; sf.Matrix33</span>
+<span class="sd">            config: Programming language and configuration in which the function is to be generated</span>
+<span class="sd">            name: Name of the function to be generated; if not provided, will be deduced from the</span>
+<span class="sd">                function name.  Must be provided if `func` is a lambda</span>
+<span class="sd">            output_names: Optional if only one object is returned by the function.</span>
+<span class="sd">                If multiple objects are returned, they must be named.</span>
+<span class="sd">            return_key: If multiple objects are returned, the generated function will return</span>
+<span class="sd">                the object with this name (must be in output_names)</span>
+<span class="sd">            docstring: The docstring to be used with the generated function.  Default is to use the</span>
+<span class="sd">                       existing docstring</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">inner_func</span> <span class="o">=</span> <span class="n">python_util</span><span class="o">.</span><span class="n">get_func_from_maybe_bound_function</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="n">inner_func</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">!=</span> <span class="s2">&quot;&lt;lambda&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;Can&#39;t deduce name automatically for a lambda&quot;</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">inner_func</span><span class="o">.</span><span class="vm">__name__</span>
+
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">symbolic_inputs</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">input_types</span><span class="p">)</span>
+
+        <span class="c1"># Run the symbolic arguments through the function and get the symbolic output expression(s)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="c1"># at this point replace all dataclasses in the inputs with values</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="n">inputs</span><span class="o">.</span><span class="n">dataclasses_to_values</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="c1"># Function returns multiple objects</span>
+            <span class="n">output_terms</span> <span class="o">=</span> <span class="n">res</span>
+            <span class="k">assert</span> <span class="n">output_names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;Must give output_names for multiple outputs&quot;</span>
+            <span class="c1"># If a return key is given, it must be valid (i.e. in output_names)</span>
+            <span class="k">if</span> <span class="n">return_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="n">return_key</span> <span class="ow">in</span> <span class="n">output_names</span><span class="p">,</span> <span class="s2">&quot;Return key not found in named outputs&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Function returns single object</span>
+            <span class="n">output_terms</span> <span class="o">=</span> <span class="p">(</span><span class="n">res</span><span class="p">,)</span>
+            <span class="k">if</span> <span class="n">output_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">output_names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;res&quot;</span><span class="p">]</span>
+                <span class="n">return_key</span> <span class="o">=</span> <span class="n">output_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_terms</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_names</span><span class="p">)</span>
+
+        <span class="c1"># Form the output expressions as a Values object</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">Values</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">output_name</span><span class="p">,</span> <span class="n">output</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">output_names</span><span class="p">,</span> <span class="n">output_terms</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+                <span class="n">output</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+            <span class="n">outputs</span><span class="p">[</span><span class="n">output_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">output</span>
+
+        <span class="c1"># Pull docstring out of function if not provided</span>
+        <span class="k">if</span> <span class="n">docstring</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">inner_func</span> <span class="o">=</span> <span class="n">python_util</span><span class="o">.</span><span class="n">get_func_from_maybe_bound_function</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">inner_func</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">:</span>
+                <span class="n">docstring</span> <span class="o">=</span> <span class="n">inner_func</span><span class="o">.</span><span class="vm">__doc__</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">docstring</span> <span class="o">=</span> <span class="n">Codegen</span><span class="o">.</span><span class="n">default_docstring</span><span class="p">(</span>
+                    <span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">,</span> <span class="n">original_function</span><span class="o">=</span><span class="n">inner_func</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span>
+            <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+            <span class="n">return_key</span><span class="o">=</span><span class="n">return_key</span><span class="p">,</span>
+            <span class="n">docstring</span><span class="o">=</span><span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="n">docstring</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Codegen.common_data"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen.html#symforce.codegen.codegen.Codegen.common_data">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">common_data</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">T</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return common template data for code generation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">T</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;ops&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ops</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Symbol&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Matrix&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;DataBuffer&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">DataBuffer</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;Values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">Values</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;pathlib&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pathlib</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;path_to_codegen&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">CURRENT_DIR</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;scalar_types&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;double&quot;</span><span class="p">,</span> <span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;camelcase_to_snakecase&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">python_util</span><span class="o">.</span><span class="n">camelcase_to_snakecase</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;python_util&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">python_util</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;lcm_type_t_include_dir&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;&lt;lcmtypes/sym/type_t.hpp&gt;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">is_symbolic</span><span class="p">(</span><span class="n">T</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">T</span><span class="p">,</span> <span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">Expr</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">))</span>
+
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;is_symbolic&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">is_symbolic</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;issubclass&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">issubclass</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;is_sequence&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">arg</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span>
+
+        <span class="k">def</span> <span class="nf">should_set_zero</span><span class="p">(</span><span class="n">mat</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">,</span> <span class="n">zero_initialization_sparsity_threshold</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Returns True if we should set a dense matrix to 0 and then only set nonzero elements,</span>
+<span class="sd">            instead of setting all elements individually (including elements that are 0)</span>
+
+<span class="sd">            Result is equivalent to `nnz / (M * N) &lt; threshold`</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">nnz</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="k">if</span> <span class="n">mat</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">nnz</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">nnz</span> <span class="o">/</span> <span class="p">(</span><span class="n">mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">mat</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">zero_initialization_sparsity_threshold</span>
+
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;should_set_zero&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">should_set_zero</span>
+
+        <span class="k">return</span> <span class="n">data</span></div>
+
+    <span class="nd">@functools</span><span class="o">.</span><span class="n">cached_property</span>
+    <span class="k">def</span> <span class="nf">print_code_results</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">codegen_util</span><span class="o">.</span><span class="n">PrintCodeResult</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">codegen_util</span><span class="o">.</span><span class="n">print_code</span><span class="p">(</span>
+            <span class="n">inputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span>
+            <span class="n">outputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">,</span>
+            <span class="n">sparse_mat_data</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sparse_mat_data</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="Codegen.total_ops"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen.html#symforce.codegen.codegen.Codegen.total_ops">[docs]</a>    <span class="k">def</span> <span class="nf">total_ops</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The number of symbolic ops in the expression.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">print_code_results</span><span class="o">.</span><span class="n">total_ops</span></div>
+
+<div class="viewcode-block" id="Codegen.generate_function"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen.html#symforce.codegen.codegen.Codegen.generate_function">[docs]</a>    <span class="k">def</span> <span class="nf">generate_function</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">output_dir</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Openable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">lcm_bindings_output_dir</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Openable</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">shared_types</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">namespace</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sym&quot;</span><span class="p">,</span>
+        <span class="n">generated_file_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">skip_directory_nesting</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeneratedPaths</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates a function that computes the given outputs from the given inputs.</span>
+
+<span class="sd">        Usage for generating multiple functions with a shared type:</span>
+<span class="sd">            codegen_obj_1.generate_function(namespace=&quot;my_namespace&quot;)</span>
+<span class="sd">            shared_types = {&quot;my_type&quot;: &quot;my_namespace.my_type_t&quot;}</span>
+<span class="sd">            codegen_obj_2.generate_function(shared_types=shared_types, namespace=&quot;my_namespace&quot;)</span>
+
+<span class="sd">        In the example above, both codegen_obj_1 and codegen_obj_2 use the type &quot;my_type&quot;. During</span>
+<span class="sd">        the first call to &quot;generate_function&quot; we generate the type &quot;my_type&quot;, and it then becomes</span>
+<span class="sd">        a shared type for the second call to &quot;generate_function&quot;. This signals that &quot;my_type&quot; does</span>
+<span class="sd">        not need to be generated during the second call to &quot;generate_function&quot; as it already exists.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            output_dir: Directory in which to output the generated function. Any generated types will</span>
+<span class="sd">                be located in a subdirectory with name equal to the namespace argument.</span>
+<span class="sd">            lcm_bindings_output_dir: Directory in which to output language-specific LCM bindings</span>
+<span class="sd">            shared_types: Mapping between types defined as part of this codegen object (e.g. keys in</span>
+<span class="sd">                self.inputs that map to Values objects) and previously generated external types.</span>
+<span class="sd">            namespace: Namespace for the generated function and any generated types.</span>
+<span class="sd">            generated_file_name: Stem for the filename into which the function is generated, with</span>
+<span class="sd">                                 no file extension</span>
+<span class="sd">            skip_directory_nesting: Generate the output file directly into output_dir instead of</span>
+<span class="sd">                                    adding the usual directory structure inside output_dir</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">),</span> <span class="s2">&quot;Name should be set either at construction or by with_jacobians&quot;</span>
+
+        <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;sf_codegen_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">_&quot;</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="s2">&quot;/tmp&quot;</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating temp directory: </span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">Path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">lcm_bindings_output_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lcm_bindings_output_dir</span> <span class="o">=</span> <span class="n">output_dir</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lcm_bindings_output_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">lcm_bindings_output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">lcm_bindings_output_dir</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lcm_bindings_output_dir</span><span class="p">,</span> <span class="n">Path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">generated_file_name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">generated_file_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="c1"># List of (template_path, output_path, data)</span>
+        <span class="n">templates</span> <span class="o">=</span> <span class="n">template_util</span><span class="o">.</span><span class="n">TemplateList</span><span class="p">()</span>
+
+        <span class="c1"># Output types</span>
+        <span class="c1"># Find each Values object in the inputs and outputs</span>
+        <span class="n">types_to_generate</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Also keep track of non-Values types used so we can have the proper includes - things like</span>
+        <span class="c1"># geo types and cameras</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">types_included</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c1"># If &quot;value&quot; is a list, extract an instance of a base element.</span>
+                <span class="n">base_value</span> <span class="o">=</span> <span class="n">codegen_util</span><span class="o">.</span><span class="n">get_base_instance</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">base_value</span><span class="p">,</span> <span class="n">Values</span><span class="p">):</span>
+                    <span class="n">types_to_generate</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">base_value</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">types_included</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">base_value</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+
+        <span class="c1"># Generate types from the Values objects in our inputs and outputs</span>
+        <span class="n">values_indices</span> <span class="o">=</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">gen_type</span><span class="o">.</span><span class="n">index</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">gen_type</span> <span class="ow">in</span> <span class="n">types_to_generate</span><span class="p">}</span>
+        <span class="n">types_codegen_data</span> <span class="o">=</span> <span class="n">types_package_codegen</span><span class="o">.</span><span class="n">generate_types</span><span class="p">(</span>
+            <span class="n">package_name</span><span class="o">=</span><span class="n">namespace</span><span class="p">,</span>
+            <span class="n">file_name</span><span class="o">=</span><span class="n">generated_file_name</span><span class="p">,</span>
+            <span class="n">values_indices</span><span class="o">=</span><span class="n">values_indices</span><span class="p">,</span>
+            <span class="n">use_eigen_types</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">use_eigen_types</span><span class="p">,</span>
+            <span class="n">shared_types</span><span class="o">=</span><span class="n">shared_types</span><span class="p">,</span>
+            <span class="n">output_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">fspath</span><span class="p">(</span><span class="n">output_dir</span><span class="p">),</span>
+            <span class="n">lcm_bindings_output_dir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">fspath</span><span class="p">(</span><span class="n">lcm_bindings_output_dir</span><span class="p">),</span>
+            <span class="n">templates</span><span class="o">=</span><span class="n">templates</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Maps typenames to generated types</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">typenames_dict</span> <span class="o">=</span> <span class="n">types_codegen_data</span><span class="p">[</span><span class="s2">&quot;typenames_dict&quot;</span><span class="p">]</span>
+        <span class="c1"># Maps typenames to namespaces</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">namespaces_dict</span> <span class="o">=</span> <span class="n">types_codegen_data</span><span class="p">[</span><span class="s2">&quot;namespaces_dict&quot;</span><span class="p">]</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">namespaces_dict</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unique_namespaces</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">namespaces_dict</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+        <span class="c1"># Namespace of this function + generated types</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">namespace</span> <span class="o">=</span> <span class="n">namespace</span>
+
+        <span class="n">template_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">common_data</span><span class="p">(),</span> <span class="n">spec</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">template_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">template_dir</span><span class="p">()</span>
+
+        <span class="n">backend_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">backend_name</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">skip_directory_nesting</span><span class="p">:</span>
+            <span class="n">out_function_dir</span> <span class="o">=</span> <span class="n">output_dir</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">out_function_dir</span> <span class="o">=</span> <span class="n">output_dir</span> <span class="o">/</span> <span class="n">backend_name</span> <span class="o">/</span> <span class="s2">&quot;symforce&quot;</span> <span class="o">/</span> <span class="n">namespace</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Creating </span><span class="si">{</span><span class="n">backend_name</span><span class="si">}</span><span class="s1"> function from &quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot; at &quot;</span><span class="si">{</span><span class="n">out_function_dir</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Get templates to render</span>
+        <span class="k">for</span> <span class="n">source</span><span class="p">,</span> <span class="n">dest</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">templates_to_render</span><span class="p">(</span><span class="n">generated_file_name</span><span class="p">):</span>
+            <span class="n">templates</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">template_dir</span> <span class="o">/</span> <span class="n">source</span><span class="p">,</span> <span class="n">out_function_dir</span> <span class="o">/</span> <span class="n">dest</span><span class="p">,</span> <span class="n">template_data</span><span class="p">)</span>
+
+        <span class="c1"># Render</span>
+        <span class="n">templates</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">autoformat</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">autoformat</span><span class="p">)</span>
+
+        <span class="n">lcm_data</span> <span class="o">=</span> <span class="n">codegen_util</span><span class="o">.</span><span class="n">generate_lcm_types</span><span class="p">(</span>
+            <span class="n">lcm_type_dir</span><span class="o">=</span><span class="n">types_codegen_data</span><span class="p">[</span><span class="s2">&quot;lcm_type_dir&quot;</span><span class="p">],</span>
+            <span class="n">lcm_files</span><span class="o">=</span><span class="n">types_codegen_data</span><span class="p">[</span><span class="s2">&quot;lcm_files&quot;</span><span class="p">],</span>
+            <span class="n">lcm_output_dir</span><span class="o">=</span><span class="n">types_codegen_data</span><span class="p">[</span><span class="s2">&quot;lcm_bindings_output_dir&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">GeneratedPaths</span><span class="p">(</span>
+            <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span>
+            <span class="n">lcm_type_dir</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="n">types_codegen_data</span><span class="p">[</span><span class="s2">&quot;lcm_type_dir&quot;</span><span class="p">]),</span>
+            <span class="n">function_dir</span><span class="o">=</span><span class="n">out_function_dir</span><span class="p">,</span>
+            <span class="n">python_types_dir</span><span class="o">=</span><span class="n">lcm_data</span><span class="p">[</span><span class="s2">&quot;python_types_dir&quot;</span><span class="p">],</span>
+            <span class="n">cpp_types_dir</span><span class="o">=</span><span class="n">lcm_data</span><span class="p">[</span><span class="s2">&quot;cpp_types_dir&quot;</span><span class="p">],</span>
+            <span class="n">generated_files</span><span class="o">=</span><span class="p">[</span><span class="n">Path</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">output_path</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">templates</span><span class="o">.</span><span class="n">items</span><span class="p">],</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Codegen.default_docstring"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen.html#symforce.codegen.codegen.Codegen.default_docstring">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">default_docstring</span><span class="p">(</span>
+        <span class="n">inputs</span><span class="p">:</span> <span class="n">Values</span><span class="p">,</span> <span class="n">outputs</span><span class="p">:</span> <span class="n">Values</span><span class="p">,</span> <span class="n">original_function</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Callable</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a default docstring if no other is available from the function or caller.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># If the function is an instance method, remove the type associated with the class</span>
+        <span class="n">input_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;self&quot;</span><span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">nice_typename</span><span class="p">(</span><span class="n">arg</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">python_util</span><span class="o">.</span><span class="n">scalar_like</span><span class="p">(</span><span class="n">arg</span><span class="p">):</span>
+                <span class="k">return</span> <span class="s2">&quot;Scalar&quot;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">python_util</span><span class="o">.</span><span class="n">get_type</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>
+
+        <span class="n">input_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">nice_typename</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;self&quot;</span><span class="p">]</span>
+        <span class="n">output_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">nice_typename</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">outputs</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+
+        <span class="k">if</span> <span class="n">original_function</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">docstring</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            This function was autogenerated from a symbolic function. Do not modify by hand.</span>
+
+<span class="s2">            Symbolic function: </span><span class="si">{</span><span class="n">original_function</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"></span>
+
+<span class="s2">            Args:</span>
+<span class="s2">            &quot;&quot;&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">docstring</span> <span class="o">=</span> <span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            This function was autogenerated. Do not modify by hand.</span>
+
+<span class="s2">            Args:</span>
+<span class="s2">            &quot;&quot;&quot;</span>
+
+        <span class="n">arg_descriptions</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;    </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">input_type</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">input_type</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">input_names</span><span class="p">,</span> <span class="n">input_types</span><span class="p">)]</span>
+        <span class="p">)</span>
+
+        <span class="n">output_descriptions</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="sa">f</span><span class="s2">&quot;    </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">output_type</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">output_type</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">output_types</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="n">docstring</span><span class="p">)</span> <span class="o">+</span> <span class="n">arg_descriptions</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Outputs:</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="n">output_descriptions</span></div>
+
+<div class="viewcode-block" id="Codegen.wrap_docstring_arg_description"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen.html#symforce.codegen.codegen.Codegen.wrap_docstring_arg_description">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">wrap_docstring_arg_description</span><span class="p">(</span>
+        <span class="n">preamble</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">codegen_config</span><span class="o">.</span><span class="n">CodegenConfig</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span>
+            <span class="n">description</span><span class="p">,</span>
+            <span class="n">width</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">line_length</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">doc_comment_line_prefix</span><span class="p">),</span>
+            <span class="n">initial_indent</span><span class="o">=</span><span class="n">preamble</span><span class="p">,</span>
+            <span class="n">subsequent_indent</span><span class="o">=</span><span class="s2">&quot; &quot;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">preamble</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_pick_name_for_function_with_derivatives</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">which_args</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="n">include_results</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+        <span class="n">linearization_mode</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">LinearizationMode</span><span class="p">],</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">),</span> <span class="s2">&quot;Codegen name must have been provided already to automatically generate a name with derivatives&quot;</span>
+
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">linearization_mode</span> <span class="o">==</span> <span class="n">LinearizationMode</span><span class="o">.</span><span class="n">FULL_LINEARIZATION</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_residual&quot;</span><span class="p">):</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">name</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;_residual&quot;</span><span class="p">)]</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;_factor&quot;</span><span class="p">):</span>
+                <span class="n">name</span> <span class="o">+=</span> <span class="s2">&quot;_factor&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">include_results</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">+=</span> <span class="s2">&quot;_with&quot;</span>
+
+            <span class="n">jacobians</span> <span class="o">=</span> <span class="n">python_util</span><span class="o">.</span><span class="n">plural</span><span class="p">(</span><span class="s2">&quot;_jacobian&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">which_args</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">which_args</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">):</span>
+                <span class="n">name</span> <span class="o">+=</span> <span class="n">jacobians</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inputs_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="n">name</span> <span class="o">+=</span> <span class="n">jacobians</span> <span class="o">+</span> <span class="s2">&quot;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">inputs_keys</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">s</span><span class="p">))</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">which_args</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">name</span>
+
+<div class="viewcode-block" id="Codegen.with_linearization"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen.html#symforce.codegen.codegen.Codegen.with_linearization">[docs]</a>    <span class="k">def</span> <span class="nf">with_linearization</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">which_args</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">include_result</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">linearization_mode</span><span class="p">:</span> <span class="n">LinearizationMode</span> <span class="o">=</span> <span class="n">LinearizationMode</span><span class="o">.</span><span class="n">FULL_LINEARIZATION</span><span class="p">,</span>
+        <span class="n">sparse_linearization</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">custom_jacobian</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Codegen</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a codegen object that takes some number of inputs and computes a single result,</span>
+<span class="sd">        create a new codegen object that additionally computes the jacobian (or the full</span>
+<span class="sd">        Gauss-Newton linearization) with respect to the given input arguments.</span>
+
+<span class="sd">        The jacobians are in the tangent spaces of the inputs and outputs, see jacobian_helpers.py</span>
+<span class="sd">        for more information.</span>
+
+<span class="sd">        The previous codegen object (the `self` argument to this function) is unmodified by this</span>
+<span class="sd">        function and still valid after this function returns.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            self: Existing codegen object that returns a single value</span>
+<span class="sd">            which_args: Names of args for which to compute jacobians. If not given, uses all.</span>
+<span class="sd">            include_result: For the STACKED_JACOBIAN mode, whether we should still include the</span>
+<span class="sd">                            result or only return the jacobian.  For the FULL_LINEARIZATION mode, we</span>
+<span class="sd">                            always include the result (which is the residual).</span>
+<span class="sd">            name: Generated function name. If not given, picks a reasonable name based on the one</span>
+<span class="sd">                  given at construction.</span>
+<span class="sd">            linearization_mode: Whether to generate a single jacobian matrix (STACKED_JACOBIANS), or</span>
+<span class="sd">                                generate a full linearization with a hessian and rhs</span>
+<span class="sd">                                (FULL_LINEARIZATION).</span>
+<span class="sd">            sparse_linearization: Whether to output matrices (jacobian and/or hessian) as sparse</span>
+<span class="sd">                                  matrices, as opposed to dense</span>
+<span class="sd">            custom_jacobian: This is generally unnecessary, unless you want to override the jacobian</span>
+<span class="sd">                             computed by SymForce, e.g. to stop derivatives with respect to certain</span>
+<span class="sd">                             variables or directions, or because the jacobian can be analytically</span>
+<span class="sd">                             simplified in a way that SymForce won&#39;t do automatically. If not</span>
+<span class="sd">                             provided, the jacobian will be computed automatically.  If provided,</span>
+<span class="sd">                             should have shape (result_dim, input_tangent_dim), where</span>
+<span class="sd">                             input_tangent_dim is the sum of the tangent dimensions of arguments</span>
+<span class="sd">                             corresponding to which_args</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">which_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">which_args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="k">assert</span> <span class="n">which_args</span><span class="p">,</span> <span class="s2">&quot;Cannot compute a linearization with respect to 0 arguments&quot;</span>
+
+        <span class="c1"># Ensure the previous codegen has one output</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span> <span class="o">==</span> <span class="mi">1</span>
+        <span class="n">result_name</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">items</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Get docstring</span>
+        <span class="n">docstring_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docstring</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Make the new outputs</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">Values</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">include_result</span><span class="p">:</span>
+            <span class="n">outputs</span><span class="p">[</span><span class="n">result_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Remove return val line from docstring</span>
+            <span class="n">docstring_lines</span> <span class="o">=</span> <span class="n">docstring_lines</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">input_args</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">which_args</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">custom_jacobian</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">jacobian</span> <span class="o">=</span> <span class="n">custom_jacobian</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">jacobian</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="o">.</span><span class="n">block_matrix</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">jacobian_helpers</span><span class="o">.</span><span class="n">tangent_jacobians</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">input_args</span><span class="p">)]</span>
+            <span class="p">)</span>
+
+        <span class="n">docstring_args</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">arg_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">ops</span><span class="o">.</span><span class="n">LieGroupOps</span><span class="o">.</span><span class="n">tangent_dim</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span>
+            <span class="k">for</span> <span class="n">arg_name</span><span class="p">,</span> <span class="n">arg</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">which_args</span><span class="p">,</span> <span class="n">input_args</span><span class="p">)</span>
+        <span class="p">]</span>
+
+        <span class="n">formatted_arg_list</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">{}</span><span class="s2"> </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">python_util</span><span class="o">.</span><span class="n">plural</span><span class="p">(</span><span class="s2">&quot;arg&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">docstring_args</span><span class="p">)),</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">docstring_args</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">docstring_lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">wrap_docstring_arg_description</span><span class="p">(</span>
+                <span class="s2">&quot;    jacobian: &quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">jacobian</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">jacobian</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">) jacobian of </span><span class="si">{</span><span class="n">result_name</span><span class="si">}</span><span class="s2"> wrt </span><span class="si">{</span><span class="n">formatted_arg_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;jacobian&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">jacobian</span>
+
+        <span class="k">if</span> <span class="n">linearization_mode</span> <span class="o">==</span> <span class="n">LinearizationMode</span><span class="o">.</span><span class="n">FULL_LINEARIZATION</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="p">(</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">)</span> <span class="ow">and</span> <span class="n">result</span><span class="o">.</span><span class="n">cols</span> <span class="o">==</span> <span class="mi">1</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;The output must be a vector (the residual), got </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2"> instead&quot;</span>
+
+            <span class="n">hessian</span> <span class="o">=</span> <span class="n">jacobian</span><span class="o">.</span><span class="n">compute_AtA</span><span class="p">(</span><span class="n">lower_only</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;hessian&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">hessian</span>
+            <span class="n">docstring_lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">wrap_docstring_arg_description</span><span class="p">(</span>
+                    <span class="s2">&quot;    hessian: &quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">hessian</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">hessian</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">) Gauss-Newton hessian for </span><span class="si">{</span><span class="n">formatted_arg_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="n">rhs</span> <span class="o">=</span> <span class="n">jacobian</span><span class="o">.</span><span class="n">T</span> <span class="o">*</span> <span class="n">result</span>
+            <span class="n">outputs</span><span class="p">[</span><span class="s2">&quot;rhs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rhs</span>
+            <span class="n">docstring_lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">wrap_docstring_arg_description</span><span class="p">(</span>
+                    <span class="s2">&quot;    rhs: &quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">rhs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">rhs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="si">}</span><span class="s2">) Gauss-Newton rhs for </span><span class="si">{</span><span class="n">formatted_arg_list</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># If just computing a single jacobian, return it instead of output arg</span>
+        <span class="n">return_key</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="c1"># Cutely pick a function name if not given</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pick_name_for_function_with_derivatives</span><span class="p">(</span>
+                <span class="n">which_args</span><span class="p">,</span> <span class="n">include_result</span><span class="p">,</span> <span class="n">linearization_mode</span>
+            <span class="p">)</span>
+
+        <span class="n">sparse_matrices</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;jacobian&quot;</span><span class="p">,</span> <span class="s2">&quot;hessian&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">sparse_linearization</span>
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">Codegen</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">inputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span>
+            <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span>
+            <span class="n">return_key</span><span class="o">=</span><span class="n">return_key</span><span class="p">,</span>
+            <span class="n">sparse_matrices</span><span class="o">=</span><span class="n">sparse_matrices</span><span class="p">,</span>
+            <span class="n">docstring</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">docstring_lines</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Codegen.with_jacobians"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen.html#symforce.codegen.codegen.Codegen.with_jacobians">[docs]</a>    <span class="k">def</span> <span class="nf">with_jacobians</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">which_args</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">which_results</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">0</span><span class="p">,),</span>
+        <span class="n">include_results</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">sparse_jacobians</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Codegen</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a codegen object that takes some number of inputs and computes some number of results,</span>
+<span class="sd">        create a new codegen object that additionally computes jacobians of the given results with</span>
+<span class="sd">        respect to the given input arguments. By default, computes the jacobians of the first result</span>
+<span class="sd">        with respect to all arguments.  Flexible to produce the values and all jacobians, just the</span>
+<span class="sd">        jacobians, or any combination of one or more jacobians.</span>
+
+<span class="sd">        The jacobians are in the tangent spaces of the inputs and outputs, see jacobian_helpers.py</span>
+<span class="sd">        for more information.</span>
+
+<span class="sd">        The previous codegen object (the `self` argument to this function) is unmodified by this</span>
+<span class="sd">        function and still valid after this function returns.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            self: Existing codegen object that return a single value</span>
+<span class="sd">            which_args: Names of args for which to compute jacobians. If not given, uses all.</span>
+<span class="sd">            which_results: Indices of results for which to compute jacobians.  If not given, uses</span>
+<span class="sd">                           the first result.</span>
+<span class="sd">            include_results: Whether we should still return the values in addition to the</span>
+<span class="sd">                             jacobian(s), for the results in which_results.  Values not in</span>
+<span class="sd">                             which_results are always still returned.</span>
+<span class="sd">            name: Generated function name. If not given, picks a reasonable name based on the one</span>
+<span class="sd">                  given at construction.</span>
+<span class="sd">            sparse_jacobians: Whether to output jacobians as sparse matrices, as opposed to dense</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">which_args</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">which_args</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="k">assert</span> <span class="n">which_args</span><span class="p">,</span> <span class="s2">&quot;Cannot compute a linearization with respect to 0 arguments&quot;</span>
+
+        <span class="k">assert</span> <span class="nb">list</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">which_results</span><span class="p">))</span> <span class="o">==</span> <span class="nb">list</span><span class="p">(</span><span class="n">which_results</span><span class="p">),</span> <span class="s2">&quot;which_results must be sorted&quot;</span>
+
+        <span class="c1"># Get docstring</span>
+        <span class="n">docstring_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docstring</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Make the new outputs</span>
+        <span class="k">if</span> <span class="n">include_results</span><span class="p">:</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="n">Values</span><span class="p">()</span>
+
+            <span class="c1"># Copy in results we&#39;re not differentiating</span>
+            <span class="n">self_outputs_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">)):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">which_results</span><span class="p">:</span>
+                    <span class="n">outputs</span><span class="p">[</span><span class="n">self_outputs_keys</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="n">self_outputs_keys</span><span class="p">[</span><span class="n">i</span><span class="p">]]</span>
+
+            <span class="c1"># Remove return val lines from docstring</span>
+            <span class="c1"># TODO(aaron): Make this work when some return values have multi-line descriptions</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">which_results</span><span class="p">:</span>
+                <span class="n">index_from_back</span> <span class="o">=</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="p">)</span> <span class="o">+</span> <span class="n">i</span>
+                <span class="k">del</span> <span class="n">docstring_lines</span><span class="p">[</span><span class="n">index_from_back</span><span class="p">]</span>
+
+        <span class="c1"># Add all the jacobians</span>
+        <span class="n">input_args</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">arg</span><span class="p">]</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">which_args</span><span class="p">]</span>
+
+        <span class="n">all_outputs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">outputs</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+        <span class="n">all_jacobian_names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">which_results</span><span class="p">:</span>
+            <span class="n">result_name</span><span class="p">,</span> <span class="n">result</span> <span class="o">=</span> <span class="n">all_outputs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+
+            <span class="n">arg_jacobians</span> <span class="o">=</span> <span class="n">jacobian_helpers</span><span class="o">.</span><span class="n">tangent_jacobians</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">input_args</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">arg_name</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="n">arg_jacobian</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">which_args</span><span class="p">,</span> <span class="n">input_args</span><span class="p">,</span> <span class="n">arg_jacobians</span><span class="p">):</span>
+                <span class="n">jacobian_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">result_name</span><span class="si">}</span><span class="s2">_D_</span><span class="si">{</span><span class="n">arg_name</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="n">outputs</span><span class="p">[</span><span class="n">jacobian_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">arg_jacobian</span>
+                <span class="n">all_jacobian_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">jacobian_name</span><span class="p">)</span>
+
+                <span class="n">result_dim</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">LieGroupOps</span><span class="o">.</span><span class="n">tangent_dim</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+                <span class="n">arg_dim</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">LieGroupOps</span><span class="o">.</span><span class="n">tangent_dim</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+                <span class="n">docstring_lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;    </span><span class="si">{</span><span class="n">jacobian_name</span><span class="si">}</span><span class="s2">: (</span><span class="si">{</span><span class="n">result_dim</span><span class="si">}</span><span class="s2">x</span><span class="si">{</span><span class="n">arg_dim</span><span class="si">}</span><span class="s2">) jacobian of &quot;</span>
+                    <span class="o">+</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">result_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">result_dim</span><span class="si">}</span><span class="s2">) wrt arg </span><span class="si">{</span><span class="n">arg_name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">arg_dim</span><span class="si">}</span><span class="s2">)&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="c1"># If just computing a single jacobian and nothing else, return it instead of output arg</span>
+            <span class="n">return_key</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">outputs</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_key</span> <span class="ow">in</span> <span class="n">outputs</span><span class="p">:</span>
+            <span class="c1"># If still computing the original return value, return that</span>
+            <span class="n">return_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">return_key</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">return_key</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Cutely pick a function name if not given</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_pick_name_for_function_with_derivatives</span><span class="p">(</span>
+                <span class="n">which_args</span><span class="p">,</span> <span class="n">include_results</span><span class="p">,</span> <span class="n">linearization_mode</span><span class="o">=</span><span class="kc">None</span>
+            <span class="p">)</span>
+
+        <span class="n">sparse_matrices</span> <span class="o">=</span> <span class="n">all_jacobian_names</span> <span class="k">if</span> <span class="n">sparse_jacobians</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">Codegen</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">inputs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">inputs</span><span class="p">,</span>
+            <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">,</span>
+            <span class="n">config</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">config</span><span class="p">,</span>
+            <span class="n">return_key</span><span class="o">=</span><span class="n">return_key</span><span class="p">,</span>
+            <span class="n">sparse_matrices</span><span class="o">=</span><span class="n">sparse_matrices</span><span class="p">,</span>
+            <span class="n">docstring</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">docstring_lines</span><span class="p">),</span>
+        <span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  <li><a href="../../symforce.html">symforce</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

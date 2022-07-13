@@ -1,0 +1,7 @@
+symforce.examples.bundle\_adjustment\_in\_the\_large.download\_dataset module
+=============================================================================
+
+.. automodule:: symforce.examples.bundle_adjustment_in_the_large.download_dataset
+   :members:
+   :undoc-members:
+   :show-inheritance:

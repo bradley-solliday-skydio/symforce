@@ -1,0 +1,5 @@
+File hash_combine.h
+===================
+
+.. doxygenfile:: hash_combine.h
+   :project: api-cpp

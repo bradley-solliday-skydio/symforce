@@ -1,0 +1,7 @@
+symforce.opt.factor module
+==========================
+
+.. automodule:: symforce.opt.factor
+   :members:
+   :undoc-members:
+   :show-inheritance:

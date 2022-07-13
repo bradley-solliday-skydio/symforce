@@ -1,0 +1,5 @@
+File group_ops.cc
+=================
+
+.. doxygenfile:: group_ops.cc
+   :project: api-gen-cpp

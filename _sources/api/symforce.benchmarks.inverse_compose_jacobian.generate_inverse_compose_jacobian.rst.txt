@@ -1,0 +1,7 @@
+symforce.benchmarks.inverse\_compose\_jacobian.generate\_inverse\_compose\_jacobian module
+==========================================================================================
+
+.. automodule:: symforce.benchmarks.inverse_compose_jacobian.generate_inverse_compose_jacobian
+   :members:
+   :undoc-members:
+   :show-inheritance:

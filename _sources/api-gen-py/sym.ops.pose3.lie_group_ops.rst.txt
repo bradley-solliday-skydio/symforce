@@ -1,0 +1,7 @@
+sym.ops.pose3.lie\_group\_ops module
+====================================
+
+.. automodule:: sym.ops.pose3.lie_group_ops
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+symforce.geo.rot3 module
+========================
+
+.. automodule:: symforce.geo.rot3
+   :members:
+   :undoc-members:
+   :show-inheritance:

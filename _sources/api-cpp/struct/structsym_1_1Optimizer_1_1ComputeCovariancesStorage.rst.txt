@@ -1,0 +1,5 @@
+Struct sym::Optimizer::ComputeCovariancesStorage
+================================================
+
+.. doxygenstruct:: sym::Optimizer::ComputeCovariancesStorage
+   :project: api-cpp

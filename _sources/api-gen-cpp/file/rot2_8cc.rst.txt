@@ -1,0 +1,5 @@
+File rot2.cc
+============
+
+.. doxygenfile:: rot2.cc
+   :project: api-gen-cpp

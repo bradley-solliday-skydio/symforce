@@ -1,0 +1,701 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>symforce.opt.noise_models module &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="symforce.opt.numeric_factor module" href="symforce.opt.numeric_factor.html" />
+    <link rel="prev" title="symforce.opt.factor module" href="symforce.opt.factor.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-symforce.opt.noise_models">
+<span id="symforce-opt-noise-models-module"></span><h1>symforce.opt.noise_models module<a class="headerlink" href="#module-symforce.opt.noise_models" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.NoiseModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">NoiseModel</span></span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#NoiseModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.NoiseModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Base class for whitening unwhitened residuals and/or computing their associated error in a
+least-squares problem.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.NoiseModel.whiten">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">whiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unwhitened_residual</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#NoiseModel.whiten"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.NoiseModel.whiten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whiten the residual vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unwhitened_residual</strong> (<em>~MatrixT</em>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>~MatrixT</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.NoiseModel.reduce">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reduce</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">whitened_residual</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#NoiseModel.reduce"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.NoiseModel.reduce" title="Permalink to this definition">¶</a></dt>
+<dd><p>Take the sum of squares of the residual.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>whitened_residual</strong> (<em>~MatrixT</em>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.NoiseModel.error">
+<span class="sig-name descname"><span class="pre">error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unwhitened_residual</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#NoiseModel.error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.NoiseModel.error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a scalar error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unwhitened_residual</strong> (<em>~MatrixT</em>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.ScalarNoiseModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScalarNoiseModel</span></span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#ScalarNoiseModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.ScalarNoiseModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#symforce.opt.noise_models.NoiseModel" title="symforce.opt.noise_models.NoiseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">symforce.opt.noise_models.NoiseModel</span></code></a></p>
+<p>Base class for noise models that apply a whitening function to each element of the unwhitened
+residual. I.e. if f() is the whiten_scalar function, each element of the whitened residual can be
+written as:</p>
+<blockquote>
+<div><p>whitened_residual[i] = f(unwhitened_residual[i])</p>
+</div></blockquote>
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.ScalarNoiseModel.whiten_scalar">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">whiten_scalar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounded_away_from_zero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#ScalarNoiseModel.whiten_scalar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.ScalarNoiseModel.whiten_scalar" title="Permalink to this definition">¶</a></dt>
+<dd><p>A scalar-valued whitening function which is applied to each element of the unwhitened
+residual.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – A single element of the unwhitened residual</p></li>
+<li><p><strong>bounded_away_from_zero</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.ScalarNoiseModel.whiten">
+<span class="sig-name descname"><span class="pre">whiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unwhitened_residual</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#ScalarNoiseModel.whiten"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.ScalarNoiseModel.whiten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whiten the unwhitened residual vector by applying <cite>whiten_scalar</cite> to each element.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unwhitened_residual</strong> (<em>~MatrixT</em>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>~MatrixT</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.ScalarNoiseModel.whiten_norm">
+<span class="sig-name descname"><span class="pre">whiten_norm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">residual</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#ScalarNoiseModel.whiten_norm"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.ScalarNoiseModel.whiten_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whiten the norm of the residual vector.</p>
+<p>Let f(x) be the whitening function here, and let x be vector of residuals.
+We compute the whitened residual vector as w(x) = f(||x||)/||x|| * x.
+Then, the overall residual is later computed as ||w(x)|| == f(||x||),
+and so we’re minimizing the whitened norm of the full residual
+for each point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>residual</strong> (<em>~MatrixT</em>) – </p></li>
+<li><p><strong>epsilon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>~MatrixT</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.IsotropicNoiseModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">IsotropicNoiseModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scalar_information</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_sqrt_information</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#IsotropicNoiseModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.IsotropicNoiseModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#symforce.opt.noise_models.ScalarNoiseModel" title="symforce.opt.noise_models.ScalarNoiseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">symforce.opt.noise_models.ScalarNoiseModel</span></code></a></p>
+<p>Isotropic noise model; equivalent to multiplying the squared residual by a scalar. The cost
+used in the optimization is:</p>
+<blockquote>
+<div><p>cost = 0.5 * information * unwhitened_residual.T * unwhitened_residual</p>
+</div></blockquote>
+<dl class="simple">
+<dt>such that:</dt><dd><p>cost = 0.5 * whitened_residual.T * whitened_residual</p>
+</dd>
+<dt>The whitened residual is:</dt><dd><p>whitened_residual = sqrt(information) * unwhitened_residual</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scalar_information</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Scalar by which the least-squares error will be multiplied. In the
+context of probability theory, the information is the inverse of the variance of the
+unwhitened residual. The information represents the weight given to a specific
+unwhitened residual relative to other residuals used in the least-squares optimization.</p></li>
+<li><p><strong>scalar_sqrt_information</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Square-root of scalar_information. If scalar_sqrt_information is
+specified, we avoid needing to take the square root of scalar_information. Note that
+only one of scalar_information and scalar_sqrt_information needs to be specified.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.IsotropicNoiseModel.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scalar_information</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_sqrt_information</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#IsotropicNoiseModel.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.IsotropicNoiseModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scalar_information</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – </p></li>
+<li><p><strong>scalar_sqrt_information</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.IsotropicNoiseModel.from_variance">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_variance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variance</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#IsotropicNoiseModel.from_variance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.IsotropicNoiseModel.from_variance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an IsotropicNoiseModel given a variance. Typically used when we treat the residual
+as a random variable with known variance, and wish to weight its cost according to the
+information gained by that measurement (i.e. the inverse of the variance).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>variance</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Typically the variance of the residual elements. Results in cost
+cost = 0.5 * (1 / variance) * unwhitened_residual.T * unwhitened_residual</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#symforce.opt.noise_models.IsotropicNoiseModel" title="symforce.opt.noise_models.IsotropicNoiseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">IsotropicNoiseModel</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.IsotropicNoiseModel.from_sigma">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_sigma</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">standard_deviation</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#IsotropicNoiseModel.from_sigma"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.IsotropicNoiseModel.from_sigma" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an IsotropicNoiseModel given a standard deviation. Typically used when we treat the
+residual as a random variable with known standard deviation, and wish to weight its cost
+according to the information gained by that measurement (i.e. the inverse of the variance).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>standard_deviation</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The standard deviation of the residual elements. Results in
+cost = 0.5 * (1 / sigma^2) * unwhitened_residual.T * unwhitened_residual</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#symforce.opt.noise_models.IsotropicNoiseModel" title="symforce.opt.noise_models.IsotropicNoiseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">IsotropicNoiseModel</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.IsotropicNoiseModel.whiten_scalar">
+<span class="sig-name descname"><span class="pre">whiten_scalar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounded_away_from_zero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#IsotropicNoiseModel.whiten_scalar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.IsotropicNoiseModel.whiten_scalar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Multiplies a single element of the unwhitened residual by <cite>sqrt(information)</cite> so
+that the least-squares cost associated with the element is scaled by <cite>information</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Single element of the unwhitened residual</p></li>
+<li><p><strong>bounded_away_from_zero</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – True if x is guaranteed to not be zero. Typically used to avoid
+extra ops incurred by using epsilons to avoid singularities at x = 0 when it’s
+known that x != 0. However, this argument is unused because there is no singularity
+at x = 0 for this whitening function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.DiagonalNoiseModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">DiagonalNoiseModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">information_diag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sqrt_information_diag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#DiagonalNoiseModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.DiagonalNoiseModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#symforce.opt.noise_models.NoiseModel" title="symforce.opt.noise_models.NoiseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">symforce.opt.noise_models.NoiseModel</span></code></a></p>
+<p>Noise model with diagonal weighting matrix. The cost used in the optimization is:</p>
+<blockquote>
+<div><p>cost = 0.5 * unwhitened_residual.T * sf.diag(information_diag) * unwhitened_residual</p>
+</div></blockquote>
+<p>where <cite>information_diag</cite> is a vector of scalars representing the relative importance of each
+element of the unwhitened residual.</p>
+<dl class="simple">
+<dt>The total cost is then:</dt><dd><p>cost = 0.5 * whitened_residual.T * whitened_residual</p>
+</dd>
+<dt>Thus, the whitened residual is:</dt><dd><p>whitened_residual = sf.diag(sqrt_information_diag) * unwhitened_residual</p>
+</dd>
+</dl>
+<p>where <cite>sqrt_information_diag</cite> is the element-wise square root of <cite>information_diag</cite>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>information_diag</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]) – List of elements of the diagonal of the information matrix. In the context
+of probability theory, this vector represents the inverse of the variance of each
+element of the unwhitened residual, assuming that each element is an independent
+random variable.</p></li>
+<li><p><strong>sqrt_information_diag</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]) – Element-wise square-root of information_diag. If specified, we avoid
+needing to take the square root of each element of information_diag. Note that only one
+of information_diag and sqrt_information_diag needs to be specified.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.DiagonalNoiseModel.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">information_diag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sqrt_information_diag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#DiagonalNoiseModel.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.DiagonalNoiseModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>information_diag</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]) – </p></li>
+<li><p><strong>sqrt_information_diag</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]]) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.DiagonalNoiseModel.from_variances">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_variances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variances</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#DiagonalNoiseModel.from_variances"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.DiagonalNoiseModel.from_variances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an DiagonalNoiseModel given a list of variances of each element of the unwhitened
+residual. Typically used when we treat the unwhitened residual as a sequence of independent
+random variables with known variances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>variances</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – List of the variances of each element of the unwhitened residual</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#symforce.opt.noise_models.DiagonalNoiseModel" title="symforce.opt.noise_models.DiagonalNoiseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiagonalNoiseModel</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.DiagonalNoiseModel.from_sigmas">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_sigmas</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">standard_deviations</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#DiagonalNoiseModel.from_sigmas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.DiagonalNoiseModel.from_sigmas" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns an DiagonalNoiseModel given a list of standard deviations of each element of the
+unwhitened residual. Typically used when we treat the unwhitened residual as a sequence of
+independent random variables with known standard deviations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>standard_deviations</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – List of the standard deviations of each element of the unwhitened
+residual</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#symforce.opt.noise_models.DiagonalNoiseModel" title="symforce.opt.noise_models.DiagonalNoiseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiagonalNoiseModel</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.DiagonalNoiseModel.whiten">
+<span class="sig-name descname"><span class="pre">whiten</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">unwhitened_residual</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#DiagonalNoiseModel.whiten"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.DiagonalNoiseModel.whiten" title="Permalink to this definition">¶</a></dt>
+<dd><p>Whiten the residual vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>unwhitened_residual</strong> (<em>~MatrixT</em>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>~MatrixT</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.PseudoHuberNoiseModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PseudoHuberNoiseModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_information</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#PseudoHuberNoiseModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.PseudoHuberNoiseModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#symforce.opt.noise_models.ScalarNoiseModel" title="symforce.opt.noise_models.ScalarNoiseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">symforce.opt.noise_models.ScalarNoiseModel</span></code></a></p>
+<p>A smooth loss function that behaves like the L2 loss for small x and the L1 loss for large x.
+The cost used in the least-squares optimization will be:</p>
+<blockquote>
+<div><p>cost = sum( pseudo_huber_loss(unwhitened_residual[i]) )
+cost = 0.5 * whitened_residual.T * whitened_residual</p>
+</div></blockquote>
+<p>where the sum is taken over the elements of the unwhitened residual.</p>
+<p>This noise model applies the square-root of the pseudo-huber loss function to each element of
+the unwhitened residual such that the resulting cost used in the least-squares problem is the
+pseudo-huber loss. The pseudo-huber loss is defined as:</p>
+<blockquote>
+<div><p>pseudo_huber_loss(x) = delta^2 * ( sqrt( 1 + scalar_information * (x/delta)^2 ) - 1)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>The whitened residual is then:</dt><dd><p>whitened_residual[i] = sqrt( 2 * pseudo_huber_loss(unwhitened_residual[i]) )</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>delta</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Controls the point at which the loss function transitions from the L2 to L1 loss.
+Must be greater than zero.</p></li>
+<li><p><strong>scalar_information</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Constant scalar weight that changes the steepness of the loss function.
+Can be considered the inverse of the variance of an element of the unwhitened residual.</p></li>
+<li><p><strong>epsilon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Small value used to handle singularity at x = 0.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.PseudoHuberNoiseModel.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delta</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_information</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#PseudoHuberNoiseModel.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.PseudoHuberNoiseModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>delta</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – </p></li>
+<li><p><strong>scalar_information</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – </p></li>
+<li><p><strong>epsilon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.PseudoHuberNoiseModel.pseudo_huber_error">
+<span class="sig-name descname"><span class="pre">pseudo_huber_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#PseudoHuberNoiseModel.pseudo_huber_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.PseudoHuberNoiseModel.pseudo_huber_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the pseudo-huber cost function error for the argument x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – argument to return the cost for.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.PseudoHuberNoiseModel.whiten_scalar">
+<span class="sig-name descname"><span class="pre">whiten_scalar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounded_away_from_zero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#PseudoHuberNoiseModel.whiten_scalar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.PseudoHuberNoiseModel.whiten_scalar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a whitening function to a single element of the unwhitened residual such that the
+cost associated with the element in the least-sqaures cost function is the Pseudo-Huber
+loss function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Single element of the unwhitened residual</p></li>
+<li><p><strong>bounded_away_from_zero</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – True if x is guaranteed to not be zero. Typically used to avoid
+extra ops incurred by using epsilons to avoid singularities at x = 0 when it’s
+known that x != 0.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.BarronNoiseModel">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">BarronNoiseModel</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_information</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_epsilon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#BarronNoiseModel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.BarronNoiseModel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#symforce.opt.noise_models.ScalarNoiseModel" title="symforce.opt.noise_models.ScalarNoiseModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">symforce.opt.noise_models.ScalarNoiseModel</span></code></a></p>
+<dl class="simple">
+<dt>Noise model adapted from:</dt><dd><p>Barron, Jonathan T. “A general and adaptive robust loss function.” Proceedings of the
+IEEE/CVF Conference on Computer Vision and Pattern Recognition. 2019.</p>
+</dd>
+</dl>
+<p>This noise model applies a modified version of the “practical implementation” from Appendix B
+of the paper to each scalar element of an unwhitened residual. The Barron loss function is
+defined as:</p>
+<blockquote>
+<div><p>barron_loss(x) = delta^2 * (b/d) * (( scalar_information * (x/delta)^2 / b + 1)^(d/2) - 1)</p>
+</div></blockquote>
+<dl class="simple">
+<dt>where</dt><dd><p>b = <a href="#id1"><span class="problematic" id="id2">|alpha - 2|</span></a> + epsilon
+d = alpha + epsilon if alpha &gt;= 0 else alpha - epsilon</p>
+</dd>
+</dl>
+<p>Here delta controls the point at which the loss function transitions from quadratic to robust.
+This is different from the original Barron loss function, and is designed to match the pseudo-
+huber loss function.</p>
+<dl class="simple">
+<dt>Thus, the cost used in the optimization will be:</dt><dd><p>cost = sum( barron_loss(unwhitened_residual[i]) )
+cost = 0.5 * whitened_residual.T * whitened_residual</p>
+</dd>
+</dl>
+<p>where the sum is taken over the elements of the unwhitened residual.</p>
+<dl class="simple">
+<dt>Thus, the whitened residual is:</dt><dd><p>whitened_residual[i] = sqrt( 2 * barron_loss(unwhitened_residual[i]) )</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alpha</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Controls shape and convexity of the loss function. Notable values:
+alpha = 2 -&gt; L2 loss
+alpha = 1 -&gt; Pseudo-huber loss
+alpha = 0 -&gt; Cauchy loss
+alpha = -2 -&gt; Geman-McClure loss
+alpha = -inf -&gt; Welsch loss</p></li>
+<li><p><strong>delta</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Determines the transition point from quadratic to robust. Similar to “delta” as used
+by the pseudo-huber loss function.</p></li>
+<li><p><strong>scalar_information</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Scalar representing the inverse of the variance of an element of the
+unwhitened residual. Conceptually, we use “scalar_information” to whiten (in a
+probabalistic sense) the unwhitened residual before passing it through the Barron loss.</p></li>
+<li><p><strong>x_epsilon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Small value used for handling the singularity at x == 0.</p></li>
+<li><p><strong>alpha_epsilon</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – Small value used for handling singularities around alpha.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.BarronNoiseModel.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">alpha</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_information</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_epsilon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha_epsilon</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#BarronNoiseModel.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.BarronNoiseModel.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>alpha</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – </p></li>
+<li><p><strong>scalar_information</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – </p></li>
+<li><p><strong>x_epsilon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – </p></li>
+<li><p><strong>delta</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – </p></li>
+<li><p><strong>alpha_epsilon</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.BarronNoiseModel.compute_alpha_from_mu">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute_alpha_from_mu</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#BarronNoiseModel.compute_alpha_from_mu"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.BarronNoiseModel.compute_alpha_from_mu" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform mu, which ranges from 0-&gt;1, to alpha by alpha=2-1/(1-mu). This transformation
+means alpha will range from 1 to -inf, so that the noise model starts as a pseudo-huber and
+goes to a robust Welsch cost.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>mu</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – ranges from 0-&gt;1</p></li>
+<li><p><strong>epsilon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – small value to avoid numerical instability</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>alpha for use in the BarronNoiseModel construction</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>sf.Scalar</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.BarronNoiseModel.barron_error">
+<span class="sig-name descname"><span class="pre">barron_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#BarronNoiseModel.barron_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.BarronNoiseModel.barron_error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the barron cost function error for the argument x.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – argument to return the cost for.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Barron loss at value x</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="symforce.opt.noise_models.BarronNoiseModel.whiten_scalar">
+<span class="sig-name descname"><span class="pre">whiten_scalar</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounded_away_from_zero</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/opt/noise_models.html#BarronNoiseModel.whiten_scalar"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.opt.noise_models.BarronNoiseModel.whiten_scalar" title="Permalink to this definition">¶</a></dt>
+<dd><p>Applies a whitening function to a single element of the unwhitened residual such that the
+cost associated with the element in the least-sqaures cost function is the Barron loss
+function (weighted by self.weight).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Single element of the unwhitened residual</p></li>
+<li><p><strong>bounded_away_from_zero</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code>) – </p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="symforce.html">symforce package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="symforce.benchmarks.html">symforce.benchmarks package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.cam.html">symforce.cam package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.codegen.html">symforce.codegen package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.examples.html">symforce.examples package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.geo.html">symforce.geo package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.internal.html">symforce.internal package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.ops.html">symforce.ops package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="symforce.opt.html">symforce.opt package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.test_util.html">symforce.test_util package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.values.html">symforce.values package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.cc_sym.html">symforce.cc_sym module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.databuffer.html">symforce.databuffer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.jacobian_helpers.html">symforce.jacobian_helpers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.logic.html">symforce.logic module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.notebook_util.html">symforce.notebook_util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.path_util.html">symforce.path_util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.python_util.html">symforce.python_util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.symbolic.html">symforce.symbolic module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.type_helpers.html">symforce.type_helpers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.typing.html">symforce.typing module</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="symforce.html">symforce package</a><ul>
+  <li><a href="symforce.opt.html">symforce.opt package</a><ul>
+      <li>Previous: <a href="symforce.opt.factor.html" title="previous chapter">symforce.opt.factor module</a></li>
+      <li>Next: <a href="symforce.opt.numeric_factor.html" title="next chapter">symforce.opt.numeric_factor module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api/symforce.opt.noise_models.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

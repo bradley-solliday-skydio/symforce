@@ -1,0 +1,7 @@
+sym.equirectangular\_camera\_cal module
+=======================================
+
+.. automodule:: sym.equirectangular_camera_cal
+   :members:
+   :undoc-members:
+   :show-inheritance:

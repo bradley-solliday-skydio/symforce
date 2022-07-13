@@ -1,0 +1,7 @@
+symforce.codegen.format\_util module
+====================================
+
+.. automodule:: symforce.codegen.format_util
+   :members:
+   :undoc-members:
+   :show-inheritance:

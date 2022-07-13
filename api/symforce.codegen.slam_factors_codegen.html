@@ -1,0 +1,385 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>symforce.codegen.slam_factors_codegen module &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="symforce.codegen.sym_util_package_codegen module" href="symforce.codegen.sym_util_package_codegen.html" />
+    <link rel="prev" title="symforce.codegen.similarity_index module" href="symforce.codegen.similarity_index.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-symforce.codegen.slam_factors_codegen">
+<span id="symforce-codegen-slam-factors-codegen-module"></span><h1>symforce.codegen.slam_factors_codegen module<a class="headerlink" href="#module-symforce.codegen.slam_factors_codegen" title="Permalink to this headline">¶</a></h1>
+<p>Factors generally useful for visual SLAM problems (or visual odometry or structure-from-motion
+problems)</p>
+<p>Currently contains reprojection factors for all camera models.  For cameras that have
+backprojection, the factor operates on pixel coordinates in the source and target cameras.  For
+cameras that do not have backprojection, it instead operates on a ray in the source camera frame and
+a pixel in the target camera.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="symforce.codegen.slam_factors_codegen.inverse_range_landmark_prior_residual">
+<span class="sig-name descname"><span class="pre">inverse_range_landmark_prior_residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">landmark_inverse_range</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">inverse_range_prior</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/codegen/slam_factors_codegen.html#inverse_range_landmark_prior_residual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.codegen.slam_factors_codegen.inverse_range_landmark_prior_residual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Factor representing a Gaussian prior on the inverse range of a landmark</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>landmark_inverse_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The current inverse range estimate</p></li>
+<li><p><strong>inverse_range_prior</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The mean of the inverse range prior</p></li>
+<li><p><strong>weight</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The weight of the prior</p></li>
+<li><p><strong>sigma</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The standard deviation of the prior</p></li>
+<li><p><strong>epsilon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Small positive value</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Outputs:</dt><dd><p>res: 1dof residual of the prior</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix11" title="symforce.geo.matrix.Matrix11"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix11</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="symforce.codegen.slam_factors_codegen.reprojection_delta">
+<span class="sig-name descname"><span class="pre">reprojection_delta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_calibration_storage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calibration_storage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_inverse_range</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_pixel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_pixel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_model_class</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/codegen/slam_factors_codegen.html#reprojection_delta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.codegen.slam_factors_codegen.reprojection_delta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reprojects the landmark into the target camera and returns the delta from the correspondence to
+the reprojection.</p>
+<p>The landmark is specified as a pixel in the source camera and an inverse range; this means the
+landmark is fixed in the source camera and always has residual 0 there (this 0 residual is not
+returned, only the residual in the target camera is returned).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_pose</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Pose3" title="symforce.geo.pose3.Pose3"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pose3</span></code></a>) – The pose of the source camera</p></li>
+<li><p><strong>source_calibration_storage</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix" title="symforce.geo.matrix.Matrix"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix</span></code></a>) – The storage vector of the source camera calibration</p></li>
+<li><p><strong>target_pose</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Pose3" title="symforce.geo.pose3.Pose3"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pose3</span></code></a>) – The pose of the target camera</p></li>
+<li><p><strong>target_calibration_storage</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix" title="symforce.geo.matrix.Matrix"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix</span></code></a>) – The storage vector of the target camera calibration</p></li>
+<li><p><strong>source_inverse_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The inverse range of the landmark in the source camera</p></li>
+<li><p><strong>source_pixel</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix21" title="symforce.geo.matrix.Matrix21"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix21</span></code></a>) – The location of the landmark in the source camera</p></li>
+<li><p><strong>target_pixel</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix21" title="symforce.geo.matrix.Matrix21"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix21</span></code></a>) – The location of the correspondence in the target camera</p></li>
+<li><p><strong>epsilon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Small positive value</p></li>
+<li><p><strong>camera_model_class</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code>[<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.CameraCal" title="symforce.cam.camera_cal.CameraCal"><code class="xref py py-class docutils literal notranslate"><span class="pre">CameraCal</span></code></a>]) – The subclass of CameraCal to use as the camera model</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Outputs:</dt><dd><p>res: 2dof pixel reprojection error
+valid: is valid projection or not</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix21" title="symforce.geo.matrix.Matrix21"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix21</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="symforce.codegen.slam_factors_codegen.inverse_range_landmark_reprojection_error_residual">
+<span class="sig-name descname"><span class="pre">inverse_range_landmark_reprojection_error_residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_calibration_storage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calibration_storage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_inverse_range</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_pixel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_pixel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gnc_mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gnc_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera_model_class</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/codegen/slam_factors_codegen.html#inverse_range_landmark_reprojection_error_residual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.codegen.slam_factors_codegen.inverse_range_landmark_reprojection_error_residual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the 2dof residual of reprojecting the landmark into the target camera and comparing
+against the correspondence in the target camera.</p>
+<p>The landmark is specified as a pixel in the source camera and an inverse range; this means the
+landmark is fixed in the source camera and always has residual 0 there (this 0 residual is not
+returned, only the residual in the target camera is returned).</p>
+<p>The norm of the residual is whitened using the Barron noise model.  Whitening each component of
+the reprojection error separately would result in rejecting individual components as outliers.
+Instead, we minimize the whitened norm of the full reprojection error for each point.  See the
+docstring for <cite>NoiseModel.whiten_norm</cite> for more information on this, and the docstring of
+<cite>BarronNoiseModel</cite> for more information on the noise model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_pose</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Pose3" title="symforce.geo.pose3.Pose3"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pose3</span></code></a>) – The pose of the source camera</p></li>
+<li><p><strong>source_calibration_storage</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix" title="symforce.geo.matrix.Matrix"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix</span></code></a>) – The storage vector of the source camera calibration</p></li>
+<li><p><strong>target_pose</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Pose3" title="symforce.geo.pose3.Pose3"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pose3</span></code></a>) – The pose of the target camera</p></li>
+<li><p><strong>target_calibration_storage</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix" title="symforce.geo.matrix.Matrix"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix</span></code></a>) – The storage vector of the target camera calibration</p></li>
+<li><p><strong>source_inverse_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The inverse range of the landmark in the source camera</p></li>
+<li><p><strong>source_pixel</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix21" title="symforce.geo.matrix.Matrix21"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix21</span></code></a>) – The location of the landmark in the source camera</p></li>
+<li><p><strong>target_pixel</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix21" title="symforce.geo.matrix.Matrix21"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix21</span></code></a>) – The location of the correspondence in the target camera</p></li>
+<li><p><strong>weight</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The weight of the factor</p></li>
+<li><p><strong>gnc_mu</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The mu convexity parameter for the Barron noise model</p></li>
+<li><p><strong>gnc_scale</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The scale parameter for the Barron noise model</p></li>
+<li><p><strong>epsilon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Small positive value</p></li>
+<li><p><strong>camera_model_class</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code>[<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.CameraCal" title="symforce.cam.camera_cal.CameraCal"><code class="xref py py-class docutils literal notranslate"><span class="pre">CameraCal</span></code></a>]) – The subclass of CameraCal to use as the camera model</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Outputs:</dt><dd><p>res: 2dof residual of the reprojection</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix21" title="symforce.geo.matrix.Matrix21"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix21</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="symforce.codegen.slam_factors_codegen.ray_reprojection_delta">
+<span class="sig-name descname"><span class="pre">ray_reprojection_delta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calibration_storage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_inverse_range</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_camera_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_pixel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_camera_model_class</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/codegen/slam_factors_codegen.html#ray_reprojection_delta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.codegen.slam_factors_codegen.ray_reprojection_delta" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reprojects the landmark ray into the target camera and returns the delta between the
+correspondence and the reprojection.</p>
+<p>The landmark is specified as a 3D point or ray (will be normalized) in the source
+camera; this means the landmark is fixed in the source camera and always has residual 0 there
+(this 0 residual is not returned, only the residual in the target camera is returned).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_pose</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Pose3" title="symforce.geo.pose3.Pose3"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pose3</span></code></a>) – The pose of the source camera</p></li>
+<li><p><strong>target_pose</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Pose3" title="symforce.geo.pose3.Pose3"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pose3</span></code></a>) – The pose of the target camera</p></li>
+<li><p><strong>target_calibration_storage</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix" title="symforce.geo.matrix.Matrix"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix</span></code></a>) – The storage vector of the target camera calibration</p></li>
+<li><p><strong>source_inverse_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The inverse range of the landmark in the source camera</p></li>
+<li><p><strong>p_camera_source</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix31" title="symforce.geo.matrix.Matrix31"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix31</span></code></a>) – The location of the landmark in the source camera coordinate, will be normalized</p></li>
+<li><p><strong>target_pixel</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix21" title="symforce.geo.matrix.Matrix21"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix21</span></code></a>) – The location of the correspondence in the target camera</p></li>
+<li><p><strong>epsilon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Small positive value</p></li>
+<li><p><strong>target_camera_model_class</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code>[<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.CameraCal" title="symforce.cam.camera_cal.CameraCal"><code class="xref py py-class docutils literal notranslate"><span class="pre">CameraCal</span></code></a>]) – The subclass of CameraCal to use as the target camera model</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Outputs:</dt><dd><p>res: 2dof reprojection delta
+valid: is valid projection or not</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-data docutils literal notranslate"><span class="pre">Tuple</span></code>[<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix21" title="symforce.geo.matrix.Matrix21"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix21</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="symforce.codegen.slam_factors_codegen.inverse_range_landmark_ray_reprojection_error_residual">
+<span class="sig-name descname"><span class="pre">inverse_range_landmark_ray_reprojection_error_residual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_pose</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_calibration_storage</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_inverse_range</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p_camera_source</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_pixel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weight</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gnc_mu</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gnc_scale</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_camera_model_class</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/codegen/slam_factors_codegen.html#inverse_range_landmark_ray_reprojection_error_residual"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.codegen.slam_factors_codegen.inverse_range_landmark_ray_reprojection_error_residual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the 2dof residual of reprojecting the landmark ray into the target spherical camera and comparing
+it against the correspondence.</p>
+<p>The landmark is specified as a camera point in the source camera with an inverse range; this means the
+landmark is fixed in the source camera and always has residual 0 there (this 0 residual is not
+returned, only the residual in the target camera is returned).</p>
+<p>The norm of the residual is whitened using the Barron noise model.  Whitening each component of
+the reprojection error separately would result in rejecting individual components as outliers.
+Instead, we minimize the whitened norm of the full reprojection error for each point.  See the
+docstring for <cite>NoiseModel.whiten_norm</cite> for more information on this, and the docstring of
+<cite>BarronNoiseModel</cite> for more information on the noise model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>source_pose</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Pose3" title="symforce.geo.pose3.Pose3"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pose3</span></code></a>) – The pose of the source camera</p></li>
+<li><p><strong>target_pose</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Pose3" title="symforce.geo.pose3.Pose3"><code class="xref py py-class docutils literal notranslate"><span class="pre">Pose3</span></code></a>) – The pose of the target camera</p></li>
+<li><p><strong>target_calibration_storage</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix" title="symforce.geo.matrix.Matrix"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix</span></code></a>) – The storage vector of the target spherical camera calibration</p></li>
+<li><p><strong>source_inverse_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The inverse range of the landmark in the source camera</p></li>
+<li><p><strong>p_camera_source</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix31" title="symforce.geo.matrix.Matrix31"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix31</span></code></a>) – The location of the landmark in the source camera coordinate, will be normalized</p></li>
+<li><p><strong>target_pixel</strong> (<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix21" title="symforce.geo.matrix.Matrix21"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix21</span></code></a>) – The location of the correspondence in the target camera</p></li>
+<li><p><strong>weight</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The weight of the factor</p></li>
+<li><p><strong>gnc_mu</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The mu convexity parameter for the Barron noise model</p></li>
+<li><p><strong>gnc_scale</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – The scale parameter for the Barron noise model</p></li>
+<li><p><strong>epsilon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – Small positive value</p></li>
+<li><p><strong>target_camera_model_class</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code>[<a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.CameraCal" title="symforce.cam.camera_cal.CameraCal"><code class="xref py py-class docutils literal notranslate"><span class="pre">CameraCal</span></code></a>]) – The subclass of CameraCal to use as the target camera model</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="simple">
+<dt>Outputs:</dt><dd><p>res: 2dof whiten residual of the reprojection</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="symforce.symbolic.html#symforce.symbolic.Matrix21" title="symforce.geo.matrix.Matrix21"><code class="xref py py-class docutils literal notranslate"><span class="pre">Matrix21</span></code></a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="symforce.codegen.slam_factors_codegen.generate">
+<span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/symforce/codegen/slam_factors_codegen.html#generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#symforce.codegen.slam_factors_codegen.generate" title="Permalink to this definition">¶</a></dt>
+<dd><p>Generate the SLAM package for the given language.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_dir</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Directory to generate outputs into</p></li>
+<li><p><strong>config</strong> (<code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code>[<a class="reference internal" href="symforce.codegen.codegen_config.html#symforce.codegen.codegen_config.CodegenConfig" title="symforce.codegen.codegen_config.CodegenConfig"><code class="xref py py-class docutils literal notranslate"><span class="pre">CodegenConfig</span></code></a>]) – CodegenConfig, defaults to the default C++ config</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="symforce.html">symforce package</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="symforce.benchmarks.html">symforce.benchmarks package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.cam.html">symforce.cam package</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="symforce.codegen.html">symforce.codegen package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.examples.html">symforce.examples package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.geo.html">symforce.geo package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.internal.html">symforce.internal package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.ops.html">symforce.ops package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.opt.html">symforce.opt package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.test_util.html">symforce.test_util package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.values.html">symforce.values package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.cc_sym.html">symforce.cc_sym module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.databuffer.html">symforce.databuffer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.jacobian_helpers.html">symforce.jacobian_helpers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.logic.html">symforce.logic module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.notebook_util.html">symforce.notebook_util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.path_util.html">symforce.path_util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.python_util.html">symforce.python_util module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.symbolic.html">symforce.symbolic module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.type_helpers.html">symforce.type_helpers module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="symforce.typing.html">symforce.typing module</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="symforce.html">symforce package</a><ul>
+  <li><a href="symforce.codegen.html">symforce.codegen package</a><ul>
+      <li>Previous: <a href="symforce.codegen.similarity_index.html" title="previous chapter">symforce.codegen.similarity_index module</a></li>
+      <li>Next: <a href="symforce.codegen.sym_util_package_codegen.html" title="next chapter">symforce.codegen.sym_util_package_codegen module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api/symforce.codegen.slam_factors_codegen.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

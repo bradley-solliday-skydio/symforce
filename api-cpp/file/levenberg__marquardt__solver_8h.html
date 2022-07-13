@@ -1,0 +1,433 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>File levenberg_marquardt_solver.h &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="File levenberg_marquardt_solver.tcc" href="levenberg__marquardt__solver_8tcc.html" />
+    <link rel="prev" title="File key.h" href="key_8h.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="file-levenberg-marquardt-solver-h">
+<h1>File levenberg_marquardt_solver.h<a class="headerlink" href="#file-levenberg-marquardt-solver-h" title="Permalink to this headline">¶</a></h1>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv43sym">
+<span class="target" id="namespacesym"></span><span class="k"><span class="pre">namespace</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">sym</span></span></span><br /></dt>
+<dd><p>Utilities for converting various types of factor functors into what’s needed for the polymorphic std::function that’s actually stored and used by <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Factor"><span class="std std-ref">sym::Factor</span></a></p>
+<p>Primarily intended to be included by factor.tcc and used internally there </p>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4I00EN3sym24LevenbergMarquardtSolverE">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ScalarType</span></span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">LinearSolverType</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="assert_8h.html#_CPPv43sym" title="sym"><span class="n"><span class="pre">sym</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="../class/classsym_1_1SparseCholeskySolver.html#_CPPv4I0_iEN3sym20SparseCholeskySolverE" title="sym::SparseCholeskySolver"><span class="n"><span class="pre">SparseCholeskySolver</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">SparseMatrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4I00EN3sym24LevenbergMarquardtSolverE" title="sym::LevenbergMarquardtSolver::ScalarType"><span class="n"><span class="pre">ScalarType</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1LevenbergMarquardtSolver"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">LevenbergMarquardtSolver</span></span></span><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;levenberg_marquardt_solver.h&gt;</em></div>
+<p>Fast Levenberg-Marquardt solver for nonlinear least squares problems specified by a linearization function. Supports on-manifold optimization and sparse solving, and attempts to minimize allocations after the first iteration.</p>
+<p>This assumes the problem structure is the same for the lifetime of the object - if the problem structure changes, create a new <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1LevenbergMarquardtSolver"><span class="std std-ref">LevenbergMarquardtSolver</span></a>.</p>
+<p>TODO(aaron): Analyze what repeated allocations we do have, and get rid of them if possible</p>
+<p>Not thread safe! Create one per thread.</p>
+<p>Example usage:</p>
+<p>constexpr const int M = 9; constexpr const int N = 5;</p>
+<p>// Create a function that computes the residual (a linear residual for this example) const auto J_MN = sym::RandomNormalMatrix&lt;double, M, N&gt;(gen); const auto linearize_func = [&amp;J_MN](const sym::Valuesd&amp; values, sym::Linearizationd* const linearization) { const auto state_vec = values.At&lt;sym::Vector5d&gt;(‘v’); linearization-&gt;residual = J_MN * state_vec; linearization-&gt;hessian_lower = (J_MN.transpose() * J_MN).sparseView(); linearization-&gt;jacobian = J_MN.sparseView(); linearization-&gt;rhs = J_MN.transpose() * linearization-&gt;residual; };</p>
+<p>// Create a <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values"><span class="std std-ref">Values</span></a> sym::Valuesd values_init{}; values_init.Set(‘v’, (StateVector::Ones() * 100).eval());</p>
+<p>// Create a Solver sym::LevenbergMarquardtSolverd solver(params, “”, kEpsilon); solver.SetIndex(values_init.CreateIndex({‘v’})); solver.Reset(values_init);</p>
+<p>// Iterate to convergence sym::optimization_stats_t stats; bool should_early_exit = false; while (!should_early_exit) { should_early_exit = solver.Iterate(linearize_func, &amp;stats); }</p>
+<p>// Get the best values sym::Valuesd values_final = solver.GetBestValues();</p>
+<p>The theory:</p>
+<p>We start with a nonlinear vector-valued error function that defines an error residual for which we want to minimize the squared norm. The residual is dimension M, the state is N. residual = f(x)</p>
+<p>Define a least squares cost function as the squared norm of the residual: e(x) = 0.5 * ||f(x)||**2 = 0.5 * f(x).T * f(x)</p>
+<p>Take the first order taylor expansion for x around the linearization point x0: f(x) = f(x0) + f’(x0) * (x - x0) + …</p>
+<p>Plug in to the cost function to get a quadratic: e(x) ~= 0.5 * (x - x0).T * f’(x0).T * f’(x0) * (x - x0) + f(x0).T * f’(x0) * (x - x0)<ul class="simple">
+<li><p>0.5 * f(x0).T * f(x0)</p></li>
+</ul>
+</p>
+<p>Take derivative with respect to x: e’(x) = f’(x0).T * f’(x0) * (x - x0) + f’(x0).T * f(x0)</p>
+<p>Set to zero to find the minimum value of the quadratic (paraboloid): 0 = f’(x0).T * f’(x0) * (x - x0) + f’(x0).T * f(x0) (x - x0) = - inv(f’(x0).T * f’(x0)) * f’(x0).T * f(x0) x = x0 - inv(f’(x0).T * f’(x0)) * f’(x0).T * f(x0)</p>
+<p>Another way to write this is to create some helpful shorthand: f’(x0) –&gt; jacobian or J (shape = MxN) f (x0) –&gt; bias or b (shape = Mx1) x - x0 –&gt; dx (shape = Nx1)</p>
+<p>Rederiving the Gauss-Newton solution: e(x) ~= 0.5 * dx.T * J.T * J * dx + b.T * J * dx + 0.5 * b.T * b e’(x) = J.T * J * dx + J.T * b x = x0 - inv(J.T * J) * J.T * b</p>
+<p>A couple more common names: f’(x0).T * f’(x0) = J.T * J –&gt; hessian approximation or H (shape = NxN) f’(x0).T * f (x0) = J.T * b –&gt; right hand side or rhs (shape = Nx1)</p>
+<p>So the iteration loop for optimization is: J, b = linearize(f, x0) dx = -inv(J.T * J) * J.T * b x_new = x0 + dx</p>
+<p>Technically what we’ve just described is the Gauss-Newton algorithm; the Levenberg-Marquardt algorithm is based on Gauss-Newton, but adds a term to J.T * J before inverting to make sure the matrix is invertible and make the optimization more stable. This additional term typically takes the form lambda * I, or lambda * diag(J.T * J), where lambda is another parameter updated by the solver at each iteration. Configuration of how this term is computed can be found in the optimizer params. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1ae3c2e4441d8f9d12f01a4474bd2c47b7"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Scalar</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4I00EN3sym24LevenbergMarquardtSolverE" title="sym::LevenbergMarquardtSolver::ScalarType"><span class="n"><span class="pre">ScalarType</span></span></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver12LinearSolverE">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a48b73f3a83f939249b7cc6bfe1b9902e"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">LinearSolver</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4I00EN3sym24LevenbergMarquardtSolverE" title="sym::LevenbergMarquardtSolver::LinearSolverType"><span class="n"><span class="pre">LinearSolverType</span></span></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver9StateTypeE">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1aac776fc3e76a29eaee6f5f79c608cf07"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">StateType</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="n"><span class="pre">internal</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">LevenbergMarquardtState</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver13LinearizeFuncE">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1af4c4ceefa7b4db62d917520e663c6449"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">LinearizeFunc</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">function</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">void</span></span><span class="p"><span class="pre">(</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="linearization_8h.html#_CPPv4I0EN3sym13LinearizationE" title="sym::Linearization"><span class="n"><span class="pre">Linearization</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">&gt;</span></span><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver24LevenbergMarquardtSolverERK18optimizer_params_tRKNSt6stringEK6Scalar">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a6ae2e83a4a6a87f5e251fd1c7c3330d7"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">LevenbergMarquardtSolver</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">optimizer_params_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">p</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">id</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">epsilon</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver24LevenbergMarquardtSolverERK18optimizer_params_tRKNSt6stringEK6ScalarRK12LinearSolver">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a964b88fb76e6fbaf3cd01140f74ac933"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">LevenbergMarquardtSolver</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">optimizer_params_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">p</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">id</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">epsilon</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver12LinearSolverE" title="sym::LevenbergMarquardtSolver::LinearSolver"><span class="n"><span class="pre">LinearSolver</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">linear_solver</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver8SetIndexERK7index_t">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a44eb6760e7040fbd805cb7fae036bd2f"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SetIndex</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">index_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">index</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver5ResetERK6ValuesI6ScalarE">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a84b6dc59c49b73fe336e35f463e3503b"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Reset</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">values</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver10ResetStateERK6ValuesI6ScalarE">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a5d2d1d78386de1b6c8dab3150ae99fce"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ResetState</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">values</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym24LevenbergMarquardtSolver6ParamsEv">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1af076623028169183f776c70c8cb32a34"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">optimizer_params_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">Params</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver12UpdateParamsERK18optimizer_params_t">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1acfc16212f8ae2979098dbd0cdd107c2b"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">UpdateParams</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">optimizer_params_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">p</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver7IterateERK13LinearizeFuncPC17OptimizationStatsI6ScalarEKb">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1aaa100fef153a968f4bf9094dbb54586c"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Iterate</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver13LinearizeFuncE" title="sym::LevenbergMarquardtSolver::LinearizeFunc"><span class="n"><span class="pre">LinearizeFunc</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">func</span></span>, <a class="reference internal" href="optimization__stats_8h.html#_CPPv4I0EN3sym17OptimizationStatsE" title="sym::OptimizationStats"><span class="n"><span class="pre">OptimizationStats</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">stats</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">debug_stats</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">false</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym24LevenbergMarquardtSolver13GetBestValuesEv">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1ac02dde8863981b1d2465ac19d7959180"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">GetBestValues</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym24LevenbergMarquardtSolver20GetBestLinearizationEv">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a71a73b5f5984a58420fe55cef7c5e5aa"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="linearization_8h.html#_CPPv4I0EN3sym13LinearizationE" title="sym::Linearization"><span class="n"><span class="pre">Linearization</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">GetBestLinearization</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver17ComputeCovarianceERKN5Eigen12SparseMatrixI6ScalarEEP7MatrixXI6ScalarE">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a524da0384ea565f6c36292c40e8cfc57"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ComputeCovariance</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">SparseMatrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">hessian_lower</span></span>, <a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7MatrixXE" title="sym::MatrixX"><span class="n"><span class="pre">MatrixX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">covariance</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-private-functions">Private Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym24LevenbergMarquardtSolver11DampHessianERKN5Eigen12SparseMatrixI6ScalarEEPCbPC7VectorXI6ScalarEK6Scalar">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a45be065142ab09a2973bdd442a225729"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">SparseMatrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">DampHessian</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">SparseMatrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">hessian_lower</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">have_max_diagonal</span></span>, <a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7VectorXE" title="sym::VectorX"><span class="n"><span class="pre">VectorX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">max_diagonal</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">lambda</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3sym24LevenbergMarquardtSolver11DampHessianERKN5Eigen12SparseMatrixI6ScalarEEPCbPC7VectorXI6ScalarEK6Scalar" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver20CheckHessianDiagonalERKN5Eigen12SparseMatrixI6ScalarEE">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a6594f42d582dab8295103aaadc646267"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CheckHessianDiagonal</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">SparseMatrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">hessian_lower_damped</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver20CheckHessianDiagonalERKN5Eigen12SparseMatrixI6ScalarEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym24LevenbergMarquardtSolver22PopulateIterationStatsEPC24optimization_iteration_tRK9StateTypeK6ScalarK6ScalarKb">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a8d13446c336ec49096611fa4d524dcbe"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PopulateIterationStats</span></span></span><span class="sig-paren">(</span><span class="n"><span class="pre">optimization_iteration_t</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">iteration_stats</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver9StateTypeE" title="sym::LevenbergMarquardtSolver::StateType"><span class="n"><span class="pre">StateType</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">state</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">new_error</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">relative_reduction</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">debug_stats</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3sym24LevenbergMarquardtSolver22PopulateIterationStatsEPC24optimization_iteration_tRK9StateTypeK6ScalarK6ScalarKb" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym24LevenbergMarquardtSolver6UpdateERK6ValuesI6ScalarERK7index_tRK7VectorXI6ScalarEPC6ValuesI6ScalarE">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a44e4e951fa1296a9d567038134bb19a7"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Update</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">values</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">index_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">index</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7VectorXE" title="sym::VectorX"><span class="n"><span class="pre">VectorX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">update</span></span>, <a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">updated_values</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3sym24LevenbergMarquardtSolver6UpdateERK6ValuesI6ScalarERK7index_tRK7VectorXI6ScalarEPC6ValuesI6ScalarE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-private-members">Private Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver2p_E">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a640b2ebbb8a141baf5b0ab8465df4b48"></span><span class="n"><span class="pre">optimizer_params_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">p_</span></span></span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver2p_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver3id_E">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1aac742f30604a3776bcf19acd1e6ce926"></span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">id_</span></span></span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver3id_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver8epsilon_E">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a340e55a51b0e4497c2e6ba2e23a8bbb7"></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">epsilon_</span></span></span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver8epsilon_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver6state_E">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a8444536b62138b5e781380df919a33a4"></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver9StateTypeE" title="sym::LevenbergMarquardtSolver::StateType"><span class="n"><span class="pre">StateType</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">state_</span></span></span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver6state_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver14linear_solver_E">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1aaf42308c611e046cf3aa8925c41a3811"></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver12LinearSolverE" title="sym::LevenbergMarquardtSolver::LinearSolver"><span class="n"><span class="pre">LinearSolver</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">linear_solver_</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="p"><span class="pre">{</span></span><span class="p"><span class="pre">}</span></span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver14linear_solver_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver16solver_analyzed_E">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1aa84374f1fb92e4c96dc208a1fd80806b"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">solver_analyzed_</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="p"><span class="pre">{</span></span><span class="k"><span class="pre">false</span></span><span class="p"><span class="pre">}</span></span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver16solver_analyzed_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver18have_max_diagonal_E">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a8d47845bd68d29f4b66330cbc3d7125a"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">have_max_diagonal_</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="p"><span class="pre">{</span></span><span class="k"><span class="pre">false</span></span><span class="p"><span class="pre">}</span></span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver18have_max_diagonal_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver13max_diagonal_E">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a2cf2e618e50f6054d0d77f2320c59f1a"></span><a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7VectorXE" title="sym::VectorX"><span class="n"><span class="pre">VectorX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">max_diagonal_</span></span></span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver13max_diagonal_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver15current_lambda_E">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a2093acff2c43ee53ba022f66c154fd62"></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">current_lambda_</span></span></span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver15current_lambda_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver17have_last_update_E">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a6741fa44e8a27de11714f20d790cce8b"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">have_last_update_</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="p"><span class="pre">{</span></span><span class="k"><span class="pre">false</span></span><span class="p"><span class="pre">}</span></span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver17have_last_update_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver12last_update_E">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a9d4f2da0bf2bea87eac3fffd13fb6388"></span><a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7VectorXE" title="sym::VectorX"><span class="n"><span class="pre">VectorX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">last_update_</span></span></span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver12last_update_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver10iteration_E">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1ae3e0311f8de54d0dd490585d4afcfa16"></span><span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">iteration_</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="p"><span class="pre">{</span></span><span class="o"><span class="pre">-</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">}</span></span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver10iteration_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver7update_E">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1ae13cb79b95a705cedb658bfbcff6e32b"></span><a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7VectorXE" title="sym::VectorX"><span class="n"><span class="pre">VectorX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">update_</span></span></span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver7update_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver9H_damped_E">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1acc383a7af33f5734e5c8136407358c96"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">SparseMatrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1LevenbergMarquardtSolver.html#_CPPv4N3sym24LevenbergMarquardtSolver6ScalarE" title="sym::LevenbergMarquardtSolver::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">H_damped_</span></span></span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver9H_damped_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver14zero_diagonal_E">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a0d07dd781ec88e1a6b37f39c6f0c40d9"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Array</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">bool</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Dynamic</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">zero_diagonal_</span></span></span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver14zero_diagonal_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver22zero_diagonal_indices_E">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1ae0436f2f321bc1bfb1d884251f2215b5"></span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">int</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">zero_diagonal_indices_</span></span></span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver22zero_diagonal_indices_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym24LevenbergMarquardtSolver6index_E">
+<span class="target" id="classsym_1_1LevenbergMarquardtSolver_1a79be3f92792ea164c37872f7282c7175"></span><span class="n"><span class="pre">index_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">index_</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="p"><span class="pre">{</span></span><span class="p"><span class="pre">}</span></span><a class="headerlink" href="#_CPPv4N3sym24LevenbergMarquardtSolver6index_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../classlist.html">Class list</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../filelist.html">File list</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="assert_8h.html">File assert.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="covariance__utils_8h.html">File covariance_utils.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="derivative__checker_8h.html">File derivative_checker.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="factor_8cc.html">File factor.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="factor_8h.html">File factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="factor_8tcc.html">File factor.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="factor__utils_8h.html">File factor_utils.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gnc__optimizer_8h.html">File gnc_optimizer.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hash__combine_8h.html">File hash_combine.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="internal_2tic__toc_8h.html">File tic_toc.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="key_8cc.html">File key.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="key_8h.html">File key.h</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">File levenberg_marquardt_solver.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levenberg__marquardt__solver_8tcc.html">File levenberg_marquardt_solver.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levenberg__marquardt__state_8h.html">File levenberg_marquardt_state.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearization_8h.html">File linearization.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearizer_8cc.html">File linearizer.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearizer_8h.html">File linearizer.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearizer_8tcc.html">File linearizer.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearizer__utils_8h.html">File linearizer_utils.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logging__configure_8cc.html">File logging_configure.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logging__configure_8h.html">File logging_configure.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimization__stats_8h.html">File optimization_stats.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimizer_8cc.html">File optimizer.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimizer_8h.html">File optimizer.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimizer_8tcc.html">File optimizer.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional_8h.html">File optional.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__cholesky__solver_8cc.html">File sparse_cholesky_solver.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__cholesky__solver_8h.html">File sparse_cholesky_solver.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__cholesky__solver_8tcc.html">File sparse_cholesky_solver.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__schur__solver_8h.html">File sparse_schur_solver.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__schur__solver_8tcc.html">File sparse_schur_solver.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="templates_8h.html">File templates.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tic__toc_8cc.html">File tic_toc.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tic__toc_8h.html">File tic_toc.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="util_8h.html">File util.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values_8cc.html">File values.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values_8h.html">File values.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values_8tcc.html">File values.tcc</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../filelist.html">File list</a><ul>
+      <li>Previous: <a href="key_8h.html" title="previous chapter">File key.h</a></li>
+      <li>Next: <a href="levenberg__marquardt__solver_8tcc.html" title="next chapter">File levenberg_marquardt_solver.tcc</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/api-cpp/file/levenberg__marquardt__solver_8h.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

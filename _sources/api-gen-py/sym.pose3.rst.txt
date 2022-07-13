@@ -1,0 +1,7 @@
+sym.pose3 module
+================
+
+.. automodule:: sym.pose3
+   :members:
+   :undoc-members:
+   :show-inheritance:

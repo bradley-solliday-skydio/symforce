@@ -1,0 +1,213 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>symforce.opt.objectives.prior_value_objective &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for symforce.opt.objectives.prior_value_objective</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># SymForce - Copyright 2022, Skydio, Inc.</span>
+<span class="c1"># This source code is under the Apache 2.0 license found in the LICENSE file.</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="kn">from</span> <span class="nn">symforce.ops</span> <span class="kn">import</span> <span class="n">LieGroupOps</span>
+<span class="kn">from</span> <span class="nn">symforce.opt</span> <span class="kn">import</span> <span class="n">objective</span>
+<span class="kn">from</span> <span class="nn">symforce.opt.residual_block</span> <span class="kn">import</span> <span class="n">ResidualBlock</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">typing</span> <span class="k">as</span> <span class="n">T</span>
+<span class="kn">import</span> <span class="nn">symforce.symbolic</span> <span class="k">as</span> <span class="nn">sf</span>
+<span class="kn">from</span> <span class="nn">symforce.opt</span> <span class="kn">import</span> <span class="n">noise_models</span>
+
+
+<div class="viewcode-block" id="PriorValueObjective"><a class="viewcode-back" href="../../../../api/symforce.opt.objectives.prior_value_objective.html#symforce.opt.objectives.prior_value_objective.PriorValueObjective">[docs]</a><span class="k">class</span> <span class="nc">PriorValueObjective</span><span class="p">(</span><span class="n">objective</span><span class="o">.</span><span class="n">TimestepObjective</span><span class="p">):</span>
+<div class="viewcode-block" id="PriorValueObjective.ExtraValues"><a class="viewcode-back" href="../../../../api/symforce.opt.objectives.prior_value_objective.html#symforce.opt.objectives.prior_value_objective.PriorValueObjective.ExtraValues">[docs]</a>    <span class="nd">@dataclass</span>
+    <span class="k">class</span> <span class="nc">ExtraValues</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Fields:</span>
+<span class="sd">            unwhitened_residual: The tangent-space error between `actual` and `desired`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">unwhitened_residual</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span></div>
+
+<div class="viewcode-block" id="PriorValueObjective.residual_at_timestep"><a class="viewcode-back" href="../../../../api/symforce.opt.objectives.prior_value_objective.html#symforce.opt.objectives.prior_value_objective.PriorValueObjective.residual_at_timestep">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">residual_at_timestep</span><span class="p">(</span>
+        <span class="n">actual</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Element</span><span class="p">,</span>
+        <span class="n">desired</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Element</span><span class="p">,</span>
+        <span class="n">information_diag</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">],</span>
+        <span class="n">epsilon</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span>
+        <span class="n">cost_scaling</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ResidualBlock</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns the residual block for the given timestep, where the residual is computed as the</span>
+<span class="sd">        weighted tangent-space difference between `actual` and `desired`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            actual: Typically an element to be optimized in the optimization problem.</span>
+<span class="sd">            desired: The desired value of the element to be optimized, or equivalently the prior we</span>
+<span class="sd">                have on `actual`.</span>
+<span class="sd">            information_diag: List of scalars defining how each element of the tangent-space vector</span>
+<span class="sd">                representing the transform between `actual` and `desired` is weighted. For example,</span>
+<span class="sd">                if `actual` and `desired` are 3D positions represented by sf.V3 objects,</span>
+<span class="sd">                the first, second, and third elements of `information_diag` represent how the x, y,</span>
+<span class="sd">                and z errors are weighted.</span>
+<span class="sd">            epsilon: A small number used to avoid singularities.</span>
+<span class="sd">            cost_scaling: Optional scaling parameter. Corresponds to multiplying the cost in the</span>
+<span class="sd">                overall optimization problem by a constant.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">unwhitened_residual</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="n">LieGroupOps</span><span class="o">.</span><span class="n">local_coordinates</span><span class="p">(</span><span class="n">desired</span><span class="p">,</span> <span class="n">actual</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">))</span>
+        <span class="n">noise_model</span> <span class="o">=</span> <span class="n">noise_models</span><span class="o">.</span><span class="n">DiagonalNoiseModel</span><span class="p">(</span>
+            <span class="n">information_diag</span><span class="o">=</span><span class="p">[</span><span class="n">cost_scaling</span> <span class="o">*</span> <span class="n">c</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">information_diag</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">whitened_residual</span> <span class="o">=</span> <span class="n">noise_model</span><span class="o">.</span><span class="n">whiten</span><span class="p">(</span><span class="n">unwhitened_residual</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">ResidualBlock</span><span class="p">(</span>
+            <span class="n">residual</span><span class="o">=</span><span class="n">whitened_residual</span><span class="p">,</span>
+            <span class="n">extra_values</span><span class="o">=</span><span class="n">PriorValueObjective</span><span class="o">.</span><span class="n">ExtraValues</span><span class="p">(</span><span class="n">unwhitened_residual</span><span class="o">=</span><span class="n">unwhitened_residual</span><span class="p">),</span>
+        <span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  <li><a href="../../../symforce.html">symforce</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

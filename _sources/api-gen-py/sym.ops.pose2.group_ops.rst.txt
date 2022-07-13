@@ -1,0 +1,7 @@
+sym.ops.pose2.group\_ops module
+===============================
+
+.. automodule:: sym.ops.pose2.group_ops
+   :members:
+   :undoc-members:
+   :show-inheritance:

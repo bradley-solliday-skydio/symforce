@@ -1,0 +1,7 @@
+symforce.cam.posed\_camera module
+=================================
+
+.. automodule:: symforce.cam.posed_camera
+   :members:
+   :undoc-members:
+   :show-inheritance:

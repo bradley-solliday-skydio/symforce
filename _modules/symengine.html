@@ -1,0 +1,224 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>symengine &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for symengine</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">platform</span> <span class="o">==</span> <span class="s1">&#39;win32&#39;</span> \
+       <span class="ow">and</span> <span class="s1">&#39;SYMENGINE_PY_ADD_PATH_TO_SEARCH_DIRS&#39;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">directory</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;PATH&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">directory</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">add_dll_directory</span><span class="p">(</span><span class="n">directory</span><span class="p">)</span>
+
+<span class="k">del</span> <span class="n">os</span><span class="p">,</span> <span class="n">sys</span>
+
+<span class="kn">import</span> <span class="nn">symengine.lib.symengine_wrapper</span> <span class="k">as</span> <span class="nn">wrapper</span>
+
+<span class="kn">from</span> <span class="nn">.lib.symengine_wrapper</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">have_mpfr</span><span class="p">,</span> <span class="n">have_mpc</span><span class="p">,</span> <span class="n">have_flint</span><span class="p">,</span> <span class="n">have_piranha</span><span class="p">,</span> <span class="n">have_llvm</span><span class="p">,</span> <span class="n">have_llvm_long_double</span><span class="p">,</span>
+    <span class="n">I</span><span class="p">,</span> <span class="n">E</span><span class="p">,</span> <span class="n">pi</span><span class="p">,</span> <span class="n">oo</span><span class="p">,</span> <span class="n">zoo</span><span class="p">,</span> <span class="n">nan</span><span class="p">,</span> <span class="n">Symbol</span><span class="p">,</span> <span class="n">Dummy</span><span class="p">,</span> <span class="n">S</span><span class="p">,</span> <span class="n">sympify</span><span class="p">,</span> <span class="n">SympifyError</span><span class="p">,</span>
+    <span class="n">Integer</span><span class="p">,</span> <span class="n">Rational</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Number</span><span class="p">,</span> <span class="n">RealNumber</span><span class="p">,</span> <span class="n">RealDouble</span><span class="p">,</span> <span class="n">ComplexDouble</span><span class="p">,</span>
+    <span class="n">add</span><span class="p">,</span> <span class="n">Add</span><span class="p">,</span> <span class="n">Mul</span><span class="p">,</span> <span class="n">Pow</span><span class="p">,</span> <span class="n">function_symbol</span><span class="p">,</span>
+    <span class="n">Max</span><span class="p">,</span> <span class="n">Min</span><span class="p">,</span> <span class="n">DenseMatrix</span><span class="p">,</span> <span class="n">Matrix</span><span class="p">,</span>
+    <span class="n">ImmutableMatrix</span><span class="p">,</span> <span class="n">ImmutableDenseMatrix</span><span class="p">,</span> <span class="n">MutableDenseMatrix</span><span class="p">,</span>
+    <span class="n">MatrixBase</span><span class="p">,</span> <span class="n">Basic</span><span class="p">,</span> <span class="n">DictBasic</span><span class="p">,</span> <span class="n">symarray</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="n">zeros</span><span class="p">,</span>
+    <span class="n">eye</span><span class="p">,</span> <span class="n">diag</span><span class="p">,</span> <span class="n">ones</span><span class="p">,</span> <span class="n">Derivative</span><span class="p">,</span> <span class="n">Subs</span><span class="p">,</span> <span class="n">expand</span><span class="p">,</span> <span class="n">has_symbol</span><span class="p">,</span>
+    <span class="n">UndefFunction</span><span class="p">,</span> <span class="n">Function</span><span class="p">,</span> <span class="n">UnevaluatedExpr</span><span class="p">,</span> <span class="n">latex</span><span class="p">,</span>
+    <span class="n">have_numpy</span><span class="p">,</span> <span class="n">true</span><span class="p">,</span> <span class="n">false</span><span class="p">,</span> <span class="n">Equality</span><span class="p">,</span> <span class="n">Unequality</span><span class="p">,</span> <span class="n">GreaterThan</span><span class="p">,</span>
+    <span class="n">LessThan</span><span class="p">,</span> <span class="n">StrictGreaterThan</span><span class="p">,</span> <span class="n">StrictLessThan</span><span class="p">,</span> <span class="n">Eq</span><span class="p">,</span> <span class="n">Ne</span><span class="p">,</span> <span class="n">Ge</span><span class="p">,</span> <span class="n">Le</span><span class="p">,</span>
+    <span class="n">Gt</span><span class="p">,</span> <span class="n">Lt</span><span class="p">,</span> <span class="n">And</span><span class="p">,</span> <span class="n">Or</span><span class="p">,</span> <span class="n">Not</span><span class="p">,</span> <span class="n">Nand</span><span class="p">,</span> <span class="n">Nor</span><span class="p">,</span> <span class="n">Xor</span><span class="p">,</span> <span class="n">Xnor</span><span class="p">,</span> <span class="n">perfect_power</span><span class="p">,</span> <span class="n">integer_nthroot</span><span class="p">,</span>
+    <span class="n">isprime</span><span class="p">,</span> <span class="n">sqrt_mod</span><span class="p">,</span> <span class="n">Expr</span><span class="p">,</span> <span class="n">cse</span><span class="p">,</span> <span class="n">count_ops</span><span class="p">,</span> <span class="n">ccode</span><span class="p">,</span> <span class="n">Piecewise</span><span class="p">,</span> <span class="n">Contains</span><span class="p">,</span> <span class="n">Interval</span><span class="p">,</span> <span class="n">FiniteSet</span><span class="p">,</span>
+    <span class="n">linsolve</span><span class="p">,</span>
+    <span class="n">FunctionSymbol</span> <span class="k">as</span> <span class="n">AppliedUndef</span><span class="p">,</span>
+    <span class="n">golden_ratio</span> <span class="k">as</span> <span class="n">GoldenRatio</span><span class="p">,</span>
+    <span class="n">catalan</span> <span class="k">as</span> <span class="n">Catalan</span><span class="p">,</span>
+    <span class="n">eulergamma</span> <span class="k">as</span> <span class="n">EulerGamma</span><span class="p">,</span>
+    <span class="n">DataBuffer</span><span class="p">,</span>
+    <span class="n">Mod</span><span class="p">,</span>
+    <span class="n">solve</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">.utilities</span> <span class="kn">import</span> <span class="n">var</span><span class="p">,</span> <span class="n">symbols</span>
+<span class="kn">from</span> <span class="nn">.functions</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">.printing</span> <span class="kn">import</span> <span class="n">init_printing</span>
+
+
+<span class="n">EmptySet</span> <span class="o">=</span> <span class="n">wrapper</span><span class="o">.</span><span class="n">S</span><span class="o">.</span><span class="n">EmptySet</span>
+<span class="n">UniversalSet</span> <span class="o">=</span> <span class="n">wrapper</span><span class="o">.</span><span class="n">S</span><span class="o">.</span><span class="n">UniversalSet</span>
+<span class="n">Reals</span> <span class="o">=</span> <span class="n">wrapper</span><span class="o">.</span><span class="n">S</span><span class="o">.</span><span class="n">Reals</span>
+<span class="n">Integers</span> <span class="o">=</span> <span class="n">wrapper</span><span class="o">.</span><span class="n">S</span><span class="o">.</span><span class="n">Integers</span>
+
+
+<span class="k">if</span> <span class="n">have_mpfr</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">.lib.symengine_wrapper</span> <span class="kn">import</span> <span class="n">RealMPFR</span>
+
+<span class="k">if</span> <span class="n">have_mpc</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">.lib.symengine_wrapper</span> <span class="kn">import</span> <span class="n">ComplexMPC</span>
+
+<span class="k">if</span> <span class="n">have_numpy</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">.lib.symengine_wrapper</span> <span class="kn">import</span> <span class="p">(</span><span class="n">Lambdify</span><span class="p">,</span> <span class="n">LambdifyCSE</span><span class="p">)</span>
+
+<div class="viewcode-block" id="lambdify"><a class="viewcode-back" href="../api/symforce.symbolic.html#symforce.symbolic.lambdify">[docs]</a>    <span class="k">def</span> <span class="nf">lambdify</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">exprs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">Lambdify</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="o">*</span><span class="n">exprs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<span class="n">__version__</span> <span class="o">=</span> <span class="s2">&quot;0.7.2&quot;</span>
+
+
+<span class="c1"># To not expose internals</span>
+<span class="k">del</span> <span class="n">lib</span><span class="o">.</span><span class="n">symengine_wrapper</span>
+<span class="k">del</span> <span class="n">lib</span>
+<span class="k">del</span> <span class="n">wrapper</span>
+
+
+<span class="k">def</span> <span class="nf">test</span><span class="p">():</span>
+    <span class="kn">import</span> <span class="nn">pytest</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="k">return</span> <span class="ow">not</span> <span class="n">pytest</span><span class="o">.</span><span class="n">cmdline</span><span class="o">.</span><span class="n">main</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))])</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

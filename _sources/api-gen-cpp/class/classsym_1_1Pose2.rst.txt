@@ -1,0 +1,5 @@
+Class sym::Pose2
+================
+
+.. doxygenclass:: sym::Pose2
+   :project: api-gen-cpp

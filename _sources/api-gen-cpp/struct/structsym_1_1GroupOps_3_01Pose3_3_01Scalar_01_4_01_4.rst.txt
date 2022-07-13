@@ -1,0 +1,5 @@
+Struct sym::GroupOps< Pose3< Scalar > >
+=======================================
+
+.. doxygenstruct:: sym::GroupOps< Pose3< Scalar > >
+   :project: api-gen-cpp

@@ -1,0 +1,5 @@
+File logging_configure.h
+========================
+
+.. doxygenfile:: logging_configure.h
+   :project: api-cpp

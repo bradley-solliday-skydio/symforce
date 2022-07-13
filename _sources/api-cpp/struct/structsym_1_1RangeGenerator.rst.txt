@@ -1,0 +1,5 @@
+Struct sym::RangeGenerator
+==========================
+
+.. doxygenstruct:: sym::RangeGenerator
+   :project: api-cpp

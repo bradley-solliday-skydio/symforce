@@ -1,0 +1,7 @@
+symforce.geo.dual\_quaternion module
+====================================
+
+.. automodule:: symforce.geo.dual_quaternion
+   :members:
+   :undoc-members:
+   :show-inheritance:

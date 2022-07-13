@@ -1,0 +1,7 @@
+symforce.ops.impl.class\_storage\_ops module
+============================================
+
+.. automodule:: symforce.ops.impl.class_storage_ops
+   :members:
+   :undoc-members:
+   :show-inheritance:

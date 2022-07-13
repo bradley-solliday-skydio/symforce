@@ -1,0 +1,5 @@
+Struct std::hash< sym::key_t >
+==============================
+
+.. doxygenstruct:: std::hash< sym::key_t >
+   :project: api-cpp

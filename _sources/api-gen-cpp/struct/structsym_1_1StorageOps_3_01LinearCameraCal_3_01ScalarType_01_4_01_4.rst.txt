@@ -1,0 +1,5 @@
+Struct sym::StorageOps< LinearCameraCal< ScalarType > >
+=======================================================
+
+.. doxygenstruct:: sym::StorageOps< LinearCameraCal< ScalarType > >
+   :project: api-gen-cpp

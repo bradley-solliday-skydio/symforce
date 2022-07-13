@@ -1,0 +1,16 @@
+symforce.codegen.backends.cpp package
+=====================================
+
+.. automodule:: symforce.codegen.backends.cpp
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.codegen.backends.cpp.cpp_code_printer
+   symforce.codegen.backends.cpp.cpp_config

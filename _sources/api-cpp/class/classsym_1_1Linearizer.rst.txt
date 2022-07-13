@@ -1,0 +1,5 @@
+Class sym::Linearizer
+=====================
+
+.. doxygenclass:: sym::Linearizer
+   :project: api-cpp

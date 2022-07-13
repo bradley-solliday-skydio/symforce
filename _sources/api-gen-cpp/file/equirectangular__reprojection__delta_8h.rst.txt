@@ -1,0 +1,5 @@
+File equirectangular_reprojection_delta.h
+=========================================
+
+.. doxygenfile:: equirectangular_reprojection_delta.h
+   :project: api-gen-cpp

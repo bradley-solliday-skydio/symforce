@@ -1,0 +1,5 @@
+Struct sym::LieGroupOps< Eigen::Matrix< ScalarType, Rows, Cols > >
+==================================================================
+
+.. doxygenstruct:: sym::LieGroupOps< Eigen::Matrix< ScalarType, Rows, Cols > >
+   :project: api-gen-cpp

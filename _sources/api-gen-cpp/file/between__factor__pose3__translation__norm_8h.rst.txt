@@ -1,0 +1,5 @@
+File between_factor_pose3_translation_norm.h
+============================================
+
+.. doxygenfile:: between_factor_pose3_translation_norm.h
+   :project: api-gen-cpp

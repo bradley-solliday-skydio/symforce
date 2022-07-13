@@ -1,0 +1,370 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>symforce.cam.spherical_camera_cal &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for symforce.cam.spherical_camera_cal</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># SymForce - Copyright 2022, Skydio, Inc.</span>
+<span class="c1"># This source code is under the Apache 2.0 license found in the LICENSE file.</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
+
+<span class="kn">from</span> <span class="nn">.camera_cal</span> <span class="kn">import</span> <span class="n">CameraCal</span>
+
+<span class="kn">from</span> <span class="nn">symforce.cam.camera_util</span> <span class="kn">import</span> <span class="n">compute_odd_polynomial_critical_point</span>
+<span class="kn">from</span> <span class="nn">symforce.cam.linear_camera_cal</span> <span class="kn">import</span> <span class="n">LinearCameraCal</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">geo</span>
+<span class="kn">import</span> <span class="nn">symforce.internal.symbolic</span> <span class="k">as</span> <span class="nn">sf</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">typing</span> <span class="k">as</span> <span class="n">T</span>
+
+
+<div class="viewcode-block" id="SphericalCameraCal"><a class="viewcode-back" href="../../../api/symforce.cam.spherical_camera_cal.html#symforce.cam.spherical_camera_cal.SphericalCameraCal">[docs]</a><span class="k">class</span> <span class="nc">SphericalCameraCal</span><span class="p">(</span><span class="n">CameraCal</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Kannala-Brandt camera model, where radial distortion is modeled relative to the 3D angle theta</span>
+<span class="sd">    off the optical axis as opposed to radius within the image plane (i.e. ATANCamera)</span>
+
+<span class="sd">    I.e. the radius in the image plane as a function of the angle theta from the camera z-axis is</span>
+<span class="sd">    assumed to be given by:</span>
+
+<span class="sd">        r(theta) = theta + d[0] * theta^3 + d[1] * theta^5 + d[2] * theta^7 + d[3] * theta^9</span>
+
+<span class="sd">    With no tangential coefficients, this model is over-parameterized in that we may scale all the</span>
+<span class="sd">    distortion coefficients by a constant, and the focal length by the inverse of that constant. To</span>
+<span class="sd">    fix this issue, we peg the first coefficient at 1. So while the distortion dimension is &#39;4&#39;,</span>
+<span class="sd">    the actual total number of coeffs is 5.</span>
+
+<span class="sd">    Additionally, the storage for this class includes the critical theta, the maximum angle from the</span>
+<span class="sd">    optical axis where projection is invertible; although the critical theta is a function of the</span>
+<span class="sd">    other parameters, this function requires polynomial root finding, so it should be computed</span>
+<span class="sd">    externally at runtime and set to the computed value.</span>
+
+<span class="sd">    Paper:</span>
+<span class="sd">    A generic camera model and calibration method for conventional, wide-angle, and fish-eye lenses</span>
+<span class="sd">    Kannala, Juho; Brandt, Sami S.</span>
+<span class="sd">    PAMI 2006</span>
+
+<span class="sd">    This is the simpler &quot;P9&quot; model without any non-radially-symmetric distortion params.</span>
+
+<span class="sd">    The storage for this class is:</span>
+<span class="sd">    [ fx fy cx cy critical_theta d0 d1 d2 d3 ]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">NUM_DISTORTION_COEFFS</span> <span class="o">=</span> <span class="mi">4</span>
+
+<div class="viewcode-block" id="SphericalCameraCal.__init__"><a class="viewcode-back" href="../../../api/symforce.cam.spherical_camera_cal.html#symforce.cam.spherical_camera_cal.SphericalCameraCal.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">focal_length</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">],</span>
+        <span class="n">principal_point</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">],</span>
+        <span class="n">distortion_coeffs</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">),</span>
+        <span class="n">critical_theta</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Scalar</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">max_theta</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Scalar</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            critical_theta: The maximum angle from the optical axis for which the projection is</span>
+<span class="sd">                            valid.  In general, this should be at least as large as the FOV of the</span>
+<span class="sd">                            camera.  If the distortion coeffs are all numerical, this will be</span>
+<span class="sd">                            computed automatically as either the first local maximum of r(theta) in</span>
+<span class="sd">                            the interval (0, max_theta), or as max_theta if there is no local</span>
+<span class="sd">                            maximum in the interval.</span>
+<span class="sd">            max_theta: Used only to compute critical_theta when the distortion coefficients are all</span>
+<span class="sd">                       numerical, see the description for critical_theta.  The default value of 180</span>
+<span class="sd">                       degrees should generally be fine regardless of the actual field of view</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">focal_length</span><span class="p">,</span> <span class="n">principal_point</span><span class="p">,</span> <span class="n">distortion_coeffs</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">critical_theta</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">critical_theta</span> <span class="o">=</span> <span class="n">critical_theta</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span>
+                <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Expr</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Number</span><span class="p">)</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">distortion_coeffs</span>
+            <span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;critical_theta must be provided if the distortion_coeffs are not all numerical&quot;</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">critical_theta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_critical_theta</span><span class="p">(</span><span class="n">max_theta</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="SphericalCameraCal.from_distortion_coeffs"><a class="viewcode-back" href="../../../api/symforce.cam.spherical_camera_cal.html#symforce.cam.spherical_camera_cal.SphericalCameraCal.from_distortion_coeffs">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_distortion_coeffs</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">focal_length</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">],</span>
+        <span class="n">principal_point</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">],</span>
+        <span class="n">distortion_coeffs</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(),</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SphericalCameraCal</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct a Camera Cal of type cls from the focal_length, principal_point, and distortion_coeffs.</span>
+
+<span class="sd">        kwargs are additional arguments which will be passed to the constructor.</span>
+
+<span class="sd">        Symbolic arguments may only be passed if the kwarg critical_theta is passed.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">focal_length</span><span class="o">=</span><span class="n">focal_length</span><span class="p">,</span>
+            <span class="n">principal_point</span><span class="o">=</span><span class="n">principal_point</span><span class="p">,</span>
+            <span class="n">distortion_coeffs</span><span class="o">=</span><span class="n">distortion_coeffs</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="SphericalCameraCal.storage_order"><a class="viewcode-back" href="../../../api/symforce.cam.spherical_camera_cal.html#symforce.cam.spherical_camera_cal.SphericalCameraCal.storage_order">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">storage_order</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="p">(</span><span class="s2">&quot;focal_length&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;principal_point&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;critical_theta&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;distortion_coeffs&quot;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="n">NUM_DISTORTION_COEFFS</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1"># Storage concept - see symforce.ops.storage_ops</span>
+    <span class="c1"># -------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="SphericalCameraCal.storage_dim"><a class="viewcode-back" href="../../../api/symforce.cam.spherical_camera_cal.html#symforce.cam.spherical_camera_cal.SphericalCameraCal.storage_dim">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">storage_dim</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="c1"># Contains the standard intrinsics, plus the critical_theta</span>
+        <span class="k">return</span> <span class="mi">4</span> <span class="o">+</span> <span class="mi">1</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="n">NUM_DISTORTION_COEFFS</span></div>
+
+<div class="viewcode-block" id="SphericalCameraCal.to_storage"><a class="viewcode-back" href="../../../api/symforce.cam.spherical_camera_cal.html#symforce.cam.spherical_camera_cal.SphericalCameraCal.to_storage">[docs]</a>    <span class="k">def</span> <span class="nf">to_storage</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="o">.</span><span class="n">to_storage</span><span class="p">()</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">principal_point</span><span class="o">.</span><span class="n">to_storage</span><span class="p">()</span>
+            <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">critical_theta</span><span class="p">]</span>
+            <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">distortion_coeffs</span><span class="o">.</span><span class="n">to_storage</span><span class="p">()</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="SphericalCameraCal.from_storage"><a class="viewcode-back" href="../../../api/symforce.cam.spherical_camera_cal.html#symforce.cam.spherical_camera_cal.SphericalCameraCal.from_storage">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_storage</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vec</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">SphericalCameraCal</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span> <span class="o">==</span> <span class="bp">cls</span><span class="o">.</span><span class="n">storage_dim</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">focal_length</span><span class="o">=</span><span class="n">vec</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span>
+            <span class="n">principal_point</span><span class="o">=</span><span class="n">vec</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">],</span>
+            <span class="n">critical_theta</span><span class="o">=</span><span class="n">vec</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span>
+            <span class="n">distortion_coeffs</span><span class="o">=</span><span class="n">vec</span><span class="p">[</span><span class="mi">5</span><span class="p">:],</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="SphericalCameraCal.symbolic"><a class="viewcode-back" href="../../../api/symforce.cam.spherical_camera_cal.html#symforce.cam.spherical_camera_cal.SphericalCameraCal.symbolic">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">symbolic</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SphericalCameraCal</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">sf</span><span class="o">.</span><span class="n">scope</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+                <span class="n">focal_length</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="s2">&quot;f_x f_y&quot;</span><span class="p">),</span>
+                <span class="n">principal_point</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">symbols</span><span class="p">(</span><span class="s2">&quot;c_x c_y&quot;</span><span class="p">),</span>
+                <span class="n">critical_theta</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;theta_crit&quot;</span><span class="p">),</span>
+                <span class="n">distortion_coeffs</span><span class="o">=</span><span class="n">geo</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">NUM_DISTORTION_COEFFS</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">to_flat_list</span><span class="p">(),</span>
+            <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;</span><span class="si">{}</span><span class="se">\n</span><span class="s2">  focal_length=</span><span class="si">{}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">  principal_point=</span><span class="si">{}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">  critical_theta=</span><span class="si">{}</span><span class="s2">,</span><span class="se">\n</span><span class="s2">  distortion_coeffs=</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="o">.</span><span class="n">to_storage</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">principal_point</span><span class="o">.</span><span class="n">to_storage</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">critical_theta</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">distortion_coeffs</span><span class="o">.</span><span class="n">to_storage</span><span class="p">(),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_compute_critical_theta</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">max_theta</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the critical_theta for the given (numerical) distortion_coeffs and max_theta</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Build the coefficients for np.polynomial.  Even coefficients are 0, and the coefficient</span>
+        <span class="c1"># on theta is 1</span>
+        <span class="k">return</span> <span class="n">compute_odd_polynomial_critical_point</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">distortion_coeffs</span><span class="o">.</span><span class="n">to_flat_list</span><span class="p">(),</span> <span class="n">max_theta</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_radial_distortion</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">theta</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the radius in the unit-depth plane from the angle theta with the camera z-axis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">theta_term</span> <span class="o">=</span> <span class="n">theta</span>
+        <span class="n">acc</span> <span class="o">=</span> <span class="n">theta</span>
+
+        <span class="k">for</span> <span class="n">coef</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distortion_coeffs</span><span class="o">.</span><span class="n">to_flat_list</span><span class="p">():</span>
+            <span class="n">theta_term</span> <span class="o">*=</span> <span class="n">theta</span> <span class="o">**</span> <span class="mi">2</span>
+            <span class="n">acc</span> <span class="o">+=</span> <span class="n">coef</span> <span class="o">*</span> <span class="n">theta_term</span>
+
+        <span class="k">return</span> <span class="n">acc</span>
+
+<div class="viewcode-block" id="SphericalCameraCal.pixel_from_camera_point"><a class="viewcode-back" href="../../../api/symforce.cam.spherical_camera_cal.html#symforce.cam.spherical_camera_cal.SphericalCameraCal.pixel_from_camera_point">[docs]</a>    <span class="k">def</span> <span class="nf">pixel_from_camera_point</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="n">geo</span><span class="o">.</span><span class="n">Matrix31</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Scalar</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">epsilon</span><span class="p">()</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">geo</span><span class="o">.</span><span class="n">Matrix21</span><span class="p">,</span> <span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]:</span>
+
+        <span class="c1"># compute theta</span>
+        <span class="n">xy_norm</span> <span class="o">=</span> <span class="n">point</span><span class="p">[:</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">epsilon</span><span class="p">)</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">xy_norm</span><span class="p">,</span> <span class="n">point</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        <span class="n">is_valid</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Max</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">critical_theta</span> <span class="o">-</span> <span class="n">theta</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1"># clamp theta to critical_theta</span>
+        <span class="n">theta</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Min</span><span class="p">(</span><span class="n">theta</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">critical_theta</span> <span class="o">-</span> <span class="n">epsilon</span><span class="p">)</span>
+
+        <span class="c1"># compute image plane coordinate</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_radial_distortion</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
+        <span class="n">unit_xy</span> <span class="o">=</span> <span class="n">point</span><span class="p">[:</span><span class="mi">2</span><span class="p">,</span> <span class="p">:]</span><span class="o">.</span><span class="n">normalized</span><span class="p">(</span><span class="n">epsilon</span><span class="p">)</span>
+        <span class="n">point_img</span> <span class="o">=</span> <span class="n">r</span> <span class="o">*</span> <span class="n">unit_xy</span>
+
+        <span class="c1"># image plane to pixel coordinate</span>
+        <span class="n">linear_camera_cal</span> <span class="o">=</span> <span class="n">LinearCameraCal</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">focal_length</span><span class="o">.</span><span class="n">to_flat_list</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">principal_point</span><span class="o">.</span><span class="n">to_flat_list</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="n">point_pix</span> <span class="o">=</span> <span class="n">linear_camera_cal</span><span class="o">.</span><span class="n">pixel_from_unit_depth</span><span class="p">(</span><span class="n">point_img</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">point_pix</span><span class="p">,</span> <span class="n">is_valid</span></div>
+
+<div class="viewcode-block" id="SphericalCameraCal.camera_ray_from_pixel"><a class="viewcode-back" href="../../../api/symforce.cam.spherical_camera_cal.html#symforce.cam.spherical_camera_cal.SphericalCameraCal.camera_ray_from_pixel">[docs]</a>    <span class="k">def</span> <span class="nf">camera_ray_from_pixel</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">pixel</span><span class="p">:</span> <span class="n">geo</span><span class="o">.</span><span class="n">Matrix21</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">geo</span><span class="o">.</span><span class="n">Matrix31</span><span class="p">,</span> <span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;Back projection involves computing the inverse of a polynomial function&quot;</span>
+        <span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  <li><a href="../../symforce.html">symforce</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

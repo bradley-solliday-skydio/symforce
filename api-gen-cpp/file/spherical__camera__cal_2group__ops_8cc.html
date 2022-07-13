@@ -1,0 +1,295 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>File group_ops.cc &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="File group_ops.h" href="spherical__camera__cal_2group__ops_8h.html" />
+    <link rel="prev" title="File storage_ops.h" href="scalar_2storage__ops_8h.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="file-group-ops-cc">
+<h1>File group_ops.cc<a class="headerlink" href="#file-group-ops-cc" title="Permalink to this headline">¶</a></h1>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>doxygenfile: Found multiple matches for file “group_ops.cc </p>
+</div>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../classlist.html">Class list</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../filelist.html">File list</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="atan__camera__cal_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atan__camera__cal_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atan__camera__cal_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atan__camera__cal_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atan__camera__cal_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atan__camera__cal_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atan__camera__cal_8cc.html">File atan_camera_cal.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atan__camera__cal_8h.html">File atan_camera_cal.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="atan__reprojection__delta_8h.html">File atan_reprojection_delta.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="between__factor__matrix31_8h.html">File between_factor_matrix31.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="between__factor__pose2_8h.html">File between_factor_pose2.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="between__factor__pose3_8h.html">File between_factor_pose3.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="between__factor__pose3__position_8h.html">File between_factor_pose3_position.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="between__factor__pose3__rotation_8h.html">File between_factor_pose3_rotation.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="between__factor__pose3__translation__norm_8h.html">File between_factor_pose3_translation_norm.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="between__factor__rot2_8h.html">File between_factor_rot2.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="between__factor__rot3_8h.html">File between_factor_rot3.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="camera_8h.html">File camera.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double__sphere__camera__cal_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double__sphere__camera__cal_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double__sphere__camera__cal_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double__sphere__camera__cal_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double__sphere__camera__cal_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double__sphere__camera__cal_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double__sphere__camera__cal_8cc.html">File double_sphere_camera_cal.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double__sphere__camera__cal_8h.html">File double_sphere_camera_cal.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="double__sphere__reprojection__delta_8h.html">File double_sphere_reprojection_delta.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epsilon_8cc.html">File epsilon.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="epsilon_8h.html">File epsilon.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__camera__cal_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__camera__cal_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__camera__cal_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__camera__cal_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__camera__cal_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__camera__cal_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__camera__cal_8cc.html">File equirectangular_camera_cal.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__camera__cal_8h.html">File equirectangular_camera_cal.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="equirectangular__reprojection__delta_8h.html">File equirectangular_reprojection_delta.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inverse__range__landmark__atan__reprojection__error__factor_8h.html">File inverse_range_landmark_atan_reprojection_error_factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inverse__range__landmark__double__sphere__reprojection__error__factor_8h.html">File inverse_range_landmark_double_sphere_reprojection_error_factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inverse__range__landmark__equirectangular__reprojection__error__factor_8h.html">File inverse_range_landmark_equirectangular_reprojection_error_factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inverse__range__landmark__linear__reprojection__error__factor_8h.html">File inverse_range_landmark_linear_reprojection_error_factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inverse__range__landmark__polynomial__reprojection__error__factor_8h.html">File inverse_range_landmark_polynomial_reprojection_error_factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inverse__range__landmark__prior__factor_8h.html">File inverse_range_landmark_prior_factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="inverse__range__landmark__spherical__reprojection__error__factor_8h.html">File inverse_range_landmark_spherical_reprojection_error_factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__camera__cal_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__camera__cal_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__camera__cal_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__camera__cal_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__camera__cal_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__camera__cal_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__camera__cal_8cc.html">File linear_camera_cal.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__camera__cal_8h.html">File linear_camera_cal.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linear__reprojection__delta_8h.html">File linear_reprojection_delta.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrix_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrix_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrix_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrix_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrix_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="matrix_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__camera__cal_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__camera__cal_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__camera__cal_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__camera__cal_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__camera__cal_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__camera__cal_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__camera__cal_8cc.html">File polynomial_camera_cal.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__camera__cal_8h.html">File polynomial_camera_cal.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="polynomial__reprojection__delta_8h.html">File polynomial_reprojection_delta.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose2_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose2_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose2_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose2_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose2_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose2_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose2_8cc.html">File pose2.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose2_8h.html">File pose2.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose3_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose3_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose3_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose3_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose3_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose3_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose3_8cc.html">File pose3.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pose3_8h.html">File pose3.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="posed__camera_8h.html">File posed_camera.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prior__factor__matrix31_8h.html">File prior_factor_matrix31.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prior__factor__pose2_8h.html">File prior_factor_pose2.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prior__factor__pose3_8h.html">File prior_factor_pose3.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prior__factor__pose3__position_8h.html">File prior_factor_pose3_position.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prior__factor__pose3__rotation_8h.html">File prior_factor_pose3_rotation.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prior__factor__rot2_8h.html">File prior_factor_rot2.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="prior__factor__rot3_8h.html">File prior_factor_rot3.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot2_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot2_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot2_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot2_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot2_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot2_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot2_8cc.html">File rot2.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot2_8h.html">File rot2.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot3_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot3_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot3_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot3_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot3_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot3_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot3_8cc.html">File rot3.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="rot3_8h.html">File rot3.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalar_2group__ops_8cc.html">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalar_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalar_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalar_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalar_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="scalar_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">File group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spherical__camera__cal_2group__ops_8h.html">File group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spherical__camera__cal_2lie__group__ops_8cc.html">File lie_group_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spherical__camera__cal_2lie__group__ops_8h.html">File lie_group_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spherical__camera__cal_2storage__ops_8cc.html">File storage_ops.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spherical__camera__cal_2storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spherical__camera__cal_8cc.html">File spherical_camera_cal.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spherical__camera__cal_8h.html">File spherical_camera_cal.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spherical__reprojection__delta_8h.html">File spherical_reprojection_delta.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="storage__ops_8h.html">File storage_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="type__ops_8h.html">File type_ops.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="typedefs_8h.html">File typedefs.h</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../filelist.html">File list</a><ul>
+      <li>Previous: <a href="scalar_2storage__ops_8h.html" title="previous chapter">File storage_ops.h</a></li>
+      <li>Next: <a href="spherical__camera__cal_2group__ops_8h.html" title="next chapter">File group_ops.h</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/api-gen-cpp/file/spherical__camera__cal_2group__ops_8cc.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

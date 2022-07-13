@@ -1,0 +1,16 @@
+symforce.codegen.backends package
+=================================
+
+.. automodule:: symforce.codegen.backends
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.codegen.backends.cpp
+   symforce.codegen.backends.python

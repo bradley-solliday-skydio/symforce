@@ -1,0 +1,7 @@
+symforce.cam.camera\_cal module
+===============================
+
+.. automodule:: symforce.cam.camera_cal
+   :members:
+   :undoc-members:
+   :show-inheritance:

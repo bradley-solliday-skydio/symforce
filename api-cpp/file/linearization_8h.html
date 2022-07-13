@@ -1,0 +1,313 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>File linearization.h &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="File linearizer.cc" href="linearizer_8cc.html" />
+    <link rel="prev" title="File levenberg_marquardt_state.h" href="levenberg__marquardt__state_8h.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="file-linearization-h">
+<h1>File linearization.h<a class="headerlink" href="#file-linearization-h" title="Permalink to this headline">¶</a></h1>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv43sym">
+<span class="target" id="namespacesym"></span><span class="k"><span class="pre">namespace</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">sym</span></span></span><br /></dt>
+<dd><p>Utilities for converting various types of factor functors into what’s needed for the polymorphic std::function that’s actually stored and used by <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Factor"><span class="std std-ref">sym::Factor</span></a></p>
+<p>Primarily intended to be included by factor.tcc and used internally there </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-typedefs">Typedefs</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym14LinearizationdE">
+<span class="target" id="namespacesym_1a955fcec69865af7508b726072845e5b5"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Linearizationd</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0EN3sym13LinearizationE" title="sym::Linearization"><span class="n"><span class="pre">Linearization</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">double</span></span><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4N3sym14LinearizationdE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym14LinearizationfE">
+<span class="target" id="namespacesym_1aa69b2ad01842dbbc1ce4a4e5e0e6f307"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Linearizationf</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0EN3sym13LinearizationE" title="sym::Linearization"><span class="n"><span class="pre">Linearization</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">float</span></span><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4N3sym14LinearizationfE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym13LinearizationE">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ScalarType</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="structsym_1_1Linearization"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Linearization</span></span></span><a class="headerlink" href="#_CPPv4I0EN3sym13LinearizationE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;linearization.h&gt;</em></div>
+<p>Class for storing a problem linearization evaluated at a <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values"><span class="std std-ref">Values</span></a> (i.e. a residual, jacobian, hessian, and rhs) </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym13Linearization6ScalarE">
+<span class="target" id="structsym_1_1Linearization_1a4097e9f3b05fc74f14119f9d0a3b9584"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Scalar</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0EN3sym13LinearizationE" title="sym::Linearization::ScalarType"><span class="n"><span class="pre">ScalarType</span></span></a><a class="headerlink" href="#_CPPv4N3sym13Linearization6ScalarE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym13Linearization10VectorTypeE">
+<span class="target" id="structsym_1_1Linearization_1a5eadacecd46d7d578b4761fb391a8454"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">VectorType</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7VectorXE" title="sym::VectorX"><span class="n"><span class="pre">VectorX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym13Linearization6ScalarE" title="sym::Linearization::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4N3sym13Linearization10VectorTypeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym13Linearization10MatrixTypeE">
+<span class="target" id="structsym_1_1Linearization_1a499cf9a179b47310c55500a4b1a9abda"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">MatrixType</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">SparseMatrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym13Linearization6ScalarE" title="sym::Linearization::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4N3sym13Linearization10MatrixTypeE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym13Linearization5ResetEv">
+<span class="target" id="structsym_1_1Linearization_1a15fd3ad54a9ccbf05b97c422adb2b799"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Reset</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3sym13Linearization5ResetEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Set to invalid </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym13Linearization13IsInitializedEv">
+<span class="target" id="structsym_1_1Linearization_1aa42dc989a316a036508384dab528b830"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">IsInitialized</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3sym13Linearization13IsInitializedEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Returns whether the linearization is currently valid for the corresponding values. Accessing any of the members when this is false could result in unexpected behavior </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym13Linearization14SetInitializedEKb">
+<span class="target" id="structsym_1_1Linearization_1a5a359e92030e2fc68f22c02cb1745398"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SetInitialized</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">initialized</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">true</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3sym13Linearization14SetInitializedEKb" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym13Linearization5ErrorEv">
+<span class="target" id="structsym_1_1Linearization_1afb64640665952619aafba1837f46652a"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Error</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3sym13Linearization5ErrorEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym13Linearization11LinearErrorERK10VectorType">
+<span class="target" id="structsym_1_1Linearization_1aea714b95f85676a16dde1db52df496e6"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">double</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">LinearError</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N3sym13Linearization10VectorTypeE" title="sym::Linearization::VectorType"><span class="n"><span class="pre">VectorType</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">x_update</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3sym13Linearization11LinearErrorERK10VectorType" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym13Linearization17JacobianValuesMapEv">
+<span class="target" id="structsym_1_1Linearization_1a0779cb4156771ac27f12084f19d2433c"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Map</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7VectorXE" title="sym::VectorX"><span class="n"><span class="pre">VectorX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym13Linearization6ScalarE" title="sym::Linearization::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">JacobianValuesMap</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3sym13Linearization17JacobianValuesMapEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym13Linearization8residualE">
+<span class="target" id="structsym_1_1Linearization_1a2fdb4726f69aea315ce2f22e4d4672b3"></span><a class="reference internal" href="#_CPPv4N3sym13Linearization10VectorTypeE" title="sym::Linearization::VectorType"><span class="n"><span class="pre">VectorType</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">residual</span></span></span><a class="headerlink" href="#_CPPv4N3sym13Linearization8residualE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym13Linearization13hessian_lowerE">
+<span class="target" id="structsym_1_1Linearization_1a603a196a4c6f75fa5546695db85c0e6a"></span><a class="reference internal" href="#_CPPv4N3sym13Linearization10MatrixTypeE" title="sym::Linearization::MatrixType"><span class="n"><span class="pre">MatrixType</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">hessian_lower</span></span></span><a class="headerlink" href="#_CPPv4N3sym13Linearization13hessian_lowerE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym13Linearization8jacobianE">
+<span class="target" id="structsym_1_1Linearization_1a2e640546ddfe85bae46d8a4dc8aa6450"></span><a class="reference internal" href="#_CPPv4N3sym13Linearization10MatrixTypeE" title="sym::Linearization::MatrixType"><span class="n"><span class="pre">MatrixType</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">jacobian</span></span></span><a class="headerlink" href="#_CPPv4N3sym13Linearization8jacobianE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym13Linearization3rhsE">
+<span class="target" id="structsym_1_1Linearization_1a5d8cb77f3431469c886ca7e2609a7b04"></span><a class="reference internal" href="#_CPPv4N3sym13Linearization10VectorTypeE" title="sym::Linearization::VectorType"><span class="n"><span class="pre">VectorType</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">rhs</span></span></span><a class="headerlink" href="#_CPPv4N3sym13Linearization3rhsE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-private-members">Private Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym13Linearization12initialized_E">
+<span class="target" id="structsym_1_1Linearization_1aa15952b3fe4c1fec51a87c32ca42fcec"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">initialized_</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="p"><span class="pre">{</span></span><span class="k"><span class="pre">false</span></span><span class="p"><span class="pre">}</span></span><a class="headerlink" href="#_CPPv4N3sym13Linearization12initialized_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../classlist.html">Class list</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../filelist.html">File list</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="assert_8h.html">File assert.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="covariance__utils_8h.html">File covariance_utils.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="derivative__checker_8h.html">File derivative_checker.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="factor_8cc.html">File factor.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="factor_8h.html">File factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="factor_8tcc.html">File factor.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="factor__utils_8h.html">File factor_utils.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gnc__optimizer_8h.html">File gnc_optimizer.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hash__combine_8h.html">File hash_combine.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="internal_2tic__toc_8h.html">File tic_toc.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="key_8cc.html">File key.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="key_8h.html">File key.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levenberg__marquardt__solver_8h.html">File levenberg_marquardt_solver.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levenberg__marquardt__solver_8tcc.html">File levenberg_marquardt_solver.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levenberg__marquardt__state_8h.html">File levenberg_marquardt_state.h</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">File linearization.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearizer_8cc.html">File linearizer.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearizer_8h.html">File linearizer.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearizer_8tcc.html">File linearizer.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearizer__utils_8h.html">File linearizer_utils.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logging__configure_8cc.html">File logging_configure.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logging__configure_8h.html">File logging_configure.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimization__stats_8h.html">File optimization_stats.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimizer_8cc.html">File optimizer.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimizer_8h.html">File optimizer.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimizer_8tcc.html">File optimizer.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional_8h.html">File optional.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__cholesky__solver_8cc.html">File sparse_cholesky_solver.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__cholesky__solver_8h.html">File sparse_cholesky_solver.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__cholesky__solver_8tcc.html">File sparse_cholesky_solver.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__schur__solver_8h.html">File sparse_schur_solver.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__schur__solver_8tcc.html">File sparse_schur_solver.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="templates_8h.html">File templates.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tic__toc_8cc.html">File tic_toc.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tic__toc_8h.html">File tic_toc.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="util_8h.html">File util.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values_8cc.html">File values.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values_8h.html">File values.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values_8tcc.html">File values.tcc</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../filelist.html">File list</a><ul>
+      <li>Previous: <a href="levenberg__marquardt__state_8h.html" title="previous chapter">File levenberg_marquardt_state.h</a></li>
+      <li>Next: <a href="linearizer_8cc.html" title="next chapter">File linearizer.cc</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/api-cpp/file/linearization_8h.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

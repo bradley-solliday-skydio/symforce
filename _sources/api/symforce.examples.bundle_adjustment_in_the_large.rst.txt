@@ -1,0 +1,16 @@
+symforce.examples.bundle\_adjustment\_in\_the\_large package
+============================================================
+
+.. automodule:: symforce.examples.bundle_adjustment_in_the_large
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.examples.bundle_adjustment_in_the_large.bundle_adjustment_in_the_large
+   symforce.examples.bundle_adjustment_in_the_large.download_dataset

@@ -1,0 +1,5 @@
+Struct sym::LinearizedDenseFactorTypeHelper
+===========================================
+
+.. doxygenstruct:: sym::LinearizedDenseFactorTypeHelper
+   :project: api-cpp

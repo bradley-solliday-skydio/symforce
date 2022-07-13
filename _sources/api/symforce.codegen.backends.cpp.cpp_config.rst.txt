@@ -1,0 +1,7 @@
+symforce.codegen.backends.cpp.cpp\_config module
+================================================
+
+.. automodule:: symforce.codegen.backends.cpp.cpp_config
+   :members:
+   :undoc-members:
+   :show-inheritance:

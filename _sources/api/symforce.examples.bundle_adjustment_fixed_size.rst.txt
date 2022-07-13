@@ -1,0 +1,16 @@
+symforce.examples.bundle\_adjustment\_fixed\_size package
+=========================================================
+
+.. automodule:: symforce.examples.bundle_adjustment_fixed_size
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.examples.bundle_adjustment_fixed_size.build_values
+   symforce.examples.bundle_adjustment_fixed_size.generate_fixed_problem

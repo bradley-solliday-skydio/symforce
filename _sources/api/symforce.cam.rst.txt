@@ -1,0 +1,24 @@
+symforce.cam package
+====================
+
+.. automodule:: symforce.cam
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.cam.atan_camera_cal
+   symforce.cam.camera
+   symforce.cam.camera_cal
+   symforce.cam.camera_util
+   symforce.cam.double_sphere_camera_cal
+   symforce.cam.equirectangular_camera_cal
+   symforce.cam.linear_camera_cal
+   symforce.cam.polynomial_camera_cal
+   symforce.cam.posed_camera
+   symforce.cam.spherical_camera_cal

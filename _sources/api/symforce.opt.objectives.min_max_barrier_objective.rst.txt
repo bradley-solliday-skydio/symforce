@@ -1,0 +1,7 @@
+symforce.opt.objectives.min\_max\_barrier\_objective module
+===========================================================
+
+.. automodule:: symforce.opt.objectives.min_max_barrier_objective
+   :members:
+   :undoc-members:
+   :show-inheritance:

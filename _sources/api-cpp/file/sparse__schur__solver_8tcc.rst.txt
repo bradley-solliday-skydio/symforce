@@ -1,0 +1,5 @@
+File sparse_schur_solver.tcc
+============================
+
+.. doxygenfile:: sparse_schur_solver.tcc
+   :project: api-cpp

@@ -1,0 +1,7 @@
+sym.ops.polynomial\_camera\_cal.group\_ops module
+=================================================
+
+.. automodule:: sym.ops.polynomial_camera_cal.group_ops
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,25 @@
+symforce.benchmarks package
+===========================
+
+.. automodule:: symforce.benchmarks
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.benchmarks.inverse_compose_jacobian
+   symforce.benchmarks.matrix_multiplication
+   symforce.benchmarks.robot_3d_localization
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.benchmarks.run_benchmarks

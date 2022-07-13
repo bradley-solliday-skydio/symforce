@@ -1,0 +1,7 @@
+sym.ops.equirectangular\_camera\_cal.lie\_group\_ops module
+===========================================================
+
+.. automodule:: sym.ops.equirectangular_camera_cal.lie_group_ops
+   :members:
+   :undoc-members:
+   :show-inheritance:

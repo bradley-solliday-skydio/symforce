@@ -1,0 +1,16 @@
+symforce.examples.custom\_factor\_generation package
+====================================================
+
+.. automodule:: symforce.examples.custom_factor_generation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.examples.custom_factor_generation.factor_residuals
+   symforce.examples.custom_factor_generation.generate_factors

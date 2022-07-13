@@ -1,0 +1,5 @@
+Struct sym::LieGroupOps< EquirectangularCameraCal< Scalar > >
+=============================================================
+
+.. doxygenstruct:: sym::LieGroupOps< EquirectangularCameraCal< Scalar > >
+   :project: api-gen-cpp

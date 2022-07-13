@@ -1,0 +1,17 @@
+sym.ops.linear\_camera\_cal package
+===================================
+
+.. automodule:: sym.ops.linear_camera_cal
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   sym.ops.linear_camera_cal.camera_ops
+   sym.ops.linear_camera_cal.group_ops
+   sym.ops.linear_camera_cal.lie_group_ops

@@ -1,0 +1,16 @@
+sym.ops.rot3 package
+====================
+
+.. automodule:: sym.ops.rot3
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   sym.ops.rot3.group_ops
+   sym.ops.rot3.lie_group_ops

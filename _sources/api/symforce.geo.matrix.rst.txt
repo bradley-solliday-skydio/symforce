@@ -1,0 +1,7 @@
+symforce.geo.matrix module
+==========================
+
+.. automodule:: symforce.geo.matrix
+   :members:
+   :undoc-members:
+   :show-inheritance:

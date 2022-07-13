@@ -1,0 +1,5 @@
+File camera.h
+=============
+
+.. doxygenfile:: camera.h
+   :project: api-gen-cpp

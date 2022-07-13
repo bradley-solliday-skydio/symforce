@@ -1,0 +1,5 @@
+File between_factor_pose3_rotation.h
+====================================
+
+.. doxygenfile:: between_factor_pose3_rotation.h
+   :project: api-gen-cpp

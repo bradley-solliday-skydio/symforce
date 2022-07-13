@@ -1,0 +1,5 @@
+File gnc_optimizer.h
+====================
+
+.. doxygenfile:: gnc_optimizer.h
+   :project: api-cpp

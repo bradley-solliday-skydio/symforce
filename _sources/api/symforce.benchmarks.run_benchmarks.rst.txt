@@ -1,0 +1,7 @@
+symforce.benchmarks.run\_benchmarks module
+==========================================
+
+.. automodule:: symforce.benchmarks.run_benchmarks
+   :members:
+   :undoc-members:
+   :show-inheritance:

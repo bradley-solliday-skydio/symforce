@@ -1,0 +1,7 @@
+symforce.cam.polynomial\_camera\_cal module
+===========================================
+
+.. automodule:: symforce.cam.polynomial_camera_cal
+   :members:
+   :undoc-members:
+   :show-inheritance:

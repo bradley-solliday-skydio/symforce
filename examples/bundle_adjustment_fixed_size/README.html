@@ -1,0 +1,180 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Fixed Size Bundle Adjustment &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Bundle-Adjustment-in-the-Large" href="../bundle_adjustment_in_the_large/README.html" />
+    <link rel="prev" title="Bundle Adjustment" href="../bundle_adjustment/README.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="fixed-size-bundle-adjustment">
+<h1>Fixed Size Bundle Adjustment<a class="headerlink" href="#fixed-size-bundle-adjustment" title="Permalink to this headline">¶</a></h1>
+<p><a class="reference external" href="https://github.com/symforce-org/symforce/tree/main/symforce/examples/bundle_adjustment_fixed_size">Source on GitHub</a></p>
+<p>This example demonstrates bundle adjustment of camera extrinsics and landmarks using factors built into SymForce.  This particular example is set up so that the number of cameras and landmarks is set at code generation time; in contrast, the <code class="docutils literal notranslate"><span class="pre">Bundle</span> <span class="pre">Adjustment</span></code> example shows how to make them configurable at runtime.  Fixing the size of the problem at generation time can produce significantly more efficient linearization functions, because common subexpression elimination can be applied across multiple factors.  For instance, multiple factors that reproject different features into the same cameras will often share computation.</p>
+<p>We randomly generate a set of camera poses and feature correspondences with noise and some outliers, and perform bundle adjustment with feature reprojection residuals and pose priors.</p>
+<section id="files">
+<h2>Files:<a class="headerlink" href="#files" title="Permalink to this headline">¶</a></h2>
+<section id="build-example-state">
+<h3><code class="docutils literal notranslate"><span class="pre">build_example_state.*</span></code>:<a class="headerlink" href="#build-example-state" title="Permalink to this headline">¶</a></h3>
+<p>Utilities for building up the problem, by randomly sampling camera poses and feature correspondences, and perturbing initial guesses.  This is all returned in the form of a <code class="docutils literal notranslate"><span class="pre">Values</span></code> produced by the <code class="docutils literal notranslate"><span class="pre">BuildValues</span></code> function.</p>
+</section>
+<section id="build-values-py">
+<h3><code class="docutils literal notranslate"><span class="pre">build_values.py</span></code>:<a class="headerlink" href="#build-values-py" title="Permalink to this headline">¶</a></h3>
+<p>Builds a symbolic Python <code class="docutils literal notranslate"><span class="pre">Values</span></code> with all of the variables in the problem.  This is used to build up the symbolic problem in <code class="docutils literal notranslate"><span class="pre">generate_fixed_problem.py</span></code>.</p>
+</section>
+<section id="generate-fixed-problem-py">
+<h3><code class="docutils literal notranslate"><span class="pre">generate_fixed_problem.py</span></code>:<a class="headerlink" href="#generate-fixed-problem-py" title="Permalink to this headline">¶</a></h3>
+<p>This actually defines the fixed-size problem, taking the <code class="docutils literal notranslate"><span class="pre">Values</span></code> built by <code class="docutils literal notranslate"><span class="pre">build_values.py</span></code> and constructing all of the residuals.  We can then generate the entire problem into C++, with common subexpression elimination running across the entire problem together.  The <code class="docutils literal notranslate"><span class="pre">FixedBundleAdjustmentProblem.generate</span></code> method is called by <code class="docutils literal notranslate"><span class="pre">test/symforce_examples_bundle_adjustment_fixed_size_codegen_test.py</span></code> to actually generate the linearization function in <code class="docutils literal notranslate"><span class="pre">gen</span></code>.</p>
+</section>
+<section id="run-bundle-adjustment-cc">
+<h3><code class="docutils literal notranslate"><span class="pre">run_bundle_adjustment.cc</span></code><a class="headerlink" href="#run-bundle-adjustment-cc" title="Permalink to this headline">¶</a></h3>
+<p>This is the C++ file that actually runs the optimization.  It builds up the <code class="docutils literal notranslate"><span class="pre">Values</span></code> for the problem and builds a factor graph.  In this example, the C++ optimization consists of one <code class="docutils literal notranslate"><span class="pre">sym::Factor</span></code>, with a single generated linearization function that contains all of the symbolic residuals.</p>
+</section>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="../bundle_adjustment/README.html" title="previous chapter">Bundle Adjustment</a></li>
+      <li>Next: <a href="../bundle_adjustment_in_the_large/README.html" title="next chapter">Bundle-Adjustment-in-the-Large</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/examples/bundle_adjustment_fixed_size/README.md.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

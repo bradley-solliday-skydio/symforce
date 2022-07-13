@@ -1,0 +1,5 @@
+Struct sym::StorageOps< Pose3< ScalarType > >
+=============================================
+
+.. doxygenstruct:: sym::StorageOps< Pose3< ScalarType > >
+   :project: api-gen-cpp

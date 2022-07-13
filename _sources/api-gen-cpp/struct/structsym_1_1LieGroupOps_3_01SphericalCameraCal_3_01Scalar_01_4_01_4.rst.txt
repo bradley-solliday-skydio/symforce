@@ -1,0 +1,5 @@
+Struct sym::LieGroupOps< SphericalCameraCal< Scalar > >
+=======================================================
+
+.. doxygenstruct:: sym::LieGroupOps< SphericalCameraCal< Scalar > >
+   :project: api-gen-cpp

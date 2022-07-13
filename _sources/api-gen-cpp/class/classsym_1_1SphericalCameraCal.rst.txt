@@ -1,0 +1,5 @@
+Class sym::SphericalCameraCal
+=============================
+
+.. doxygenclass:: sym::SphericalCameraCal
+   :project: api-gen-cpp

@@ -1,0 +1,5 @@
+Class sym::Values
+=================
+
+.. doxygenclass:: sym::Values
+   :project: api-cpp

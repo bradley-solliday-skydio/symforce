@@ -1,0 +1,5 @@
+File prior_factor_rot3.h
+========================
+
+.. doxygenfile:: prior_factor_rot3.h
+   :project: api-gen-cpp

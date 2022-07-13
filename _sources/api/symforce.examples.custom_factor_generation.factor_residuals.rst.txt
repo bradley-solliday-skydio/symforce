@@ -1,0 +1,7 @@
+symforce.examples.custom\_factor\_generation.factor\_residuals module
+=====================================================================
+
+.. automodule:: symforce.examples.custom_factor_generation.factor_residuals
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+symforce.benchmarks.matrix\_multiplication.generate\_matrix\_multiplication\_benchmark module
+=============================================================================================
+
+.. automodule:: symforce.benchmarks.matrix_multiplication.generate_matrix_multiplication_benchmark
+   :members:
+   :undoc-members:
+   :show-inheritance:

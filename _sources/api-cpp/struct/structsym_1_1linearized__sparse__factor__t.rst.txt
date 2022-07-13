@@ -1,0 +1,5 @@
+Struct sym::linearized_sparse_factor_t
+======================================
+
+.. doxygenstruct:: sym::linearized_sparse_factor_t
+   :project: api-cpp

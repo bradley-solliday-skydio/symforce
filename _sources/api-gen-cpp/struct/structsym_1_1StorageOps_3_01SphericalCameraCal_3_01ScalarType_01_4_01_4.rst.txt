@@ -1,0 +1,5 @@
+Struct sym::StorageOps< SphericalCameraCal< ScalarType > >
+==========================================================
+
+.. doxygenstruct:: sym::StorageOps< SphericalCameraCal< ScalarType > >
+   :project: api-gen-cpp

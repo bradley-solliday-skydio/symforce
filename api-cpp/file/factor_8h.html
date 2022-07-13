@@ -1,0 +1,565 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>File factor.h &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="File factor.tcc" href="factor_8tcc.html" />
+    <link rel="prev" title="File factor.cc" href="factor_8cc.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="file-factor-h">
+<h1>File factor.h<a class="headerlink" href="#file-factor-h" title="Permalink to this headline">¶</a></h1>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv43sym">
+<span class="target" id="namespacesym"></span><span class="k"><span class="pre">namespace</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">sym</span></span></span><br /></dt>
+<dd><p>Utilities for converting various types of factor functors into what’s needed for the polymorphic std::function that’s actually stored and used by <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Factor"><span class="std std-ref">sym::Factor</span></a></p>
+<p>Primarily intended to be included by factor.tcc and used internally there </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-typedefs">Typedefs</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym7FactordE">
+<span class="target" id="namespacesym_1ad9162e0e9e6e11bfc902eec4884073f0"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Factord</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor"><span class="n"><span class="pre">Factor</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">double</span></span><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4N3sym7FactordE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym7FactorfE">
+<span class="target" id="namespacesym_1a6bd93e39b6bb56db6bcbeedf96591296"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Factorf</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor"><span class="n"><span class="pre">Factor</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">float</span></span><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4N3sym7FactorfE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym6FactorE">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ScalarType</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Factor"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Factor</span></span></span><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;factor.h&gt;</em></div>
+<p>A residual term for optimization.</p>
+<p>Created from a function and a set of Keys that act as inputs. Given a <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values"><span class="std std-ref">Values</span></a> as an evaluation point, generates a linear approximation to the residual function. Contains templated helper constructors to simplify creation. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor6ScalarE">
+<span class="target" id="classsym_1_1Factor_1a9ba853407467c818faadcfaf765b4652"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Scalar</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor::ScalarType"><span class="n"><span class="pre">ScalarType</span></span></a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor21LinearizedDenseFactorE">
+<span class="target" id="classsym_1_1Factor_1aec7df86410388be892dcc95c81d56b62"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">LinearizedDenseFactor</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0EN3sym31LinearizedDenseFactorTypeHelperE" title="sym::LinearizedDenseFactorTypeHelper"><span class="n"><span class="pre">LinearizedDenseFactorTypeHelper</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Type</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor22LinearizedSparseFactorE">
+<span class="target" id="classsym_1_1Factor_1ab51d1a8f86f79fc7b308c640f6b83ef0"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">LinearizedSparseFactor</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0EN3sym32LinearizedSparseFactorTypeHelperE" title="sym::LinearizedSparseFactorTypeHelper"><span class="n"><span class="pre">LinearizedSparseFactorTypeHelper</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Type</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym6Factor12JacobianFuncE">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">JacobianMatrixType</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Factor_1aef998172ed6618dcc51fc54b222a3d78"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">JacobianFunc</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">function</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">void</span></span><span class="p"><span class="pre">(</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">index_entry_t</span></span><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7VectorXE" title="sym::VectorX"><span class="n"><span class="pre">VectorX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6Factor12JacobianFuncE" title="sym::Factor::JacobianFunc::JacobianMatrixType"><span class="n"><span class="pre">JacobianMatrixType</span></span></a><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">&gt;</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor17DenseJacobianFuncE">
+<span class="target" id="classsym_1_1Factor_1a8d4d924753c5d41c04b33de276a1db01"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">DenseJacobianFunc</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6Factor12JacobianFuncE" title="sym::Factor::JacobianFunc"><span class="n"><span class="pre">JacobianFunc</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7MatrixXE" title="sym::MatrixX"><span class="n"><span class="pre">MatrixX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&gt;</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor18SparseJacobianFuncE">
+<span class="target" id="classsym_1_1Factor_1a36b617d75ebb89917cc88acd2889c6f0"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SparseJacobianFunc</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6Factor12JacobianFuncE" title="sym::Factor::JacobianFunc"><span class="n"><span class="pre">JacobianFunc</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">SparseMatrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&gt;</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor11HessianFuncE">
+<span class="target" id="classsym_1_1Factor_1ae6497a6d64fe469a856520ad6eb67302"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">HessianFunc</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">function</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">void</span></span><span class="p"><span class="pre">(</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">index_entry_t</span></span><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7VectorXE" title="sym::VectorX"><span class="n"><span class="pre">VectorX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7MatrixXE" title="sym::MatrixX"><span class="n"><span class="pre">MatrixX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7MatrixXE" title="sym::MatrixX"><span class="n"><span class="pre">MatrixX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7VectorXE" title="sym::VectorX"><span class="n"><span class="pre">VectorX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">&gt;</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor17SparseHessianFuncE">
+<span class="target" id="classsym_1_1Factor_1ad6b1128d9318534fcd9be5ee9f94c2a3"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SparseHessianFunc</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">function</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">void</span></span><span class="p"><span class="pre">(</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">index_entry_t</span></span><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7VectorXE" title="sym::VectorX"><span class="n"><span class="pre">VectorX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">SparseMatrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">SparseMatrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7VectorXE" title="sym::VectorX"><span class="n"><span class="pre">VectorX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">*</span></span><span class="p"><span class="pre">)</span></span><span class="p"><span class="pre">&gt;</span></span><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor6FactorEv">
+<span class="target" id="classsym_1_1Factor_1a817fbf4ed4ba3861a7afb8c651a1eef6"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Factor</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor6FactorERR11HessianFuncRKNSt6vectorI3KeyEE">
+<span class="target" id="classsym_1_1Factor_1a7764c2620969da60c6512c4eb361df96"></span><span class="sig-name descname"><span class="n"><span class="pre">Factor</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor11HessianFuncE" title="sym::Factor::HessianFunc"><span class="n"><span class="pre">HessianFunc</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">hessian_func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Create directly from a (dense) hessian functor. This is the lowest-level constructor.</p>
+<p>Args: keys_to_func: The set of input arguments, in order, accepted by func. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor6FactorERR11HessianFuncRKNSt6vectorI3KeyEERKNSt6vectorI3KeyEE">
+<span class="target" id="classsym_1_1Factor_1a697b893620ddd3adc2cbe9316059aae7"></span><span class="sig-name descname"><span class="n"><span class="pre">Factor</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor11HessianFuncE" title="sym::Factor::HessianFunc"><span class="n"><span class="pre">HessianFunc</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">hessian_func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys_to_func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys_to_optimize</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Create directly from a (sparse) hessian functor. This is the lowest-level constructor.</p>
+<p>Args: keys_to_func: The set of input arguments, in order, accepted by func. keys_to_optimize: The set of input arguments that correspond to the derivative in func. Must be a subset of keys_to_func. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor6FactorERR17SparseHessianFuncRKNSt6vectorI3KeyEE">
+<span class="target" id="classsym_1_1Factor_1ad52784dbd36ec75d4018fa19b11bcf8d"></span><span class="sig-name descname"><span class="n"><span class="pre">Factor</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor17SparseHessianFuncE" title="sym::Factor::SparseHessianFunc"><span class="n"><span class="pre">SparseHessianFunc</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">hessian_func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys_to_func</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor6FactorERR17SparseHessianFuncRKNSt6vectorI3KeyEERKNSt6vectorI3KeyEE">
+<span class="target" id="classsym_1_1Factor_1a0aace8c76d2714092cc92f979ec141c3"></span><span class="sig-name descname"><span class="n"><span class="pre">Factor</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor17SparseHessianFuncE" title="sym::Factor::SparseHessianFunc"><span class="n"><span class="pre">SparseHessianFunc</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">hessian_func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys_to_func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys_to_optimize</span></span><span class="sig-paren">)</span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Factor8IsSparseEv">
+<span class="target" id="classsym_1_1Factor_1afffc7ca2712c5cd852698e908672de8b"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">IsSparse</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Does this factor use a sparse jacobian/hessian matrix? </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Factor9LinearizeERK6ValuesI6ScalarEP7VectorXI10ScalarTypeE">
+<span class="target" id="classsym_1_1Factor_1a56ecc7c2a2f06491d4e669f3da928f0d"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Linearize</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">values</span></span>, <a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7VectorXE" title="sym::VectorX"><span class="n"><span class="pre">VectorX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor::ScalarType"><span class="n"><span class="pre">ScalarType</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">residual</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Evaluate the factor at the given linearization point and output just the numerical values of the residual. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Factor9LinearizeERK6ValuesI6ScalarEP7VectorXI10ScalarTypeEP7MatrixXI10ScalarTypeE">
+<span class="target" id="classsym_1_1Factor_1a425922663017894e22bbbd07f12514a2"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Linearize</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">values</span></span>, <a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7VectorXE" title="sym::VectorX"><span class="n"><span class="pre">VectorX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor::ScalarType"><span class="n"><span class="pre">ScalarType</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">residual</span></span>, <a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7MatrixXE" title="sym::MatrixX"><span class="n"><span class="pre">MatrixX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor::ScalarType"><span class="n"><span class="pre">ScalarType</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">jacobian</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Evaluate the factor at the given linearization point and output just the numerical values of the residual and jacobian.</p>
+<p>This overload can only be called if IsSparse is false; otherwise, it will throw </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Factor9LinearizeERK6ValuesI6ScalarEP7VectorXI10ScalarTypeEPN5Eigen12SparseMatrixI10ScalarTypeEE">
+<span class="target" id="classsym_1_1Factor_1a385fc7d0593a5cb0cc63217d2acdd5b3"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Linearize</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">values</span></span>, <a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7VectorXE" title="sym::VectorX"><span class="n"><span class="pre">VectorX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor::ScalarType"><span class="n"><span class="pre">ScalarType</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">residual</span></span>, <span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">SparseMatrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor::ScalarType"><span class="n"><span class="pre">ScalarType</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">jacobian</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Evaluate the factor at the given linearization point and output just the numerical values of the residual and jacobian.</p>
+<p>This overload can only be called if IsSparse is true; otherwise, it will throw </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Factor9LinearizeERK6ValuesI6ScalarEP21LinearizedDenseFactor">
+<span class="target" id="classsym_1_1Factor_1a085d899c60b2a32c6e22c92784f6820b"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Linearize</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">values</span></span>, <a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor21LinearizedDenseFactorE" title="sym::Factor::LinearizedDenseFactor"><span class="n"><span class="pre">LinearizedDenseFactor</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">linearized_factor</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Evaluate the factor at the given linearization point and output a LinearizedDenseFactor that contains the numerical values of the residual, jacobian, hessian, and right-hand-side.</p>
+<p>This overload can only be called if IsSparse is false; otherwise, it will throw </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Factor9LinearizeERK6ValuesI6ScalarE">
+<span class="target" id="classsym_1_1Factor_1aa37187687cb49d2976ae62169b6cc41f"></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor21LinearizedDenseFactorE" title="sym::Factor::LinearizedDenseFactor"><span class="n"><span class="pre">LinearizedDenseFactor</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Linearize</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">values</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Evaluate the factor at the given linearization point and output a LinearizedDenseFactor that contains the numerical values of the residual, jacobian, hessian, and right-hand-side.</p>
+<p>This overload can only be called if IsSparse is false; otherwise, it will throw </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Factor9LinearizeERK6ValuesI6ScalarEP22LinearizedSparseFactor">
+<span class="target" id="classsym_1_1Factor_1a0a27359bf56e13f3d4c3471989dc6c58"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Linearize</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">values</span></span>, <a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor22LinearizedSparseFactorE" title="sym::Factor::LinearizedSparseFactor"><span class="n"><span class="pre">LinearizedSparseFactor</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">linearized_factor</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Evaluate the factor at the given linearization point and output a LinearizedDenseFactor that contains the numerical values of the residual, jacobian, hessian, and right-hand-side.</p>
+<p>This overload can only be called if IsSparse is true; otherwise, it will throw </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Factor13OptimizedKeysEv">
+<span class="target" id="classsym_1_1Factor_1a23beaffd7e91c7eb24f519699754a244"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">OptimizedKeys</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Get the optimized keys for this factor </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Factor7AllKeysEv">
+<span class="target" id="classsym_1_1Factor_1a1876147dfc72d7dff08270b2a6c621e8"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">AllKeys</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Get all keys required to evaluate this factor </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-static-functions">Public Static Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor8JacobianERK17DenseJacobianFuncRKNSt6vectorI3KeyEE">
+<span class="target" id="classsym_1_1Factor_1af7e9c43cbcda9bc634f778d8b7e551cc"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor"><span class="n"><span class="pre">Factor</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Jacobian</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor17DenseJacobianFuncE" title="sym::Factor::DenseJacobianFunc"><span class="n"><span class="pre">DenseJacobianFunc</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">jacobian_func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Create from a function that computes the (dense) jacobian. The hessian will be computed using the Gauss Newton approximation: H = J.T * J rhs = J.T * b</p>
+<p>Args: keys_to_func: The set of input arguments, in order, accepted by func. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor8JacobianERK17DenseJacobianFuncRKNSt6vectorI3KeyEERKNSt6vectorI3KeyEE">
+<span class="target" id="classsym_1_1Factor_1a9e32bab2c379bf06369ba43155909fc0"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor"><span class="n"><span class="pre">Factor</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Jacobian</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor17DenseJacobianFuncE" title="sym::Factor::DenseJacobianFunc"><span class="n"><span class="pre">DenseJacobianFunc</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">jacobian_func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys_to_func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys_to_optimize</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Create from a function that computes the (dense) jacobian. The hessian will be computed using the Gauss Newton approximation: H = J.T * J rhs = J.T * b</p>
+<p>Args: keys_to_func: The set of input arguments, in order, accepted by func. keys_to_optimize: The set of input arguments that correspond to the derivative in func. Must be a subset of keys_to_func. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor8JacobianERK18SparseJacobianFuncRKNSt6vectorI3KeyEE">
+<span class="target" id="classsym_1_1Factor_1acef4787fc68d7db577ddcc2d39edd106"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor"><span class="n"><span class="pre">Factor</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Jacobian</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor18SparseJacobianFuncE" title="sym::Factor::SparseJacobianFunc"><span class="n"><span class="pre">SparseJacobianFunc</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">jacobian_func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Create from a function that computes the (sparse) jacobian. The hessian will be computed using the Gauss Newton approximation: H = J.T * J rhs = J.T * b</p>
+<p>Args: keys_to_func: The set of input arguments, in order, accepted by func. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor8JacobianERK18SparseJacobianFuncRKNSt6vectorI3KeyEERKNSt6vectorI3KeyEE">
+<span class="target" id="classsym_1_1Factor_1a899982f448895ef5a8a665a7fb0e1e17"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor"><span class="n"><span class="pre">Factor</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Jacobian</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor18SparseJacobianFuncE" title="sym::Factor::SparseJacobianFunc"><span class="n"><span class="pre">SparseJacobianFunc</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">jacobian_func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys_to_func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys_to_optimize</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Create from a function that computes the (sparse) jacobian. The hessian will be computed using the Gauss Newton approximation: H = J.T * J rhs = J.T * b</p>
+<p>Args: keys_to_func: The set of input arguments, in order, accepted by func. keys_to_optimize: The set of input arguments that correspond to the derivative in func. Must be a subset of keys_to_func. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym6Factor8JacobianE6Factor7FunctorRKNSt6vectorI3KeyEE">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Functor</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Factor_1ac70c7dde66fa9428fd7144d58d50b0c9"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor"><span class="n"><span class="pre">Factor</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Jacobian</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6Factor8JacobianE6Factor7FunctorRKNSt6vectorI3KeyEE" title="sym::Factor::Jacobian::Functor"><span class="n"><span class="pre">Functor</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Create from a function that computes the jacobian. The hessian will be computed using the Gauss Newton approximation: H = J.T * J rhs = J.T * b</p>
+<p>This version handles a variety of functors that take in individual input arguments rather than a <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values"><span class="std std-ref">Values</span></a> object - the last two arguments to <code class="docutils literal notranslate"><span class="pre">func</span></code> should be outputs for the residual and jacobian; arguments before that should be inputs to <code class="docutils literal notranslate"><span class="pre">func</span></code>.</p>
+<p>If generating this factor from a single Python function, you probably want to use the <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Factor_1a7f5c44904ba7494737d5d2956a7981fb"><span class="std std-ref">Factor::Hessian</span></a> constructor instead (it’ll likely result in faster linearization). If you really want to generate a factor and use this constructor, <code class="docutils literal notranslate"><span class="pre">func</span></code> can be generated easily by creating a Codegen object from a Python function which returns the residual, then calling with_linearization with linearization_mode=STACKED_JACOBIAN</p>
+<p>See <code class="docutils literal notranslate"><span class="pre">symforce_factor_test.cc</span></code> for many examples. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym6Factor8JacobianE6Factor7FunctorRKNSt6vectorI3KeyEERKNSt6vectorI3KeyEE">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Functor</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Factor_1a796cfcba271b179c49a8ae24cdd3635b"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor"><span class="n"><span class="pre">Factor</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Jacobian</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6Factor8JacobianE6Factor7FunctorRKNSt6vectorI3KeyEERKNSt6vectorI3KeyEE" title="sym::Factor::Jacobian::Functor"><span class="n"><span class="pre">Functor</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys_to_func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys_to_optimize</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Same as the above, but allows extra constant keys into the function which are not optimized. For example, to pass through epsilon.</p>
+<p>Args: keys_to_func: The set of input arguments, in order, accepted by func. keys_to_optimize: The set of input arguments that correspond to the derivative in func. Must be a subset of keys_to_func. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym6Factor7HessianE6Factor7FunctorRKNSt6vectorI3KeyEE">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Functor</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Factor_1a7f5c44904ba7494737d5d2956a7981fb"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor"><span class="n"><span class="pre">Factor</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Hessian</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6Factor7HessianE6Factor7FunctorRKNSt6vectorI3KeyEE" title="sym::Factor::Hessian::Functor"><span class="n"><span class="pre">Functor</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Create from a functor that computes the full linearization, but takes in individual input arguments rather than a <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values"><span class="std std-ref">Values</span></a> object. The last four arguments to <code class="docutils literal notranslate"><span class="pre">func</span></code> should be outputs for the residual, jacobian, hessian, and rhs; arguments before that should be inputs to <code class="docutils literal notranslate"><span class="pre">func</span></code>.</p>
+<p>This should be used in cases where computing J^T J using a matrix multiplication is slower than evaluating J^T J symbolically; for instance, if the jacobian is sparse or J^T J has structure so that CSE is very effective.</p>
+<p><code class="docutils literal notranslate"><span class="pre">func</span></code> can be generated easily by creating a Codegen object from a Python function which returns the residual, then calling with_linearization with linearization_mode=FULL_LINEARIZATION (the default)</p>
+<p>See <code class="docutils literal notranslate"><span class="pre">symforce_factor_test.cc</span></code> for many examples. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym6Factor7HessianE6Factor7FunctorRKNSt6vectorI3KeyEERKNSt6vectorI3KeyEE">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Functor</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Factor_1ad0d0293cf0a61ee7559ef54d7201f621"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor"><span class="n"><span class="pre">Factor</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Hessian</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4I0EN3sym6Factor7HessianE6Factor7FunctorRKNSt6vectorI3KeyEERKNSt6vectorI3KeyEE" title="sym::Factor::Hessian::Functor"><span class="n"><span class="pre">Functor</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys_to_func</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys_to_optimize</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Same as the above, but allows extra constant keys into the function which are not optimized. For example, to pass through epsilon.</p>
+<p>Args: keys_to_func: The set of input arguments, in order, accepted by func. keys_to_optimize: The set of input arguments that correspond to the derivative in func. Must be a subset of keys_to_func. </p>
+</dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-private-functions">Private Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Factor23EnsureIndexEntriesExistERK6ValuesI6ScalarE">
+<span class="target" id="classsym_1_1Factor_1ae6c899234bf96807e4bd13514e841c83"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">EnsureIndexEntriesExist</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">values</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3sym6Factor23EnsureIndexEntriesExistERK6ValuesI6ScalarE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0ENK3sym6Factor25FillLinearizedFactorIndexEvRK6ValuesI6ScalarER17LinearizedFactorT">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">LinearizedFactorT</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Factor_1a509779e3bba49589732222e59a57f7fc"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">FillLinearizedFactorIndex</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor6ScalarE" title="sym::Factor::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">values</span></span>, <a class="reference internal" href="#_CPPv4I0ENK3sym6Factor25FillLinearizedFactorIndexEvRK6ValuesI6ScalarER17LinearizedFactorT" title="sym::Factor::FillLinearizedFactorIndex::LinearizedFactorT"><span class="n"><span class="pre">LinearizedFactorT</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">linearized_factor</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4I0ENK3sym6Factor25FillLinearizedFactorIndexEvRK6ValuesI6ScalarER17LinearizedFactorT" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-private-members">Private Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor13hessian_func_E">
+<span class="target" id="classsym_1_1Factor_1ac34d0bd83adc0861c3758490933c8205"></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor11HessianFuncE" title="sym::Factor::HessianFunc"><span class="n"><span class="pre">HessianFunc</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">hessian_func_</span></span></span><a class="headerlink" href="#_CPPv4N3sym6Factor13hessian_func_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor20sparse_hessian_func_E">
+<span class="target" id="classsym_1_1Factor_1a55ccebd420645e5a6506283e88688782"></span><a class="reference internal" href="../class/classsym_1_1Factor.html#_CPPv4N3sym6Factor17SparseHessianFuncE" title="sym::Factor::SparseHessianFunc"><span class="n"><span class="pre">SparseHessianFunc</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">sparse_hessian_func_</span></span></span><a class="headerlink" href="#_CPPv4N3sym6Factor20sparse_hessian_func_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor10is_sparse_E">
+<span class="target" id="classsym_1_1Factor_1a639f8869eeb6fd90f2ba12af2ada67d0"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">is_sparse_</span></span></span><a class="headerlink" href="#_CPPv4N3sym6Factor10is_sparse_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor17keys_to_optimize_E">
+<span class="target" id="classsym_1_1Factor_1ae29403dc95c6bd2ee434ad1c2a2a7d72"></span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">keys_to_optimize_</span></span></span><a class="headerlink" href="#_CPPv4N3sym6Factor17keys_to_optimize_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor5keys_E">
+<span class="target" id="classsym_1_1Factor_1ae584b4598af1873bd643493c06b778fa"></span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">keys_</span></span></span><a class="headerlink" href="#_CPPv4N3sym6Factor5keys_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Factor14index_entries_E">
+<span class="target" id="classsym_1_1Factor_1aff8f513c19710e393aa2f2d782d6978b"></span><span class="k"><span class="pre">mutable</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><span class="n"><span class="pre">index_entry_t</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">index_entries_</span></span></span><a class="headerlink" href="#_CPPv4N3sym6Factor14index_entries_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym26linearized_sparse_factor_tE">
+<span class="target" id="structsym_1_1linearized__sparse__factor__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">linearized_sparse_factor_t</span></span></span><a class="headerlink" href="#_CPPv4N3sym26linearized_sparse_factor_tE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym26linearized_sparse_factor_t5indexE">
+<span class="target" id="structsym_1_1linearized__sparse__factor__t_1a2e83eb4d09f7718c5986842efd6fd2ae"></span><span class="n"><span class="pre">index_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">index</span></span></span><a class="headerlink" href="#_CPPv4N3sym26linearized_sparse_factor_t5indexE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym26linearized_sparse_factor_t8residualE">
+<span class="target" id="structsym_1_1linearized__sparse__factor__t_1a76daaff78268ce1d436920aa69eb5dd6"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">residual</span></span></span><a class="headerlink" href="#_CPPv4N3sym26linearized_sparse_factor_t8residualE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym26linearized_sparse_factor_t8jacobianE">
+<span class="target" id="structsym_1_1linearized__sparse__factor__t_1a1a18027326f44a5d72e1f902310f7ded"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">SparseMatrix</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">double</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">jacobian</span></span></span><a class="headerlink" href="#_CPPv4N3sym26linearized_sparse_factor_t8jacobianE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym26linearized_sparse_factor_t7hessianE">
+<span class="target" id="structsym_1_1linearized__sparse__factor__t_1a9cf9e29dc4a9f95dd14595e098a7eebd"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">SparseMatrix</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">double</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">hessian</span></span></span><a class="headerlink" href="#_CPPv4N3sym26linearized_sparse_factor_t7hessianE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym26linearized_sparse_factor_t3rhsE">
+<span class="target" id="structsym_1_1linearized__sparse__factor__t_1ad2ef6d2b3db95b56dce728230d4aa292"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXd</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">rhs</span></span></span><a class="headerlink" href="#_CPPv4N3sym26linearized_sparse_factor_t3rhsE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-static-functions">Public Static Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym26linearized_sparse_factor_t11getTypeNameEv">
+<span class="target" id="structsym_1_1linearized__sparse__factor__t_1a8c24d8c6983b8d3705b6e81ff072c6ba"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">constexpr</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">getTypeName</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3sym26linearized_sparse_factor_t11getTypeNameEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym27linearized_sparse_factorf_tE">
+<span class="target" id="structsym_1_1linearized__sparse__factorf__t"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">linearized_sparse_factorf_t</span></span></span><a class="headerlink" href="#_CPPv4N3sym27linearized_sparse_factorf_tE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-members">Public Members</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym27linearized_sparse_factorf_t5indexE">
+<span class="target" id="structsym_1_1linearized__sparse__factorf__t_1a4b7678f33f7fd301a8fd990a9f6e1391"></span><span class="n"><span class="pre">index_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">index</span></span></span><a class="headerlink" href="#_CPPv4N3sym27linearized_sparse_factorf_t5indexE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym27linearized_sparse_factorf_t8residualE">
+<span class="target" id="structsym_1_1linearized__sparse__factorf__t_1ac55c9bb6340dc7c629371d36703638d8"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXf</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">residual</span></span></span><a class="headerlink" href="#_CPPv4N3sym27linearized_sparse_factorf_t8residualE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym27linearized_sparse_factorf_t8jacobianE">
+<span class="target" id="structsym_1_1linearized__sparse__factorf__t_1a752725b45b04da426008b8f9a738e872"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">SparseMatrix</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">float</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">jacobian</span></span></span><a class="headerlink" href="#_CPPv4N3sym27linearized_sparse_factorf_t8jacobianE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym27linearized_sparse_factorf_t7hessianE">
+<span class="target" id="structsym_1_1linearized__sparse__factorf__t_1a1cd5487c32cec8b2d943c19ab753f291"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">SparseMatrix</span></span><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">float</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">hessian</span></span></span><a class="headerlink" href="#_CPPv4N3sym27linearized_sparse_factorf_t7hessianE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym27linearized_sparse_factorf_t3rhsE">
+<span class="target" id="structsym_1_1linearized__sparse__factorf__t_1a13a9c9f93f7605a1b4ba07748ccc81de"></span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">VectorXf</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">rhs</span></span></span><a class="headerlink" href="#_CPPv4N3sym27linearized_sparse_factorf_t3rhsE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-static-functions">Public Static Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym27linearized_sparse_factorf_t11getTypeNameEv">
+<span class="target" id="structsym_1_1linearized__sparse__factorf__t_1a9010c66179ad471f8a3ee8d71b27a752"></span><span class="k"><span class="pre">static</span></span><span class="w"> </span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">constexpr</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">char</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="sig-name descname"><span class="n"><span class="pre">getTypeName</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3sym27linearized_sparse_factorf_t11getTypeNameEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym31LinearizedDenseFactorTypeHelperE">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_S</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="structsym_1_1LinearizedDenseFactorTypeHelper"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">LinearizedDenseFactorTypeHelper</span></span></span><a class="headerlink" href="#_CPPv4I0EN3sym31LinearizedDenseFactorTypeHelperE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym32LinearizedSparseFactorTypeHelperE">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_S</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="structsym_1_1LinearizedSparseFactorTypeHelper"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">LinearizedSparseFactorTypeHelper</span></span></span><a class="headerlink" href="#_CPPv4I0EN3sym32LinearizedSparseFactorTypeHelperE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../classlist.html">Class list</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../filelist.html">File list</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="assert_8h.html">File assert.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="covariance__utils_8h.html">File covariance_utils.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="derivative__checker_8h.html">File derivative_checker.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="factor_8cc.html">File factor.cc</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">File factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="factor_8tcc.html">File factor.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="factor__utils_8h.html">File factor_utils.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gnc__optimizer_8h.html">File gnc_optimizer.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hash__combine_8h.html">File hash_combine.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="internal_2tic__toc_8h.html">File tic_toc.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="key_8cc.html">File key.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="key_8h.html">File key.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levenberg__marquardt__solver_8h.html">File levenberg_marquardt_solver.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levenberg__marquardt__solver_8tcc.html">File levenberg_marquardt_solver.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levenberg__marquardt__state_8h.html">File levenberg_marquardt_state.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearization_8h.html">File linearization.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearizer_8cc.html">File linearizer.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearizer_8h.html">File linearizer.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearizer_8tcc.html">File linearizer.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearizer__utils_8h.html">File linearizer_utils.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logging__configure_8cc.html">File logging_configure.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logging__configure_8h.html">File logging_configure.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimization__stats_8h.html">File optimization_stats.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimizer_8cc.html">File optimizer.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimizer_8h.html">File optimizer.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimizer_8tcc.html">File optimizer.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional_8h.html">File optional.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__cholesky__solver_8cc.html">File sparse_cholesky_solver.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__cholesky__solver_8h.html">File sparse_cholesky_solver.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__cholesky__solver_8tcc.html">File sparse_cholesky_solver.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__schur__solver_8h.html">File sparse_schur_solver.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__schur__solver_8tcc.html">File sparse_schur_solver.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="templates_8h.html">File templates.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tic__toc_8cc.html">File tic_toc.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tic__toc_8h.html">File tic_toc.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="util_8h.html">File util.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values_8cc.html">File values.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values_8h.html">File values.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values_8tcc.html">File values.tcc</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../filelist.html">File list</a><ul>
+      <li>Previous: <a href="factor_8cc.html" title="previous chapter">File factor.cc</a></li>
+      <li>Next: <a href="factor_8tcc.html" title="next chapter">File factor.tcc</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/api-cpp/file/factor_8h.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

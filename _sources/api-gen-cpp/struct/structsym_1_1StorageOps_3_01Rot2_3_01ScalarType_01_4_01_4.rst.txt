@@ -1,0 +1,5 @@
+Struct sym::StorageOps< Rot2< ScalarType > >
+============================================
+
+.. doxygenstruct:: sym::StorageOps< Rot2< ScalarType > >
+   :project: api-gen-cpp

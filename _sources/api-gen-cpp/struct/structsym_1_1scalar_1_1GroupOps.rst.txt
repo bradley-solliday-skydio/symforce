@@ -1,0 +1,5 @@
+Struct sym::scalar::GroupOps
+============================
+
+.. doxygenstruct:: sym::scalar::GroupOps
+   :project: api-gen-cpp

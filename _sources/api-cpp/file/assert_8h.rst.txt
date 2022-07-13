@@ -1,0 +1,5 @@
+File assert.h
+=============
+
+.. doxygenfile:: assert.h
+   :project: api-cpp

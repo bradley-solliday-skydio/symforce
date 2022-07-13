@@ -1,0 +1,5 @@
+Struct sym::LieGroupOps< PolynomialCameraCal< Scalar > >
+========================================================
+
+.. doxygenstruct:: sym::LieGroupOps< PolynomialCameraCal< Scalar > >
+   :project: api-gen-cpp

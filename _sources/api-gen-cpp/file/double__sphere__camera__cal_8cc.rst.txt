@@ -1,0 +1,5 @@
+File double_sphere_camera_cal.cc
+================================
+
+.. doxygenfile:: double_sphere_camera_cal.cc
+   :project: api-gen-cpp

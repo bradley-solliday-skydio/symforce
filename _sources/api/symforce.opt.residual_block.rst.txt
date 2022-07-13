@@ -1,0 +1,7 @@
+symforce.opt.residual\_block module
+===================================
+
+.. automodule:: symforce.opt.residual_block
+   :members:
+   :undoc-members:
+   :show-inheritance:

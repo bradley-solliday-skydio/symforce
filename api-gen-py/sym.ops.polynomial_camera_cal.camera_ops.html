@@ -1,0 +1,258 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>sym.ops.polynomial_camera_cal.camera_ops module &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="sym.ops.polynomial_camera_cal.group_ops module" href="sym.ops.polynomial_camera_cal.group_ops.html" />
+    <link rel="prev" title="sym.ops.polynomial_camera_cal package" href="sym.ops.polynomial_camera_cal.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="module-sym.ops.polynomial_camera_cal.camera_ops">
+<span id="sym-ops-polynomial-camera-cal-camera-ops-module"></span><h1>sym.ops.polynomial_camera_cal.camera_ops module<a class="headerlink" href="#module-sym.ops.polynomial_camera_cal.camera_ops" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="sym.ops.polynomial_camera_cal.camera_ops.CameraOps">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">CameraOps</span></span><a class="reference internal" href="../_modules/sym/ops/polynomial_camera_cal/camera_ops.html#CameraOps"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sym.ops.polynomial_camera_cal.camera_ops.CameraOps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Python CameraOps implementation for &lt;class ‘symforce.cam.polynomial_camera_cal.PolynomialCameraCal’&gt;.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="sym.ops.polynomial_camera_cal.camera_ops.CameraOps.focal_length">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">focal_length</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sym/ops/polynomial_camera_cal/camera_ops.html#CameraOps.focal_length"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sym.ops.polynomial_camera_cal.camera_ops.CameraOps.focal_length" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the focal length.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="sym.polynomial_camera_cal.html#sym.polynomial_camera_cal.PolynomialCameraCal" title="sym.polynomial_camera_cal.PolynomialCameraCal"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolynomialCameraCal</span></code></a>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sym.ops.polynomial_camera_cal.camera_ops.CameraOps.principal_point">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">principal_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sym/ops/polynomial_camera_cal/camera_ops.html#CameraOps.principal_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sym.ops.polynomial_camera_cal.camera_ops.CameraOps.principal_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the principal point.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>self</strong> (<a class="reference internal" href="sym.polynomial_camera_cal.html#sym.polynomial_camera_cal.PolynomialCameraCal" title="sym.polynomial_camera_cal.PolynomialCameraCal"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolynomialCameraCal</span></code></a>) – </p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">List</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sym.ops.polynomial_camera_cal.camera_ops.CameraOps.pixel_from_camera_point">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pixel_from_camera_point</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sym/ops/polynomial_camera_cal/camera_ops.html#CameraOps.pixel_from_camera_point"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sym.ops.polynomial_camera_cal.camera_ops.CameraOps.pixel_from_camera_point" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project a 3D point in the camera frame into 2D pixel coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(x, y) coordinate in pixels if valid
+is_valid: 1 if the operation is within bounds else 0</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>pixel</p>
+</dd>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (<a class="reference internal" href="sym.polynomial_camera_cal.html#sym.polynomial_camera_cal.PolynomialCameraCal" title="sym.polynomial_camera_cal.PolynomialCameraCal"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolynomialCameraCal</span></code></a>) – </p></li>
+<li><p><strong>point</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – </p></li>
+<li><p><strong>epsilon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="sym.ops.polynomial_camera_cal.camera_ops.CameraOps.pixel_from_camera_point_with_jacobians">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">pixel_from_camera_point_with_jacobians</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">point</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/sym/ops/polynomial_camera_cal/camera_ops.html#CameraOps.pixel_from_camera_point_with_jacobians"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#sym.ops.polynomial_camera_cal.camera_ops.CameraOps.pixel_from_camera_point_with_jacobians" title="Permalink to this definition">¶</a></dt>
+<dd><p>Project a 3D point in the camera frame into 2D pixel coordinates.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>(x, y) coordinate in pixels if valid
+is_valid: 1 if the operation is within bounds else 0
+pixel_D_cal: Derivative of pixel with respect to intrinsic calibration parameters
+pixel_D_point: Derivative of pixel with respect to point</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>pixel</p>
+</dd>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>self</strong> (<a class="reference internal" href="sym.polynomial_camera_cal.html#sym.polynomial_camera_cal.PolynomialCameraCal" title="sym.polynomial_camera_cal.PolynomialCameraCal"><code class="xref py py-class docutils literal notranslate"><span class="pre">PolynomialCameraCal</span></code></a>) – </p></li>
+<li><p><strong>point</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Sequence</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>]) – </p></li>
+<li><p><strong>epsilon</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code>) – </p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="sym.html">sym package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="sym.ops.html">sym.ops package</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sym.atan_camera_cal.html">sym.atan_camera_cal module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sym.double_sphere_camera_cal.html">sym.double_sphere_camera_cal module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sym.equirectangular_camera_cal.html">sym.equirectangular_camera_cal module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sym.linear_camera_cal.html">sym.linear_camera_cal module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sym.polynomial_camera_cal.html">sym.polynomial_camera_cal module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sym.pose2.html">sym.pose2 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sym.pose3.html">sym.pose3 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sym.rot2.html">sym.rot2 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sym.rot3.html">sym.rot3 module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sym.spherical_camera_cal.html">sym.spherical_camera_cal module</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="sym.html">sym package</a><ul>
+  <li><a href="sym.ops.html">sym.ops package</a><ul>
+  <li><a href="sym.ops.polynomial_camera_cal.html">sym.ops.polynomial_camera_cal package</a><ul>
+      <li>Previous: <a href="sym.ops.polynomial_camera_cal.html" title="previous chapter">sym.ops.polynomial_camera_cal package</a></li>
+      <li>Next: <a href="sym.ops.polynomial_camera_cal.group_ops.html" title="next chapter">sym.ops.polynomial_camera_cal.group_ops module</a></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/api-gen-py/sym.ops.polynomial_camera_cal.camera_ops.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

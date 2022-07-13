@@ -1,0 +1,277 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>symforce.geo.dual_quaternion &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for symforce.geo.dual_quaternion</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># SymForce - Copyright 2022, Skydio, Inc.</span>
+<span class="c1"># This source code is under the Apache 2.0 license found in the LICENSE file.</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">symforce.ops.interfaces</span> <span class="kn">import</span> <span class="n">Group</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">typing</span> <span class="k">as</span> <span class="n">T</span>
+
+<span class="kn">from</span> <span class="nn">.quaternion</span> <span class="kn">import</span> <span class="n">Quaternion</span>
+
+
+<div class="viewcode-block" id="DualQuaternion"><a class="viewcode-back" href="../../../api/symforce.geo.dual_quaternion.html#symforce.geo.dual_quaternion.DualQuaternion">[docs]</a><span class="k">class</span> <span class="nc">DualQuaternion</span><span class="p">(</span><span class="n">Group</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dual quaternions can be used for rigid motions in 3D. Similar to the way that rotations in</span>
+<span class="sd">    3D space can be represented by quaternions of unit length, rigid motions in 3D space can be</span>
+<span class="sd">    represented by dual quaternions of unit length. This fact is used in theoretical kinematics,</span>
+<span class="sd">    and in applications to 3D computer graphics, robotics and computer vision.</span>
+
+<span class="sd">    References:</span>
+
+<span class="sd">        https://en.wikipedia.org/wiki/Dual_quaternion</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="DualQuaternion.__init__"><a class="viewcode-back" href="../../../api/symforce.geo.dual_quaternion.html#symforce.geo.dual_quaternion.DualQuaternion.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">real_q</span><span class="p">:</span> <span class="n">Quaternion</span><span class="p">,</span> <span class="n">inf_q</span><span class="p">:</span> <span class="n">Quaternion</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct from two quaternions - a real one and an infinitesimal one.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            real_q (Quaternion):</span>
+<span class="sd">            inf_q (Quaternion):</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">real_q</span> <span class="o">=</span> <span class="n">real_q</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inf_q</span> <span class="o">=</span> <span class="n">inf_q</span></div>
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1"># Storage concept - see symforce.ops.storage_ops</span>
+    <span class="c1"># -------------------------------------------------------------------------</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;&lt;DQ real=</span><span class="si">{}</span><span class="s2">, inf=</span><span class="si">{}</span><span class="s2">&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">real_q</span><span class="p">),</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">inf_q</span><span class="p">))</span>
+
+<div class="viewcode-block" id="DualQuaternion.storage_dim"><a class="viewcode-back" href="../../../api/symforce.geo.dual_quaternion.html#symforce.geo.dual_quaternion.DualQuaternion.storage_dim">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">storage_dim</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">Quaternion</span><span class="o">.</span><span class="n">storage_dim</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DualQuaternion.to_storage"><a class="viewcode-back" href="../../../api/symforce.geo.dual_quaternion.html#symforce.geo.dual_quaternion.DualQuaternion.to_storage">[docs]</a>    <span class="k">def</span> <span class="nf">to_storage</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">real_q</span><span class="o">.</span><span class="n">to_storage</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf_q</span><span class="o">.</span><span class="n">to_storage</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DualQuaternion.from_storage"><a class="viewcode-back" href="../../../api/symforce.geo.dual_quaternion.html#symforce.geo.dual_quaternion.DualQuaternion.from_storage">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_storage</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">vec</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">DualQuaternion</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span> <span class="o">==</span> <span class="bp">cls</span><span class="o">.</span><span class="n">storage_dim</span><span class="p">()</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">real_q</span><span class="o">=</span><span class="n">Quaternion</span><span class="o">.</span><span class="n">from_storage</span><span class="p">(</span><span class="n">vec</span><span class="p">[</span><span class="mi">0</span> <span class="p">:</span> <span class="n">Quaternion</span><span class="o">.</span><span class="n">storage_dim</span><span class="p">()]),</span>
+            <span class="n">inf_q</span><span class="o">=</span><span class="n">Quaternion</span><span class="o">.</span><span class="n">from_storage</span><span class="p">(</span><span class="n">vec</span><span class="p">[</span><span class="n">Quaternion</span><span class="o">.</span><span class="n">storage_dim</span><span class="p">()</span> <span class="p">:]),</span>
+        <span class="p">)</span></div>
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1"># Group concept - see symforce.ops.group_ops</span>
+    <span class="c1"># -------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="DualQuaternion.identity"><a class="viewcode-back" href="../../../api/symforce.geo.dual_quaternion.html#symforce.geo.dual_quaternion.DualQuaternion.identity">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DualQuaternion</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">Quaternion</span><span class="o">.</span><span class="n">identity</span><span class="p">(),</span> <span class="n">Quaternion</span><span class="o">.</span><span class="n">zero</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="DualQuaternion.compose"><a class="viewcode-back" href="../../../api/symforce.geo.dual_quaternion.html#symforce.geo.dual_quaternion.DualQuaternion.compose">[docs]</a>    <span class="k">def</span> <span class="nf">compose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">DualQuaternion</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DualQuaternion</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
+            <span class="n">real_q</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_q</span> <span class="o">*</span> <span class="n">other</span><span class="o">.</span><span class="n">real_q</span><span class="p">,</span>
+            <span class="n">inf_q</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_q</span> <span class="o">*</span> <span class="n">other</span><span class="o">.</span><span class="n">inf_q</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf_q</span> <span class="o">*</span> <span class="n">other</span><span class="o">.</span><span class="n">real_q</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="DualQuaternion.inverse"><a class="viewcode-back" href="../../../api/symforce.geo.dual_quaternion.html#symforce.geo.dual_quaternion.DualQuaternion.inverse">[docs]</a>    <span class="k">def</span> <span class="nf">inverse</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DualQuaternion</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">DualQuaternion</span><span class="p">(</span>
+            <span class="n">real_q</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">real_q</span><span class="o">.</span><span class="n">inverse</span><span class="p">(),</span>
+            <span class="n">inf_q</span><span class="o">=-</span><span class="bp">self</span><span class="o">.</span><span class="n">real_q</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf_q</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">real_q</span><span class="o">.</span><span class="n">inverse</span><span class="p">(),</span>
+        <span class="p">)</span></div>
+
+    <span class="c1"># -------------------------------------------------------------------------</span>
+    <span class="c1"># Helper methods</span>
+    <span class="c1"># -------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="DualQuaternion.__mul__"><a class="viewcode-back" href="../../../api/symforce.geo.dual_quaternion.html#symforce.geo.dual_quaternion.DualQuaternion.__mul__">[docs]</a>    <span class="k">def</span> <span class="fm">__mul__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">right</span><span class="p">:</span> <span class="n">DualQuaternion</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DualQuaternion</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Left-multiply with another dual quaternion.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            other (DualQuaternion):</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DualQuaternion:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span><span class="n">right</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DualQuaternion.__div__"><a class="viewcode-back" href="../../../api/symforce.geo.dual_quaternion.html#symforce.geo.dual_quaternion.DualQuaternion.__div__">[docs]</a>    <span class="k">def</span> <span class="nf">__div__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">scalar</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DualQuaternion</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Scalar division.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            scalar (Scalar):</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DualQuaternion:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">DualQuaternion</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">real_q</span> <span class="o">/</span> <span class="n">scalar</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf_q</span> <span class="o">/</span> <span class="n">scalar</span><span class="p">)</span></div>
+
+    <span class="fm">__truediv__</span> <span class="o">=</span> <span class="n">__div__</span>
+
+<div class="viewcode-block" id="DualQuaternion.squared_norm"><a class="viewcode-back" href="../../../api/symforce.geo.dual_quaternion.html#symforce.geo.dual_quaternion.DualQuaternion.squared_norm">[docs]</a>    <span class="k">def</span> <span class="nf">squared_norm</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Squared norm when considering the dual quaternion as 8-tuple.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Scalar:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">real_q</span><span class="o">.</span><span class="n">squared_norm</span><span class="p">()</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf_q</span><span class="o">.</span><span class="n">squared_norm</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="DualQuaternion.conj"><a class="viewcode-back" href="../../../api/symforce.geo.dual_quaternion.html#symforce.geo.dual_quaternion.DualQuaternion.conj">[docs]</a>    <span class="k">def</span> <span class="nf">conj</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DualQuaternion</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Dual quaternion conjugate.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            DualQuaternion:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">DualQuaternion</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">real_q</span><span class="o">.</span><span class="n">conj</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">inf_q</span><span class="o">.</span><span class="n">conj</span><span class="p">())</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  <li><a href="../../symforce.html">symforce</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

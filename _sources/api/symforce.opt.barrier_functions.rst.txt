@@ -1,0 +1,7 @@
+symforce.opt.barrier\_functions module
+======================================
+
+.. automodule:: symforce.opt.barrier_functions
+   :members:
+   :undoc-members:
+   :show-inheritance:

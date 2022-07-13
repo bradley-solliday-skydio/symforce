@@ -1,0 +1,473 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>File values.h &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="File values.tcc" href="values_8tcc.html" />
+    <link rel="prev" title="File values.cc" href="values_8cc.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="file-values-h">
+<h1>File values.h<a class="headerlink" href="#file-values-h" title="Permalink to this headline">¶</a></h1>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv43sym">
+<span class="target" id="namespacesym"></span><span class="k"><span class="pre">namespace</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">sym</span></span></span><br /></dt>
+<dd><p>Utilities for converting various types of factor functors into what’s needed for the polymorphic std::function that’s actually stored and used by <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Factor"><span class="std std-ref">sym::Factor</span></a></p>
+<p>Primarily intended to be included by factor.tcc and used internally there </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-typedefs">Typedefs</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym7ValuesdE">
+<span class="target" id="namespacesym_1a9a2b3a9ee3726b075c777ea4e57109c8"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Valuesd</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">double</span></span><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4N3sym7ValuesdE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym7ValuesfE">
+<span class="target" id="namespacesym_1a144e7fb93f2e6e95492afa9ab2e37835"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Valuesf</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><span class="kt"><span class="pre">float</span></span><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4N3sym7ValuesfE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym6ValuesE">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Scalar</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Values"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Values</span></span></span><br /></dt>
+<dd><div class="docutils container">
+<em>#include &lt;values.h&gt;</em></div>
+<p>Efficient polymorphic data structure to store named types with a dict-like interface and support efficient repeated operations using a key index. Supports on-manifold optimization.</p>
+<p>Compatible types are given by the type_t enum. All types implement the StorageOps and LieGroupOps concepts, which are the core operating mechanisms in this class. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Values7MapTypeE">
+<span class="target" id="classsym_1_1Values_1a139d2abaa663ed1caec160392acc3e1d"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">MapType</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">unordered_map</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="n"><span class="pre">index_entry_t</span></span><span class="p"><span class="pre">&gt;</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Values9ArrayTypeE">
+<span class="target" id="classsym_1_1Values_1ac2493c23a7f93367a3217afc165c2120"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ArrayType</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Values7LcmTypeE">
+<span class="target" id="classsym_1_1Values_1a36d04a0d0246b2479eca0276d204e647"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">LcmType</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0EN3sym19ValuesLcmTypeHelperE" title="sym::ValuesLcmTypeHelper"><span class="n"><span class="pre">ValuesLcmTypeHelper</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Type</span></span><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Values6ValuesEv">
+<span class="target" id="classsym_1_1Values_1a3e549c7e9451203288906e02b9fcf642"></span><span class="sig-name descname"><span class="n"><span class="pre">Values</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Default construct as empty. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Values6ValuesENSt16initializer_listI6ValuesI6ScalarEEE">
+<span class="target" id="classsym_1_1Values_1a93f6145df51f7cdd1c5fb05b6bea6473"></span><span class="k"><span class="pre">explicit</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Values</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">initializer_list</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4N3sym6Values6ValuesENSt16initializer_listI6ValuesI6ScalarEEE" title="sym::Values::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">others</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Construct from a list of other <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values"><span class="std std-ref">Values</span></a> objects. The order of Keys are preserved by the order of the <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values"><span class="std std-ref">Values</span></a> in the initializer list</p>
+<p>NOTE(alvin): others <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values"><span class="std std-ref">Values</span></a> should not contain overlapping Keys </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Values6ValuesERK7LcmType">
+<span class="target" id="classsym_1_1Values_1a341351860bc4e2d889db01613781baa7"></span><span class="k"><span class="pre">explicit</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Values</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4N3sym6Values7LcmTypeE" title="sym::Values::LcmType"><span class="n"><span class="pre">LcmType</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">msg</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Construct from serialized form. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Values3HasERK3Key">
+<span class="target" id="classsym_1_1Values_1a27debd4e72bbb4a6527ca4815a29203c"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Has</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">key</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Return whether the key exists. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0ENK3sym6Values2AtE1TRK3Key">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Values_1ae13378e46ff9168b50c9e6c20bd3793e"></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0ENK3sym6Values2AtE1TRK3Key" title="sym::Values::At::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">At</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">key</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Retrieve a value by key. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym6Values3SetENSt11enable_if_tIXnt12kIsEigenTypeI1TEEbEERK3KeyRK1T">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Values_1a7a18ec9dc96ef95726d3fc36fa28cdc4"></span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">enable_if_t</span></span><span class="p"><span class="pre">&lt;</span></span><span class="o"><span class="pre">!</span></span><a class="reference internal" href="../../api-gen-cpp/file/type__ops_8h.html#_CPPv4I0EN3sym12kIsEigenTypeE" title="sym::kIsEigenType"><span class="n"><span class="pre">kIsEigenType</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6Values3SetENSt11enable_if_tIXnt12kIsEigenTypeI1TEEbEERK3KeyRK1T" title="sym::Values::Set::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Set</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">key</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6Values3SetENSt11enable_if_tIXnt12kIsEigenTypeI1TEEbEERK3KeyRK1T" title="sym::Values::Set::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">value</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Add or update a value by key. Returns true if added, false if updated.</p>
+<p>Overload for non-Eigen types </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym6Values3SetENSt11enable_if_tI12kIsEigenTypeI7DerivedEbEERK3KeyRK7Derived">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Derived</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Values_1a33f461caa84bb447edd48538d29bd1dc"></span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">enable_if_t</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../../api-gen-cpp/file/type__ops_8h.html#_CPPv4I0EN3sym12kIsEigenTypeE" title="sym::kIsEigenType"><span class="n"><span class="pre">kIsEigenType</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6Values3SetENSt11enable_if_tI12kIsEigenTypeI7DerivedEbEERK3KeyRK7Derived" title="sym::Values::Set::Derived"><span class="n"><span class="pre">Derived</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Set</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">key</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6Values3SetENSt11enable_if_tI12kIsEigenTypeI7DerivedEbEERK3KeyRK7Derived" title="sym::Values::Set::Derived"><span class="n"><span class="pre">Derived</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">value</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Add or update a value by key. Returns true if added, false if updated.</p>
+<p>Overload for Eigen types </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Values11UpdateOrSetERK7index_tRK6ValuesI6ScalarE">
+<span class="target" id="classsym_1_1Values_1a7a6d53daa9094e29b52217f6a0a3192f"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">UpdateOrSet</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">index_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">index</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Update or add keys to this <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values"><span class="std std-ref">Values</span></a> base on other <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values"><span class="std std-ref">Values</span></a> of different structure. index MUST be valid for other.</p>
+<p>NOTE(alvin): it is less efficient than the Update methods below if index objects are created and cached. This method performs map lookup for each key of the index </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Values10NumEntriesEv">
+<span class="target" id="classsym_1_1Values_1a123655511d025ce832d12fad2b543617"></span><span class="n"><span class="pre">int32_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NumEntries</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Number of keys. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Values5EmptyEv">
+<span class="target" id="classsym_1_1Values_1ac2d9d7116f6a0c34d388ff505d611423"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Empty</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Has zero keys. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Values4KeysEKb">
+<span class="target" id="classsym_1_1Values_1ae2b2943f6470eb8250160b8b08653ebb"></span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Keys</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">sort_by_offset</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">true</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Get all keys.</p>
+<p>Args: sort_by_offset: Sorts by storage order to make iteration safer and more memory efficient</p>
+<p>NOTE(hayk): If we changed key storage to a sorted vector this could automatically be maintained and it would be more embedded friendly, but At(key) would become O(N) for linear search. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Values5ItemsEv">
+<span class="target" id="classsym_1_1Values_1a695ce417d6da21618f6c18de05f3f6ae"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4N3sym6Values7MapTypeE" title="sym::Values::MapType"><span class="n"><span class="pre">MapType</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">Items</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Expose map type to allow iteration. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Values4DataEv">
+<span class="target" id="classsym_1_1Values_1a624e0a5b582e46cbf32acac8a13cdb4b"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4N3sym6Values9ArrayTypeE" title="sym::Values::ArrayType"><span class="n"><span class="pre">ArrayType</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">Data</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Raw data buffer. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0ENK3sym6Values4CastE6ValuesI9NewScalarEv">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NewScalar</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Values_1a09f4b2e281393560d3c414c817f6fc6c"></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0ENK3sym6Values4CastE6ValuesI9NewScalarEv" title="sym::Values::Cast::NewScalar"><span class="n"><span class="pre">NewScalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Cast</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Cast to another Scalar type (returns a copy) </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Values6RemoveERK3Key">
+<span class="target" id="classsym_1_1Values_1ac1e51309a3be394b82460dd7d05a268c"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Remove</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">key</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Remove the given key. Only removes the index entry, does not change the data array. Returns true if removed, false if already not present.</p>
+<p>Call <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values_1afd9597aa0598a965f56ce80f33877876"><span class="std std-ref">Cleanup()</span></a> to re-pack the data array. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Values9RemoveAllEv">
+<span class="target" id="classsym_1_1Values_1a4facf3e89d5eeab1530b53ca95e42c7e"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">RemoveAll</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Remove all keys and empty out the storage. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Values7CleanupEv">
+<span class="target" id="classsym_1_1Values_1afd9597aa0598a965f56ce80f33877876"></span><span class="n"><span class="pre">size_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Cleanup</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Repack the data array to get rid of empty space from removed keys. If regularly removing keys, it’s up to the user to call this appropriately to avoid storage growth. Returns the number of Scalar elements cleaned up from the data array.</p>
+<p>It will INVALIDATE all indices, offset increments, and pointers. Re-create an index with <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values_1a5aee2d876c754e9f5b9b08518e5f9a08"><span class="std std-ref">CreateIndex()</span></a>. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Values11CreateIndexERKNSt6vectorI3KeyEE">
+<span class="target" id="classsym_1_1Values_1a5aee2d876c754e9f5b9b08518e5f9a08"></span><span class="n"><span class="pre">index_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CreateIndex</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Create an index from the given ordered subset of keys. This object can then be used for repeated efficient operations on that subset of keys.</p>
+<p>If you want an index of all the keys, call <code class="docutils literal notranslate"><span class="pre">values.CreateIndex(values.Keys())</span></code>.</p>
+<p>An index will be INVALIDATED if the following happens: 1) <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values_1ac1e51309a3be394b82460dd7d05a268c"><span class="std std-ref">Remove()</span></a> is called with a contained key, or <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values_1a4facf3e89d5eeab1530b53ca95e42c7e"><span class="std std-ref">RemoveAll()</span></a> is called 2) <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values_1afd9597aa0598a965f56ce80f33877876"><span class="std std-ref">Cleanup()</span></a> is called to re-pack the data array</p>
+<p>NOTE(hayk): We could also add a simple UpdateIndex(&amp;index) method, since the offset is the only thing that needs to get updated after repacking. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Values12IndexEntryAtERK3Key">
+<span class="target" id="classsym_1_1Values_1a6d1df1462d1e76e1491a9553adbee668"></span><span class="n"><span class="pre">index_entry_t</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">IndexEntryAt</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">key</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Retrieve an index entry by key. This performs a map lookup.</p>
+<p>An index entry will be INVALIDATED if the following happens: 1) <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values_1ac1e51309a3be394b82460dd7d05a268c"><span class="std std-ref">Remove()</span></a> is called with the indexed key, or <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values_1a4facf3e89d5eeab1530b53ca95e42c7e"><span class="std std-ref">RemoveAll()</span></a> is called 2) <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values_1afd9597aa0598a965f56ce80f33877876"><span class="std std-ref">Cleanup()</span></a> is called to re-pack the data array </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0ENK3sym6Values2AtE1TRK13index_entry_t">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Values_1a0001055cc76a3ab1f07d10546e76759b"></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0ENK3sym6Values2AtE1TRK13index_entry_t" title="sym::Values::At::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">At</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">index_entry_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">entry</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Retrieve a value by index entry. This avoids a map lookup compared to At(key). </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym6Values3SetENSt11enable_if_tIXnt12kIsEigenTypeI1TEEEERK13index_entry_tRK1T">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Values_1a67ff35c3f1f966b6dea333d64484a2e2"></span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">enable_if_t</span></span><span class="p"><span class="pre">&lt;</span></span><span class="o"><span class="pre">!</span></span><a class="reference internal" href="../../api-gen-cpp/file/type__ops_8h.html#_CPPv4I0EN3sym12kIsEigenTypeE" title="sym::kIsEigenType"><span class="n"><span class="pre">kIsEigenType</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6Values3SetENSt11enable_if_tIXnt12kIsEigenTypeI1TEEEERK13index_entry_tRK1T" title="sym::Values::Set::T"><span class="n"><span class="pre">T</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Set</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">index_entry_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">key</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6Values3SetENSt11enable_if_tIXnt12kIsEigenTypeI1TEEEERK13index_entry_tRK1T" title="sym::Values::Set::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">value</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<p>Overload for non-Eigen types </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym6Values3SetENSt11enable_if_tI12kIsEigenTypeI7DerivedEEERK13index_entry_tRK7Derived">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Derived</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Values_1a407535bcea009a061575d8c3c1a1b255"></span><a class="reference internal" href="key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">enable_if_t</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../../api-gen-cpp/file/type__ops_8h.html#_CPPv4I0EN3sym12kIsEigenTypeE" title="sym::kIsEigenType"><span class="n"><span class="pre">kIsEigenType</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6Values3SetENSt11enable_if_tI12kIsEigenTypeI7DerivedEEERK13index_entry_tRK7Derived" title="sym::Values::Set::Derived"><span class="n"><span class="pre">Derived</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Set</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">index_entry_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">key</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6Values3SetENSt11enable_if_tI12kIsEigenTypeI7DerivedEEERK13index_entry_tRK7Derived" title="sym::Values::Set::Derived"><span class="n"><span class="pre">Derived</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">value</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<p>Overload for Eigen types </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Values6UpdateERK7index_tRK6ValuesI6ScalarE">
+<span class="target" id="classsym_1_1Values_1a5d821e04d555e8115e8355f20a7adc26"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Update</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">index_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">index</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Efficiently update the keys given by this index from other into this. This purely copies slices of the data arrays, the index MUST be valid for both objects! </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Values6UpdateERK7index_tRK7index_tRK6ValuesI6ScalarE">
+<span class="target" id="classsym_1_1Values_1a4ed9496c6ebc7bf6a478acfca33fde6a"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Update</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">index_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">index_this</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">index_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">index_other</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">other</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Efficiently update the keys from a different structured <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values"><span class="std std-ref">Values</span></a>, given by this index and other index. This purely copies slices of the data arrays. index_this MUST be valid for this object; index_other MUST be valid for other object. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Values7RetractERK7index_tPK6ScalarK6Scalar">
+<span class="target" id="classsym_1_1Values_1a5f8f9e661372d356d5c9a0b744c1192d"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Retract</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">index_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">index</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">delta</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">epsilon</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Perform a retraction from an update vector.</p>
+<p>Args: index: Ordered list of keys in the delta vector delta: Pointer to update vector - MUST be the size of index.tangent_dim! epsilon: Small constant to avoid singularities (do not use zero) </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Values16LocalCoordinatesERK6ValuesI6ScalarERK7index_tK6Scalar">
+<span class="target" id="classsym_1_1Values_1aecbbc7b6a4ab42cb9beecbfceb16ba6a"></span><a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7VectorXE" title="sym::VectorX"><span class="n"><span class="pre">VectorX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">LocalCoordinates</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">others</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">index_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">index</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">epsilon</span></span><span class="sig-paren">)</span><br /></dt>
+<dd><p>Express this <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values"><span class="std std-ref">Values</span></a> in the local coordinate of others <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values"><span class="std std-ref">Values</span></a>, i.e., this \ominus others</p>
+<p>Args: others: The other <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values"><span class="std std-ref">Values</span></a> that the local coordinate is relative to index: Ordered list of keys to include (MUST be valid for both this and others <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values"><span class="std std-ref">Values</span></a>) epsilon: Small constant to avoid singularities (do not use zero) </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Values11FillLcmTypeEP7LcmType">
+<span class="target" id="classsym_1_1Values_1a2e68ead830fb11079826a7eda6e998cf"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">FillLcmType</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4N3sym6Values7LcmTypeE" title="sym::Values::LcmType"><span class="n"><span class="pre">LcmType</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">msg</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd><p>Serialize to LCM. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym6Values10GetLcmTypeEv">
+<span class="target" id="classsym_1_1Values_1ad9aaa6044ecf2330ef209e6fa6dc3f91"></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4N3sym6Values7LcmTypeE" title="sym::Values::LcmType"><span class="n"><span class="pre">LcmType</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">GetLcmType</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-functions">Protected Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym6Values11SetInternalEbRKN3sym3KeyERK1T">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Values_1ac575fa26b10ac9adf6f513030dcbe59f"></span><span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SetInternal</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="assert_8h.html#_CPPv43sym" title="sym"><span class="n"><span class="pre">sym</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="../class/classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">key</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0EN3sym6Values11SetInternalEbRKN3sym3KeyERK1T" title="sym::Values::SetInternal::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4I0EN3sym6Values11SetInternalEbRKN3sym3KeyERK1T" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym6Values11SetInternalEvRK13index_entry_tRK1T">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">T</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Values_1a71b7883f2d9b780ea73b9ecfc4db2d15"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">SetInternal</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">index_entry_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">entry</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0EN3sym6Values11SetInternalEvRK13index_entry_tRK1T" title="sym::Values::SetInternal::T"><span class="n"><span class="pre">T</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">value</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4I0EN3sym6Values11SetInternalEvRK13index_entry_tRK1T" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-protected-attributes">Protected Attributes</p>
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Values4map_E">
+<span class="target" id="classsym_1_1Values_1a658e10bde5726e56f1aed0ac63355915"></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4N3sym6Values7MapTypeE" title="sym::Values::MapType"><span class="n"><span class="pre">MapType</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">map_</span></span></span><a class="headerlink" href="#_CPPv4N3sym6Values4map_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp var">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym6Values5data_E">
+<span class="target" id="classsym_1_1Values_1a81c35047cad04c95848603c616605826"></span><a class="reference internal" href="../class/classsym_1_1Values.html#_CPPv4N3sym6Values9ArrayTypeE" title="sym::Values::ArrayType"><span class="n"><span class="pre">ArrayType</span></span></a><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">data_</span></span></span><a class="headerlink" href="#_CPPv4N3sym6Values5data_E" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-friends">Friends</p>
+<dl>
+<dt class="sig sig-object cpp">
+<em class="property"><span class="pre">friend</span> <span class="pre">class</span></em> <span class="pre">Values</span></dt>
+</dl>
+
+</div>
+</dd></dl>
+
+<dl class="cpp struct">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym19ValuesLcmTypeHelperE">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">_S</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="structsym_1_1ValuesLcmTypeHelper"></span><span class="k"><span class="pre">struct</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ValuesLcmTypeHelper</span></span></span><a class="headerlink" href="#_CPPv4I0EN3sym19ValuesLcmTypeHelperE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../classlist.html">Class list</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../filelist.html">File list</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="assert_8h.html">File assert.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="covariance__utils_8h.html">File covariance_utils.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="derivative__checker_8h.html">File derivative_checker.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="factor_8cc.html">File factor.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="factor_8h.html">File factor.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="factor_8tcc.html">File factor.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="factor__utils_8h.html">File factor_utils.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="gnc__optimizer_8h.html">File gnc_optimizer.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="hash__combine_8h.html">File hash_combine.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="internal_2tic__toc_8h.html">File tic_toc.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="key_8cc.html">File key.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="key_8h.html">File key.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levenberg__marquardt__solver_8h.html">File levenberg_marquardt_solver.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levenberg__marquardt__solver_8tcc.html">File levenberg_marquardt_solver.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="levenberg__marquardt__state_8h.html">File levenberg_marquardt_state.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearization_8h.html">File linearization.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearizer_8cc.html">File linearizer.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearizer_8h.html">File linearizer.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearizer_8tcc.html">File linearizer.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="linearizer__utils_8h.html">File linearizer_utils.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logging__configure_8cc.html">File logging_configure.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="logging__configure_8h.html">File logging_configure.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimization__stats_8h.html">File optimization_stats.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimizer_8cc.html">File optimizer.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimizer_8h.html">File optimizer.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optimizer_8tcc.html">File optimizer.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="optional_8h.html">File optional.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__cholesky__solver_8cc.html">File sparse_cholesky_solver.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__cholesky__solver_8h.html">File sparse_cholesky_solver.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__cholesky__solver_8tcc.html">File sparse_cholesky_solver.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__schur__solver_8h.html">File sparse_schur_solver.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="sparse__schur__solver_8tcc.html">File sparse_schur_solver.tcc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="templates_8h.html">File templates.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tic__toc_8cc.html">File tic_toc.cc</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tic__toc_8h.html">File tic_toc.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="util_8h.html">File util.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values_8cc.html">File values.cc</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">File values.h</a></li>
+<li class="toctree-l2"><a class="reference internal" href="values_8tcc.html">File values.tcc</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../filelist.html">File list</a><ul>
+      <li>Previous: <a href="values_8cc.html" title="previous chapter">File values.cc</a></li>
+      <li>Next: <a href="values_8tcc.html" title="next chapter">File values.tcc</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/api-cpp/file/values_8h.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

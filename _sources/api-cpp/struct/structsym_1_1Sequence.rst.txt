@@ -1,0 +1,5 @@
+Struct sym::Sequence
+====================
+
+.. doxygenstruct:: sym::Sequence
+   :project: api-cpp

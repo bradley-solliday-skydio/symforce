@@ -1,0 +1,828 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>symforce.codegen.codegen_util &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for symforce.codegen.codegen_util</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># SymForce - Copyright 2022, Skydio, Inc.</span>
+<span class="c1"># This source code is under the Apache 2.0 license found in the LICENSE file.</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Shared helper code between codegen of all languages.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">import</span> <span class="nn">importlib.abc</span>
+<span class="kn">import</span> <span class="nn">importlib.util</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">sympy</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">symforce</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">ops</span>
+<span class="kn">from</span> <span class="nn">symforce.values</span> <span class="kn">import</span> <span class="n">Values</span><span class="p">,</span> <span class="n">IndexEntry</span>
+<span class="kn">import</span> <span class="nn">symforce.symbolic</span> <span class="k">as</span> <span class="nn">sf</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">typing</span> <span class="k">as</span> <span class="n">T</span>
+<span class="kn">from</span> <span class="nn">symforce.codegen</span> <span class="kn">import</span> <span class="n">format_util</span>
+<span class="kn">from</span> <span class="nn">symforce.codegen</span> <span class="kn">import</span> <span class="n">codegen_config</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">python_util</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">_sympy_count_ops</span>
+
+<span class="n">NUMPY_DTYPE_FROM_SCALAR_TYPE</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;double&quot;</span><span class="p">:</span> <span class="s2">&quot;numpy.float64&quot;</span><span class="p">,</span> <span class="s2">&quot;float&quot;</span><span class="p">:</span> <span class="s2">&quot;numpy.float32&quot;</span><span class="p">}</span>
+<span class="c1"># Type representing generated code (list of lhs and rhs terms)</span>
+<span class="n">T_terms</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Expr</span><span class="p">]]</span>
+<span class="n">T_nested_terms</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T_terms</span><span class="p">]</span>
+<span class="n">T_terms_printed</span> <span class="o">=</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span>
+
+
+<div class="viewcode-block" id="DenseAndSparseOutputTerms"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen_util.html#symforce.codegen.codegen_util.DenseAndSparseOutputTerms">[docs]</a><span class="k">class</span> <span class="nc">DenseAndSparseOutputTerms</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">NamedTuple</span><span class="p">):</span>
+    <span class="n">dense</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Expr</span><span class="p">]]</span>
+    <span class="n">sparse</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Expr</span><span class="p">]]</span></div>
+
+
+<div class="viewcode-block" id="OutputWithTerms"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen_util.html#symforce.codegen.codegen_util.OutputWithTerms">[docs]</a><span class="k">class</span> <span class="nc">OutputWithTerms</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">NamedTuple</span><span class="p">):</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Element</span>
+    <span class="n">terms</span><span class="p">:</span> <span class="n">T_terms_printed</span></div>
+
+
+<div class="viewcode-block" id="PrintCodeResult"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen_util.html#symforce.codegen.codegen_util.PrintCodeResult">[docs]</a><span class="k">class</span> <span class="nc">PrintCodeResult</span><span class="p">(</span><span class="n">T</span><span class="o">.</span><span class="n">NamedTuple</span><span class="p">):</span>
+    <span class="n">intermediate_terms</span><span class="p">:</span> <span class="n">T_terms_printed</span>
+    <span class="n">dense_terms</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">OutputWithTerms</span><span class="p">]</span>
+    <span class="n">sparse_terms</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">OutputWithTerms</span><span class="p">]</span>
+    <span class="n">total_ops</span><span class="p">:</span> <span class="nb">int</span></div>
+
+
+<div class="viewcode-block" id="CSCFormat"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen_util.html#symforce.codegen.codegen_util.CSCFormat">[docs]</a><span class="nd">@dataclasses</span><span class="o">.</span><span class="n">dataclass</span>
+<span class="k">class</span> <span class="nc">CSCFormat</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A matrix written in Compressed Sparse Column format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">kRows</span><span class="p">:</span> <span class="nb">int</span>  <span class="c1"># Number of rows</span>
+    <span class="n">kCols</span><span class="p">:</span> <span class="nb">int</span>  <span class="c1"># Number of columns</span>
+    <span class="n">kNumNonZero</span><span class="p">:</span> <span class="nb">int</span>  <span class="c1"># Number of nonzero entries</span>
+    <span class="n">kColPtrs</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>  <span class="c1"># nonzero_elements[kColPtrs[col]] is the first nonzero entry of col</span>
+    <span class="n">kRowIndices</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span>  <span class="c1"># row indices of nonzero entries written in column-major order</span>
+    <span class="n">nonzero_elements</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]</span>  <span class="c1"># nonzero entries written in column-major order</span>
+
+<div class="viewcode-block" id="CSCFormat.from_matrix"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen_util.html#symforce.codegen.codegen_util.CSCFormat.from_matrix">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_matrix</span><span class="p">(</span><span class="n">sparse_matrix</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CSCFormat</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Returns a dictionary with the metadata required to represent a matrix as a sparse matrix</span>
+<span class="sd">        in CSC form.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            sparse_matrix: A symbolic sf.Matrix where sparsity is given by exact zero equality.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">kColPtrs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">kRowIndices</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nonzero_elements</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">data_inx</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="c1"># Loop through columns because we assume CSC form</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sparse_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+            <span class="n">kColPtrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_inx</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sparse_matrix</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                <span class="k">if</span> <span class="n">sparse_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="n">kRowIndices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">nonzero_elements</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sparse_matrix</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">])</span>
+                <span class="n">data_inx</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">kColPtrs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">data_inx</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">CSCFormat</span><span class="p">(</span>
+            <span class="n">kRows</span><span class="o">=</span><span class="n">sparse_matrix</span><span class="o">.</span><span class="n">rows</span><span class="p">,</span>
+            <span class="n">kCols</span><span class="o">=</span><span class="n">sparse_matrix</span><span class="o">.</span><span class="n">cols</span><span class="p">,</span>
+            <span class="n">kNumNonZero</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">nonzero_elements</span><span class="p">),</span>
+            <span class="n">kColPtrs</span><span class="o">=</span><span class="n">kColPtrs</span><span class="p">,</span>
+            <span class="n">kRowIndices</span><span class="o">=</span><span class="n">kRowIndices</span><span class="p">,</span>
+            <span class="n">nonzero_elements</span><span class="o">=</span><span class="n">nonzero_elements</span><span class="p">,</span>
+        <span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="print_code"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen_util.html#symforce.codegen.codegen_util.print_code">[docs]</a><span class="k">def</span> <span class="nf">print_code</span><span class="p">(</span>
+    <span class="n">inputs</span><span class="p">:</span> <span class="n">Values</span><span class="p">,</span>
+    <span class="n">outputs</span><span class="p">:</span> <span class="n">Values</span><span class="p">,</span>
+    <span class="n">sparse_mat_data</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">CSCFormat</span><span class="p">],</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">codegen_config</span><span class="o">.</span><span class="n">CodegenConfig</span><span class="p">,</span>
+    <span class="n">cse</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">PrintCodeResult</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return executable code lines from the given input/output values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        inputs: Values object specifying names and symbolic inputs</span>
+<span class="sd">        outputs: Values object specifying names and output expressions (written in terms</span>
+<span class="sd">            of the symbolic inputs)</span>
+<span class="sd">        sparse_mat_data: Data associated with sparse matrices. sparse_mat_data[&quot;keys&quot;] stores</span>
+<span class="sd">            a list of the keys in outputs which should be treated as sparse matrices</span>
+<span class="sd">        config: Programming language and configuration in which the expressions are to be generated</span>
+<span class="sd">        cse: Perform common sub-expression elimination</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        T.List[T.Tuple[str, str]]: Line of code per temporary variable</span>
+<span class="sd">        T.List[OutputWithTerms]: Collection of lines of code per dense output variable</span>
+<span class="sd">        T.List[OutputWithTerms]: Collection of lines of code per sparse output variable</span>
+<span class="sd">        int: Total number of ops</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Split outputs into dense and sparse outputs, since we treat them differently when doing codegen</span>
+    <span class="n">dense_outputs</span> <span class="o">=</span> <span class="n">Values</span><span class="p">()</span>
+    <span class="n">sparse_outputs</span> <span class="o">=</span> <span class="n">Values</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">outputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">sparse_mat_data</span><span class="p">:</span>
+            <span class="n">sparse_outputs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">sparse_mat_data</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">nonzero_elements</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dense_outputs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="n">output_exprs</span> <span class="o">=</span> <span class="n">DenseAndSparseOutputTerms</span><span class="p">(</span>
+        <span class="n">dense</span><span class="o">=</span><span class="p">[</span><span class="n">ops</span><span class="o">.</span><span class="n">StorageOps</span><span class="o">.</span><span class="n">to_storage</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">dense_outputs</span><span class="o">.</span><span class="n">items</span><span class="p">()],</span>
+        <span class="n">sparse</span><span class="o">=</span><span class="p">[</span><span class="n">ops</span><span class="o">.</span><span class="n">StorageOps</span><span class="o">.</span><span class="n">to_storage</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">sparse_outputs</span><span class="o">.</span><span class="n">items</span><span class="p">()],</span>
+    <span class="p">)</span>
+
+    <span class="c1"># CSE If needed</span>
+    <span class="k">if</span> <span class="n">cse</span><span class="p">:</span>
+        <span class="n">temps</span><span class="p">,</span> <span class="n">simplified_outputs</span> <span class="o">=</span> <span class="n">perform_cse</span><span class="p">(</span>
+            <span class="n">output_exprs</span><span class="o">=</span><span class="n">output_exprs</span><span class="p">,</span>
+            <span class="n">cse_optimizations</span><span class="o">=</span><span class="n">config</span><span class="o">.</span><span class="n">cse_optimizations</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">temps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">simplified_outputs</span> <span class="o">=</span> <span class="n">output_exprs</span>
+
+    <span class="c1"># Replace default symbols with vector notation (e.g. &quot;R_re&quot; -&gt; &quot;_R[0]&quot;)</span>
+    <span class="n">temps_formatted</span><span class="p">,</span> <span class="n">dense_outputs_formatted</span><span class="p">,</span> <span class="n">sparse_outputs_formatted</span> <span class="o">=</span> <span class="n">format_symbols</span><span class="p">(</span>
+        <span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span>
+        <span class="n">dense_outputs</span><span class="o">=</span><span class="n">dense_outputs</span><span class="p">,</span>
+        <span class="n">sparse_outputs</span><span class="o">=</span><span class="n">sparse_outputs</span><span class="p">,</span>
+        <span class="n">intermediate_terms</span><span class="o">=</span><span class="n">temps</span><span class="p">,</span>
+        <span class="n">output_terms</span><span class="o">=</span><span class="n">simplified_outputs</span><span class="p">,</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">simpify_list</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">lst</span><span class="p">:</span> <span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">S</span><span class="p">(</span><span class="n">term</span><span class="p">)</span> <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">lst</span><span class="p">]</span>
+    <span class="n">simpify_nested_lists</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">nested_lsts</span><span class="p">:</span> <span class="p">[</span><span class="n">simpify_list</span><span class="p">(</span><span class="n">lst</span><span class="p">)</span> <span class="k">for</span> <span class="n">lst</span> <span class="ow">in</span> <span class="n">nested_lsts</span><span class="p">]</span>
+
+    <span class="n">temps_formatted</span> <span class="o">=</span> <span class="n">simpify_list</span><span class="p">(</span><span class="n">temps_formatted</span><span class="p">)</span>
+    <span class="n">dense_outputs_formatted</span> <span class="o">=</span> <span class="n">simpify_nested_lists</span><span class="p">(</span><span class="n">dense_outputs_formatted</span><span class="p">)</span>
+    <span class="n">sparse_outputs_formatted</span> <span class="o">=</span> <span class="n">simpify_nested_lists</span><span class="p">(</span><span class="n">sparse_outputs_formatted</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">count_ops</span><span class="p">(</span><span class="n">expr</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="n">op_count</span> <span class="o">=</span> <span class="n">_sympy_count_ops</span><span class="o">.</span><span class="n">count_ops</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">op_count</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">op_count</span>
+
+    <span class="n">total_ops</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">count_ops</span><span class="p">(</span><span class="n">temps_formatted</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">count_ops</span><span class="p">(</span><span class="n">dense_outputs_formatted</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">count_ops</span><span class="p">(</span><span class="n">sparse_outputs_formatted</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Get printer</span>
+    <span class="n">printer</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">printer</span><span class="p">()</span>
+
+    <span class="c1"># Print code</span>
+    <span class="n">intermediate_terms</span> <span class="o">=</span> <span class="p">[(</span><span class="nb">str</span><span class="p">(</span><span class="n">var</span><span class="p">),</span> <span class="n">printer</span><span class="o">.</span><span class="n">doprint</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">temps_formatted</span><span class="p">]</span>
+    <span class="n">dense_outputs_code_no_names</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">[(</span><span class="nb">str</span><span class="p">(</span><span class="n">var</span><span class="p">),</span> <span class="n">printer</span><span class="o">.</span><span class="n">doprint</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">single_output_terms</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">single_output_terms</span> <span class="ow">in</span> <span class="n">dense_outputs_formatted</span>
+    <span class="p">]</span>
+    <span class="n">sparse_outputs_code_no_names</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">[(</span><span class="nb">str</span><span class="p">(</span><span class="n">var</span><span class="p">),</span> <span class="n">printer</span><span class="o">.</span><span class="n">doprint</span><span class="p">(</span><span class="n">t</span><span class="p">))</span> <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">single_output_terms</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">single_output_terms</span> <span class="ow">in</span> <span class="n">sparse_outputs_formatted</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Pack names and types with outputs</span>
+    <span class="n">dense_terms</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">OutputWithTerms</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">output_code_no_name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">output_code_no_name</span><span class="p">,</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">dense_outputs_code_no_names</span><span class="p">,</span> <span class="n">dense_outputs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">sparse_terms</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">OutputWithTerms</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">sparse_output_code_no_name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sparse_output_code_no_name</span><span class="p">,</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">sparse_outputs_code_no_names</span><span class="p">,</span> <span class="n">sparse_outputs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">PrintCodeResult</span><span class="p">(</span>
+        <span class="n">intermediate_terms</span><span class="o">=</span><span class="n">intermediate_terms</span><span class="p">,</span>
+        <span class="n">dense_terms</span><span class="o">=</span><span class="n">dense_terms</span><span class="p">,</span>
+        <span class="n">sparse_terms</span><span class="o">=</span><span class="n">sparse_terms</span><span class="p">,</span>
+        <span class="n">total_ops</span><span class="o">=</span><span class="n">total_ops</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="perform_cse"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen_util.html#symforce.codegen.codegen_util.perform_cse">[docs]</a><span class="k">def</span> <span class="nf">perform_cse</span><span class="p">(</span>
+    <span class="n">output_exprs</span><span class="p">:</span> <span class="n">DenseAndSparseOutputTerms</span><span class="p">,</span>
+    <span class="n">cse_optimizations</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span>
+        <span class="n">T</span><span class="o">.</span><span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;basic&quot;</span><span class="p">],</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Callable</span><span class="p">,</span> <span class="n">T</span><span class="o">.</span><span class="n">Callable</span><span class="p">]]</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">T_terms</span><span class="p">,</span> <span class="n">DenseAndSparseOutputTerms</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Run common sub-expression elimination on the given input/output values.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        output_exprs: expressions on which to perform cse</span>
+<span class="sd">        cse_optimizations: optimizations to be forwarded to sf.cse</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        T_terms: Temporary variables holding the common sub-expressions found within output_exprs</span>
+<span class="sd">        DenseAndSparseOutputTerms: output_exprs, but in terms of the returned temporaries.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Perform CSE</span>
+    <span class="n">flat_output_exprs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">x</span> <span class="k">for</span> <span class="n">storage</span> <span class="ow">in</span> <span class="p">(</span><span class="n">output_exprs</span><span class="o">.</span><span class="n">dense</span> <span class="o">+</span> <span class="n">output_exprs</span><span class="o">.</span><span class="n">sparse</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">storage</span>
+    <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">tmp_symbols</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">count</span><span class="p">():</span>
+            <span class="k">yield</span> <span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;_tmp</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">cse_optimizations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">symforce</span><span class="o">.</span><span class="n">get_symbolic_api</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;symengine&quot;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;cse_optimizations is not supported on symengine&quot;</span><span class="p">)</span>
+
+        <span class="n">temps</span><span class="p">,</span> <span class="n">flat_simplified_outputs</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">cse</span><span class="p">(</span>
+            <span class="n">flat_output_exprs</span><span class="p">,</span> <span class="n">symbols</span><span class="o">=</span><span class="n">tmp_symbols</span><span class="p">(),</span> <span class="n">optimizations</span><span class="o">=</span><span class="n">cse_optimizations</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">temps</span><span class="p">,</span> <span class="n">flat_simplified_outputs</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">cse</span><span class="p">(</span><span class="n">flat_output_exprs</span><span class="p">,</span> <span class="n">symbols</span><span class="o">=</span><span class="n">tmp_symbols</span><span class="p">())</span>
+
+    <span class="c1"># Unflatten output of CSE</span>
+    <span class="n">simplified_outputs</span> <span class="o">=</span> <span class="n">DenseAndSparseOutputTerms</span><span class="p">(</span><span class="n">dense</span><span class="o">=</span><span class="p">[],</span> <span class="n">sparse</span><span class="o">=</span><span class="p">[])</span>
+    <span class="n">flat_i</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">storage</span> <span class="ow">in</span> <span class="n">output_exprs</span><span class="o">.</span><span class="n">dense</span><span class="p">:</span>
+        <span class="n">simplified_outputs</span><span class="o">.</span><span class="n">dense</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flat_simplified_outputs</span><span class="p">[</span><span class="n">flat_i</span> <span class="p">:</span> <span class="n">flat_i</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">storage</span><span class="p">)])</span>
+        <span class="n">flat_i</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">storage</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">storage</span> <span class="ow">in</span> <span class="n">output_exprs</span><span class="o">.</span><span class="n">sparse</span><span class="p">:</span>
+        <span class="n">simplified_outputs</span><span class="o">.</span><span class="n">sparse</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flat_simplified_outputs</span><span class="p">[</span><span class="n">flat_i</span> <span class="p">:</span> <span class="n">flat_i</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">storage</span><span class="p">)])</span>
+        <span class="n">flat_i</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">storage</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">temps</span><span class="p">,</span> <span class="n">simplified_outputs</span></div>
+
+
+<div class="viewcode-block" id="format_symbols"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen_util.html#symforce.codegen.codegen_util.format_symbols">[docs]</a><span class="k">def</span> <span class="nf">format_symbols</span><span class="p">(</span>
+    <span class="n">inputs</span><span class="p">:</span> <span class="n">Values</span><span class="p">,</span>
+    <span class="n">dense_outputs</span><span class="p">:</span> <span class="n">Values</span><span class="p">,</span>
+    <span class="n">sparse_outputs</span><span class="p">:</span> <span class="n">Values</span><span class="p">,</span>
+    <span class="n">intermediate_terms</span><span class="p">:</span> <span class="n">T_terms</span><span class="p">,</span>
+    <span class="n">output_terms</span><span class="p">:</span> <span class="n">DenseAndSparseOutputTerms</span><span class="p">,</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">codegen_config</span><span class="o">.</span><span class="n">CodegenConfig</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">T_terms</span><span class="p">,</span> <span class="n">T_nested_terms</span><span class="p">,</span> <span class="n">T_nested_terms</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Reformats symbolic variables used in intermediate and outputs terms to match structure of</span>
+<span class="sd">    inputs/outputs. For example if we have an input array &quot;arr&quot; with symbolic elements [arr0, arr1],</span>
+<span class="sd">    we will remap symbol &quot;arr0&quot; to &quot;arr[0]&quot; and symbol &quot;arr1&quot; to &quot;arr[1]&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Rename the symbolic inputs so that they match the code we generate</span>
+
+    <span class="n">formatted_input_args</span><span class="p">,</span> <span class="n">original_args</span> <span class="o">=</span> <span class="n">get_formatted_list</span><span class="p">(</span><span class="n">inputs</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">format_as_inputs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">input_subs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">original_args</span><span class="p">),</span>
+            <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">formatted_input_args</span><span class="p">),</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="n">intermediate_terms_formatted</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">lhs</span><span class="p">,</span> <span class="n">ops</span><span class="o">.</span><span class="n">StorageOps</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">rhs</span><span class="p">,</span> <span class="n">input_subs</span><span class="p">,</span> <span class="n">dont_flatten_args</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span> <span class="ow">in</span> <span class="n">intermediate_terms</span>
+    <span class="p">]</span>
+
+    <span class="n">dense_output_lhs_formatted</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_formatted_list</span><span class="p">(</span>
+        <span class="n">dense_outputs</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="n">format_as_inputs</span><span class="o">=</span><span class="kc">False</span>
+    <span class="p">)</span>
+    <span class="n">dense_output_terms_formatted</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">lhs_formatted</span><span class="p">,</span> <span class="n">ops</span><span class="o">.</span><span class="n">StorageOps</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">storage</span><span class="p">,</span> <span class="n">input_subs</span><span class="p">,</span> <span class="n">dont_flatten_args</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">lhs_formatted</span><span class="p">,</span> <span class="n">storage</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">dense_output_lhs_formatted</span><span class="p">,</span> <span class="n">output_terms</span><span class="o">.</span><span class="n">dense</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="n">sparse_output_lhs_formatted</span> <span class="o">=</span> <span class="n">get_formatted_sparse_list</span><span class="p">(</span><span class="n">sparse_outputs</span><span class="p">)</span>
+    <span class="n">sparse_output_terms_formatted</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">lhs_formatted</span><span class="p">,</span> <span class="n">ops</span><span class="o">.</span><span class="n">StorageOps</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">storage</span><span class="p">,</span> <span class="n">input_subs</span><span class="p">,</span> <span class="n">dont_flatten_args</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">lhs_formatted</span><span class="p">,</span> <span class="n">storage</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">sparse_output_lhs_formatted</span><span class="p">,</span> <span class="n">output_terms</span><span class="o">.</span><span class="n">sparse</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">intermediate_terms_formatted</span><span class="p">,</span> <span class="n">dense_output_terms_formatted</span><span class="p">,</span> <span class="n">sparse_output_terms_formatted</span></div>
+
+
+<div class="viewcode-block" id="get_formatted_list"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen_util.html#symforce.codegen.codegen_util.get_formatted_list">[docs]</a><span class="k">def</span> <span class="nf">get_formatted_list</span><span class="p">(</span>
+    <span class="n">values</span><span class="p">:</span> <span class="n">Values</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">codegen_config</span><span class="o">.</span><span class="n">CodegenConfig</span><span class="p">,</span> <span class="n">format_as_inputs</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">DataBuffer</span><span class="p">]]],</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a nested list of formatted symbols, as well as a nested list of the corresponding</span>
+<span class="sd">    original scalar values. For use in generated functions.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        values: Values object mapping keys to different objects. Here we only</span>
+<span class="sd">                use the object types, not their actual values.</span>
+<span class="sd">        config: Programming language and configuration for when language-specific formatting is</span>
+<span class="sd">                required</span>
+<span class="sd">        format_as_inputs: True if values defines the input symbols, false if values defines output</span>
+<span class="sd">                          expressions.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        flattened_formatted_symbolic_values: nested list of formatted scalar symbols</span>
+<span class="sd">        flattened_original_values: nested list of original scalar values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">flattened_formatted_symbolic_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">flattened_original_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">arg_cls</span> <span class="o">=</span> <span class="n">python_util</span><span class="o">.</span><span class="n">get_type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="n">storage_dim</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">StorageOps</span><span class="o">.</span><span class="n">storage_dim</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="c1"># For each item in the given Values object, we construct a list of symbols used</span>
+        <span class="c1"># to access the scalar elements of the object. These symbols will later be matched up</span>
+        <span class="c1"># with the flattened Values object symbols.</span>
+        <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">arg_cls</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">DataBuffer</span><span class="p">):</span>
+            <span class="n">formatted_symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">DataBuffer</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+            <span class="n">flattened_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">Expr</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">)):</span>
+            <span class="n">formatted_symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span>
+            <span class="n">flattened_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">value</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">arg_cls</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">matrix_is_1d</span><span class="p">:</span>
+                <span class="c1"># TODO(nathan): Not sure this works for 2D matrices. Get rid of this.</span>
+                <span class="n">formatted_symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">storage_dim</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># NOTE(brad): The order of the symbols must match the storage order of sf.Matrix</span>
+                <span class="c1"># (as returned by sf.Matrix.to_storage). Hence, if there storage order were</span>
+                <span class="c1"># changed to, say, row major, the below for loops would have to be swapped to</span>
+                <span class="c1"># reflect that.</span>
+                <span class="n">formatted_symbols</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+                        <span class="n">formatted_symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">(</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">))</span>
+
+            <span class="n">flattened_value</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">StorageOps</span><span class="o">.</span><span class="n">to_storage</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">arg_cls</span><span class="p">,</span> <span class="n">Values</span><span class="p">):</span>
+            <span class="c1"># Term is a Values object, so we must flatten it. Here we loop over the index so that</span>
+            <span class="c1"># we can use the same code with lists.</span>
+            <span class="n">formatted_symbols</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">flattened_value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">to_storage</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">index_value</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">index</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="c1"># Elements of a Values object are accessed with the &quot;.&quot; operator</span>
+                <span class="n">formatted_symbols</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="n">_get_scalar_keys_recursive</span><span class="p">(</span>
+                        <span class="n">index_value</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">use_data</span><span class="o">=</span><span class="kc">False</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">formatted_symbols</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="nb">set</span><span class="p">(</span><span class="n">formatted_symbols</span><span class="p">)</span>
+            <span class="p">),</span> <span class="s2">&quot;Non-unique keys:</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">formatted_symbols</span> <span class="k">if</span> <span class="n">formatted_symbols</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">arg_cls</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="c1"># Term is a list, so we loop over the index of the list, i.e.</span>
+            <span class="c1"># &quot;values.index()[key].item_index&quot;.</span>
+            <span class="n">formatted_symbols</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">flattened_value</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">StorageOps</span><span class="o">.</span><span class="n">to_storage</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+            <span class="n">sub_index</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">index</span><span class="p">()[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">item_index</span>
+            <span class="k">assert</span> <span class="n">sub_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sub_index_val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">sub_index</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+                <span class="c1"># Elements of a list are accessed with the &quot;[]&quot; operator.</span>
+                <span class="n">formatted_symbols</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="n">_get_scalar_keys_recursive</span><span class="p">(</span>
+                        <span class="n">sub_index_val</span><span class="p">,</span>
+                        <span class="n">prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
+                        <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+                        <span class="n">use_data</span><span class="o">=</span><span class="n">format_as_inputs</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">formatted_symbols</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="nb">set</span><span class="p">(</span><span class="n">formatted_symbols</span><span class="p">)</span>
+            <span class="p">),</span> <span class="s2">&quot;Non-unique keys:</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                <span class="p">[</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">formatted_symbols</span> <span class="k">if</span> <span class="n">formatted_symbols</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">format_as_inputs</span><span class="p">:</span>
+                <span class="c1"># For readability, we will store the data of geo/cam objects in a temp vector named &quot;_key&quot;</span>
+                <span class="c1"># where &quot;key&quot; is the name of the given input variable (can be &quot;self&quot; for member functions accessing</span>
+                <span class="c1"># object data)</span>
+                <span class="n">formatted_symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">storage_dim</span><span class="p">)]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># For geo/cam objects being output, we can&#39;t access &quot;data&quot; directly, so in the</span>
+                <span class="c1"># jinja template we will construct a new object from a vector</span>
+                <span class="n">formatted_symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">storage_dim</span><span class="p">)]</span>
+            <span class="n">flattened_value</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">StorageOps</span><span class="o">.</span><span class="n">to_storage</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="n">flattened_formatted_symbolic_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">formatted_symbols</span><span class="p">)</span>
+        <span class="n">flattened_original_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">flattened_value</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">flattened_formatted_symbolic_values</span><span class="p">,</span> <span class="n">flattened_original_values</span></div>
+
+
+<span class="k">def</span> <span class="nf">_get_scalar_keys_recursive</span><span class="p">(</span>
+    <span class="n">index_value</span><span class="p">:</span> <span class="n">IndexEntry</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">codegen_config</span><span class="o">.</span><span class="n">CodegenConfig</span><span class="p">,</span> <span class="n">use_data</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a vector of keys, recursing on Values or List objects to get sub-elements.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        index_value: Entry in a given index consisting of (inx, datatype, shape, item_index)</span>
+<span class="sd">            See Values.index() for details on how this entry is built.</span>
+<span class="sd">        prefix: Symbol used to access parent object, e.g. &quot;my_values.item&quot; or &quot;my_list[i]&quot;</span>
+<span class="sd">        config: Programming language and configuration for when language-specific formatting is</span>
+<span class="sd">                required</span>
+<span class="sd">        use_data: If true, we assume we can have a list of geo/cam objects whose data can be</span>
+<span class="sd">            accessed with &quot;.data&quot; or &quot;.Data()&quot;. Otherwise, assume geo/cam objects are represented</span>
+<span class="sd">            by a vector of scalars (e.g. as they are in lcm types).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vec</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">datatype</span> <span class="o">=</span> <span class="n">index_value</span><span class="o">.</span><span class="n">datatype</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">datatype</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">):</span>
+        <span class="c1"># Element is a scalar, no need to access subvalues</span>
+        <span class="n">vec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">prefix</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">datatype</span><span class="p">,</span> <span class="n">Values</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="n">index_value</span><span class="o">.</span><span class="n">item_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="c1"># Recursively add subitems using &quot;.&quot; to access subvalues</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">sub_index_val</span> <span class="ow">in</span> <span class="n">index_value</span><span class="o">.</span><span class="n">item_index</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">vec</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="n">_get_scalar_keys_recursive</span><span class="p">(</span>
+                    <span class="n">sub_index_val</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">use_data</span><span class="o">=</span><span class="kc">False</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">datatype</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">DataBuffer</span><span class="p">):</span>
+        <span class="n">vec</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">DataBuffer</span><span class="p">(</span><span class="n">prefix</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">datatype</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">assert</span> <span class="n">index_value</span><span class="o">.</span><span class="n">item_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="c1"># Assume all elements of list are same type as first element</span>
+        <span class="c1"># Recursively add subitems using &quot;[]&quot; to access subvalues</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sub_index_val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">index_value</span><span class="o">.</span><span class="n">item_index</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="n">vec</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="n">_get_scalar_keys_recursive</span><span class="p">(</span>
+                    <span class="n">sub_index_val</span><span class="p">,</span> <span class="n">prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">use_data</span><span class="o">=</span><span class="n">use_data</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">datatype</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">use_data</span><span class="p">:</span>
+        <span class="c1"># TODO(hayk): Fix this in follow-up.</span>
+        <span class="c1"># TODO(nathan): I don&#39;t think this deals with 2D matrices correctly</span>
+        <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">matrix_is_1d</span> <span class="ow">and</span> <span class="n">config</span><span class="o">.</span><span class="n">use_eigen_types</span><span class="p">:</span>
+            <span class="n">vec</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">.data[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">index_value</span><span class="o">.</span><span class="n">storage_dim</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vec</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">index_value</span><span class="o">.</span><span class="n">storage_dim</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># We have a geo/cam or other object that uses &quot;data&quot; to store a flat vector of scalars.</span>
+        <span class="n">vec</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">format_data_accessor</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">i</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">index_value</span><span class="o">.</span><span class="n">storage_dim</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">vec</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">vec</span><span class="p">)),</span> <span class="s2">&quot;Non-unique keys:</span><span class="se">\n</span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">vec</span> <span class="k">if</span> <span class="n">vec</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">vec</span>
+
+
+<div class="viewcode-block" id="get_formatted_sparse_list"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen_util.html#symforce.codegen.codegen_util.get_formatted_sparse_list">[docs]</a><span class="k">def</span> <span class="nf">get_formatted_sparse_list</span><span class="p">(</span><span class="n">sparse_outputs</span><span class="p">:</span> <span class="n">Values</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a nested list of symbols for use in generated functions for sparse matrices.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">symbolic_args</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># Each element of sparse_outputs is a list of the nonzero terms in the sparse matrix</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">sparse_matrix_data</span> <span class="ow">in</span> <span class="n">sparse_outputs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">symbolic_args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">_value_ptr[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sparse_matrix_data</span><span class="p">))]</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">symbolic_args</span></div>
+
+
+<span class="k">def</span> <span class="nf">_load_generated_package_internal</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Any</span><span class="p">,</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dynamically load generated package (or module).</span>
+
+<span class="sd">    Returns the generated package (module) and a list of the names of all modules added</span>
+<span class="sd">    to sys.module by this function.</span>
+
+<span class="sd">    Does not remove the modules it imports from sys.modules.</span>
+
+<span class="sd">    Precondition: If m is a module from the same package as name and is imported by name, then</span>
+<span class="sd">    there does not exist a different module with the same name as m in sys.modules. This is to</span>
+<span class="sd">    ensure name imports the correct modules.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;__init__.py&quot;</span>
+
+    <span class="n">parts</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># Load parent packages</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">added_module_names</span> <span class="o">=</span> <span class="n">_load_generated_package_internal</span><span class="p">(</span>
+            <span class="s2">&quot;.&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="n">path</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;__init__.py&quot;</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">added_module_names</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">spec_from_file_location</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">spec</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">module_from_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">module</span>
+    <span class="n">added_module_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="c1"># For mypy: https://github.com/python/typeshed/issues/2793</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">loader</span><span class="p">,</span> <span class="n">importlib</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Loader</span><span class="p">)</span>
+
+    <span class="n">spec</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">exec_module</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">module</span><span class="p">,</span> <span class="n">added_module_names</span>
+
+
+<div class="viewcode-block" id="load_generated_package"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen_util.html#symforce.codegen.codegen_util.load_generated_package">[docs]</a><span class="k">def</span> <span class="nf">load_generated_package</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Openable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Dynamically load generated package (or module).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># NOTE(brad): We remove all possibly conflicting modules from the cache. This is</span>
+    <span class="c1"># to ensure that when name is executed, it loads local modules (if any) rather</span>
+    <span class="c1"># than any with colliding names that have been loaded elsewhere</span>
+    <span class="n">root_package_name</span> <span class="o">=</span> <span class="n">name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">callee_saved_modules</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">T</span><span class="o">.</span><span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">module_name</span> <span class="ow">in</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+        <span class="k">if</span> <span class="n">root_package_name</span> <span class="o">==</span> <span class="n">module_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">conflicting_module</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">module_name</span><span class="p">]</span>
+                <span class="k">del</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">module_name</span><span class="p">]</span>
+                <span class="n">callee_saved_modules</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">module_name</span><span class="p">,</span> <span class="n">conflicting_module</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+    <span class="n">module</span><span class="p">,</span> <span class="n">added_module_names</span> <span class="o">=</span> <span class="n">_load_generated_package_internal</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+
+    <span class="c1"># We remove the temporarily added modules</span>
+    <span class="k">for</span> <span class="n">added_name</span> <span class="ow">in</span> <span class="n">added_module_names</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">added_name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+    <span class="c1"># And we restore the original removed modules</span>
+    <span class="k">for</span> <span class="n">removed_name</span><span class="p">,</span> <span class="n">removed_module</span> <span class="ow">in</span> <span class="n">callee_saved_modules</span><span class="p">:</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">removed_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">removed_module</span>
+
+    <span class="k">return</span> <span class="n">module</span></div>
+
+
+<div class="viewcode-block" id="load_generated_lcmtype"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen_util.html#symforce.codegen.codegen_util.load_generated_lcmtype">[docs]</a><span class="k">def</span> <span class="nf">load_generated_lcmtype</span><span class="p">(</span>
+    <span class="n">package</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">type_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">lcmtypes_path</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Type</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Load an LCM type generated by Codegen.generate_function</span>
+
+<span class="sd">    Example usage:</span>
+
+<span class="sd">        my_codegen = Codegen(my_func, config=PythonConfig())</span>
+<span class="sd">        codegen_data = my_codegen.generate_function(output_dir=output_dir, namespace=namespace)</span>
+<span class="sd">        my_type_t = codegen_util.load_generated_lcmtype(</span>
+<span class="sd">            namespace, &quot;my_type_t&quot;, codegen_data.python_types_dir</span>
+<span class="sd">        )</span>
+<span class="sd">        my_type_msg = my_type_t(foo=5)</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        package: The name of the LCM package for the type</span>
+<span class="sd">        type_name: The name of the LCM type itself (not including the package)</span>
+<span class="sd">        lcmtypes_path: The path to the directory containing the generated lcmtypes package</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The Python LCM type</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span>
+        <span class="n">load_generated_package</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;lcmtypes.</span><span class="si">{</span><span class="n">package</span><span class="si">}</span><span class="s2">._</span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="n">Path</span><span class="p">(</span><span class="n">lcmtypes_path</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;lcmtypes&quot;</span> <span class="o">/</span> <span class="n">package</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;_</span><span class="si">{</span><span class="n">type_name</span><span class="si">}</span><span class="s2">.py&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">type_name</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_base_instance"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen_util.html#symforce.codegen.codegen_util.get_base_instance">[docs]</a><span class="k">def</span> <span class="nf">get_base_instance</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns an instance of the base element (e.g. Scalar, Values, Matrix, etc.) of an object.</span>
+<span class="sd">    If input is a list (incl. multidimensional lists), we return an instance of one of the base</span>
+<span class="sd">    elements (i.e. the first element that isn&#39;t a list). If input is a list we assume all</span>
+<span class="sd">    elements are of the same type/shape.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">get_base_instance</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">obj</span></div>
+
+
+<div class="viewcode-block" id="generate_lcm_types"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen_util.html#symforce.codegen.codegen_util.generate_lcm_types">[docs]</a><span class="k">def</span> <span class="nf">generate_lcm_types</span><span class="p">(</span>
+    <span class="n">lcm_type_dir</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Openable</span><span class="p">,</span> <span class="n">lcm_files</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">lcm_output_dir</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Openable</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generates the language-specific type files for all symforce generated &quot;.lcm&quot; files.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        lcm_type_dir: Directory containing symforce-generated .lcm files</span>
+<span class="sd">        lcm_files: List of .lcm files to process</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">lcm_type_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">lcm_type_dir</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">lcm_output_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lcm_output_dir</span> <span class="o">=</span> <span class="n">lcm_type_dir</span> <span class="o">/</span> <span class="s2">&quot;..&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lcm_output_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">lcm_output_dir</span><span class="p">)</span>
+
+    <span class="n">python_types_dir</span> <span class="o">=</span> <span class="n">lcm_output_dir</span> <span class="o">/</span> <span class="s2">&quot;python&quot;</span>
+    <span class="n">cpp_types_dir</span> <span class="o">=</span> <span class="n">lcm_output_dir</span> <span class="o">/</span> <span class="s2">&quot;cpp&quot;</span> <span class="o">/</span> <span class="s2">&quot;lcmtypes&quot;</span>
+    <span class="n">lcm_include_dir</span> <span class="o">=</span> <span class="s2">&quot;lcmtypes&quot;</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;python_types_dir&quot;</span><span class="p">:</span> <span class="n">python_types_dir</span><span class="p">,</span> <span class="s2">&quot;cpp_types_dir&quot;</span><span class="p">:</span> <span class="n">cpp_types_dir</span><span class="p">}</span>
+
+    <span class="c1"># TODO(brad, aaron): Do something reasonable with lcm_files other than returning early</span>
+    <span class="c1"># If no LCM files provided, do nothing</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">lcm_files</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="kn">from</span> <span class="nn">skymarshal</span> <span class="kn">import</span> <span class="n">skymarshal</span>
+    <span class="kn">from</span> <span class="nn">skymarshal.emit_python</span> <span class="kn">import</span> <span class="n">SkymarshalPython</span>
+    <span class="kn">from</span> <span class="nn">skymarshal.emit_cpp</span> <span class="kn">import</span> <span class="n">SkymarshalCpp</span>
+
+    <span class="n">skymarshal</span><span class="o">.</span><span class="n">main</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">SkymarshalPython</span><span class="p">,</span> <span class="n">SkymarshalCpp</span><span class="p">],</span>
+        <span class="n">args</span><span class="o">=</span><span class="p">[</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">lcm_type_dir</span><span class="p">),</span>
+            <span class="s2">&quot;--python&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;--python-path&quot;</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">python_types_dir</span> <span class="o">/</span> <span class="s2">&quot;lcmtypes&quot;</span><span class="p">),</span>
+            <span class="s2">&quot;--python-namespace-packages&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;--python-package-prefix&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;lcmtypes&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;--cpp&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;--cpp-hpath&quot;</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">cpp_types_dir</span><span class="p">),</span>
+            <span class="s2">&quot;--cpp-include&quot;</span><span class="p">,</span>
+            <span class="n">lcm_include_dir</span><span class="p">,</span>
+        <span class="p">],</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Autoformat generated python files</span>
+    <span class="n">format_util</span><span class="o">.</span><span class="n">format_py_dir</span><span class="p">(</span><span class="n">python_types_dir</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="flat_symbols_from_values"><a class="viewcode-back" href="../../../api/symforce.codegen.codegen_util.html#symforce.codegen.codegen_util.flat_symbols_from_values">[docs]</a><span class="k">def</span> <span class="nf">flat_symbols_from_values</span><span class="p">(</span><span class="n">values</span><span class="p">:</span> <span class="n">Values</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a flat list of unique symbols in the object for codegen</span>
+<span class="sd">    Note that this *does not* respect storage ordering</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">symbols_list</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">to_storage</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">values_recursive</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">DataBuffer</span><span class="p">):</span>
+            <span class="n">symbols_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">symbols_list</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  <li><a href="../../symforce.html">symforce</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

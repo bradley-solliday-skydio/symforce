@@ -1,0 +1,41 @@
+symforce package
+================
+
+.. automodule:: symforce
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.benchmarks
+   symforce.cam
+   symforce.codegen
+   symforce.examples
+   symforce.geo
+   symforce.internal
+   symforce.ops
+   symforce.opt
+   symforce.test_util
+   symforce.values
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.cc_sym
+   symforce.databuffer
+   symforce.jacobian_helpers
+   symforce.logic
+   symforce.notebook_util
+   symforce.path_util
+   symforce.python_util
+   symforce.symbolic
+   symforce.type_helpers
+   symforce.typing

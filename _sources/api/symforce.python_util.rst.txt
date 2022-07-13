@@ -1,0 +1,7 @@
+symforce.python\_util module
+============================
+
+.. automodule:: symforce.python_util
+   :members:
+   :undoc-members:
+   :show-inheritance:

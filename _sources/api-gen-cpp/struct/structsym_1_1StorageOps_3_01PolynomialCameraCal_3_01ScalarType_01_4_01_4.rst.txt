@@ -1,0 +1,5 @@
+Struct sym::StorageOps< PolynomialCameraCal< ScalarType > >
+===========================================================
+
+.. doxygenstruct:: sym::StorageOps< PolynomialCameraCal< ScalarType > >
+   :project: api-gen-cpp

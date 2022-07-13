@@ -1,0 +1,17 @@
+sym.ops.double\_sphere\_camera\_cal package
+===========================================
+
+.. automodule:: sym.ops.double_sphere_camera_cal
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   sym.ops.double_sphere_camera_cal.camera_ops
+   sym.ops.double_sphere_camera_cal.group_ops
+   sym.ops.double_sphere_camera_cal.lie_group_ops

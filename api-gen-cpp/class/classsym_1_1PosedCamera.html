@@ -1,0 +1,225 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Class sym::PosedCamera &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Class sym::Rot2" href="classsym_1_1Rot2.html" />
+    <link rel="prev" title="Class sym::Pose3" href="classsym_1_1Pose3.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="class-sym-posedcamera">
+<h1>Class sym::PosedCamera<a class="headerlink" href="#class-sym-posedcamera" title="Permalink to this headline">¶</a></h1>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4I0EN3sym11PosedCameraE">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">CameraCalType</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1PosedCamera"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-prename descclassname"><a class="reference internal" href="../../api-cpp/file/assert_8h.html#_CPPv43sym" title="sym"><span class="n"><span class="pre">sym</span></span></a><span class="p"><span class="pre">::</span></span></span><span class="sig-name descname"><span class="n"><span class="pre">PosedCamera</span></span></span><span class="w"> </span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="k"><span class="pre">public</span></span><span class="w"> </span><a class="reference internal" href="../../api-cpp/file/assert_8h.html#_CPPv43sym" title="sym"><span class="n"><span class="pre">sym</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classsym_1_1Camera.html#_CPPv4I0EN3sym6CameraE" title="sym::Camera"><span class="n"><span class="pre">Camera</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I0EN3sym11PosedCameraE" title="sym::PosedCamera::CameraCalType"><span class="n"><span class="pre">CameraCalType</span></span></a><span class="p"><span class="pre">&gt;</span></span><a class="headerlink" href="#_CPPv4I0EN3sym11PosedCameraE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p><a class="reference internal" href="../file/camera_8h.html#classsym_1_1Camera"><span class="std std-ref">Camera</span></a> with a given pose, camera calibration, and an optionally specified image size. If the image size is specified, we use it to check whether pixels (either given or computed by projection of 3D points into the image frame) are in the image frame and thus valid/invalid. </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym11PosedCamera6ScalarE">
+<span class="target" id="classsym_1_1PosedCamera_1a10c5da0be3fef4072c8a52c81f0fec68"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Scalar</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0EN3sym11PosedCameraE" title="sym::PosedCamera::CameraCalType"><span class="n"><span class="pre">CameraCalType</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Scalar</span></span><a class="headerlink" href="#_CPPv4N3sym11PosedCamera6ScalarE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym11PosedCamera11PosedCameraERKN3sym5Pose3I6ScalarEERK13CameraCalTypeRKN5Eigen8Vector2iE">
+<span class="target" id="classsym_1_1PosedCamera_1a0daf57e59ecd94560880d0867917b2ce"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PosedCamera</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../../api-cpp/file/assert_8h.html#_CPPv43sym" title="sym"><span class="n"><span class="pre">sym</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classsym_1_1Pose3.html#_CPPv4I0EN3sym5Pose3E" title="sym::Pose3"><span class="n"><span class="pre">Pose3</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym11PosedCamera6ScalarE" title="sym::PosedCamera::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">pose</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0EN3sym11PosedCameraE" title="sym::PosedCamera::CameraCalType"><span class="n"><span class="pre">CameraCalType</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">calibration</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector2i</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">image_size</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Vector2i</span></span><span class="p"><span class="pre">(</span></span><span class="o"><span class="pre">-</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="o"><span class="pre">-</span></span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">)</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3sym11PosedCamera11PosedCameraERKN3sym5Pose3I6ScalarEERK13CameraCalTypeRKN5Eigen8Vector2iE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym11PosedCamera20PixelFromGlobalPointERKN5Eigen6MatrixI6ScalarXL3EEXL1EEEEK6ScalarPC6Scalar">
+<span class="target" id="classsym_1_1PosedCamera_1ae9010ab933d53e5de633208bd0bc7800"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym11PosedCamera6ScalarE" title="sym::PosedCamera::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">PixelFromGlobalPoint</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym11PosedCamera6ScalarE" title="sym::PosedCamera::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">point</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N3sym11PosedCamera6ScalarE" title="sym::PosedCamera::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">epsilon</span></span>, <a class="reference internal" href="#_CPPv4N3sym11PosedCamera6ScalarE" title="sym::PosedCamera::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">is_valid</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3sym11PosedCamera20PixelFromGlobalPointERKN5Eigen6MatrixI6ScalarXL3EEXL1EEEEK6ScalarPC6Scalar" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Transforms the given point into the camera frame using the given camera pose and then uses the given camera calibration to compute the resulted pixel coordinates of the projected point.</p>
+<p>Args: point: Vector written in camera frame. epsilon: Small value intended to prevent division by 0.</p>
+<p>Return: pixel: UV coodinates in pixel units, assuming the point is in view is_valid: 1 if point is valid </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym11PosedCamera20GlobalPointFromPixelERKN5Eigen6MatrixI6ScalarXL2EEXL1EEEE6ScalarK6ScalarPC6Scalar">
+<span class="target" id="classsym_1_1PosedCamera_1a30c0447edfec773ec13d0aaff80ae8bd"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym11PosedCamera6ScalarE" title="sym::PosedCamera::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">3</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">GlobalPointFromPixel</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym11PosedCamera6ScalarE" title="sym::PosedCamera::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">pixel</span></span>, <a class="reference internal" href="#_CPPv4N3sym11PosedCamera6ScalarE" title="sym::PosedCamera::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">range_to_point</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N3sym11PosedCamera6ScalarE" title="sym::PosedCamera::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">epsilon</span></span>, <a class="reference internal" href="#_CPPv4N3sym11PosedCamera6ScalarE" title="sym::PosedCamera::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">is_valid</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3sym11PosedCamera20GlobalPointFromPixelERKN5Eigen6MatrixI6ScalarXL2EEXL1EEEE6ScalarK6ScalarPC6Scalar" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Computes a point written in the global frame along the ray passing through the center of the given pixel. The point is positioned at a given range along the ray.</p>
+<p>Args: pixel: Vector in pixels in camera image. range_to_point: Distance of the returned point along the ray passing through pixel epsilon: Small value intended to prevent division by 0.</p>
+<p>Return: global_point: The point in the global frame. is_valid: 1 if point is valid </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym11PosedCamera9WarpPixelERKN5Eigen6MatrixI6ScalarXL2EEXL1EEEE6ScalarRK11PosedCameraK6ScalarPC6Scalar">
+<span class="target" id="classsym_1_1PosedCamera_1a8eb96b96fce9b1611e87fc81aa697322"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym11PosedCamera6ScalarE" title="sym::PosedCamera::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">WarpPixel</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">Eigen</span></span><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">Matrix</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym11PosedCamera6ScalarE" title="sym::PosedCamera::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">2</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">pixel</span></span>, <a class="reference internal" href="#_CPPv4N3sym11PosedCamera6ScalarE" title="sym::PosedCamera::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">inverse_range</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I0EN3sym11PosedCameraE" title="sym::PosedCamera"><span class="n"><span class="pre">PosedCamera</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">target_cam</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N3sym11PosedCamera6ScalarE" title="sym::PosedCamera::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">epsilon</span></span>, <a class="reference internal" href="#_CPPv4N3sym11PosedCamera6ScalarE" title="sym::PosedCamera::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">is_valid</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3sym11PosedCamera9WarpPixelERKN5Eigen6MatrixI6ScalarXL2EEXL1EEEE6ScalarRK11PosedCameraK6ScalarPC6Scalar" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Project a pixel in this camera into another camera.</p>
+<p>Args: pixel: Pixel in the source camera inverse_range: Inverse distance along the ray to the global point target_cam: <a class="reference internal" href="../file/camera_8h.html#classsym_1_1Camera"><span class="std std-ref">Camera</span></a> to project global point into</p>
+<p>Return: pixel: Pixel in the target camera is_valid: 1 if given point is valid in source camera and target camera </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym11PosedCamera4PoseEv">
+<span class="target" id="classsym_1_1PosedCamera_1a53ce0c03204b283e89d39fbe5aef7cef"></span><span class="k"><span class="pre">inline</span></span><span class="w"> </span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../../api-cpp/file/assert_8h.html#_CPPv43sym" title="sym"><span class="n"><span class="pre">sym</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classsym_1_1Pose3.html#_CPPv4I0EN3sym5Pose3E" title="sym::Pose3"><span class="n"><span class="pre">Pose3</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym11PosedCamera6ScalarE" title="sym::PosedCamera::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">Pose</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3sym11PosedCamera4PoseEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../classlist.html">Class list</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1ATANCameraCal.html">Class sym::ATANCameraCal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1Camera.html">Class sym::Camera</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1DoubleSphereCameraCal.html">Class sym::DoubleSphereCameraCal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1EquirectangularCameraCal.html">Class sym::EquirectangularCameraCal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1LinearCameraCal.html">Class sym::LinearCameraCal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1PolynomialCameraCal.html">Class sym::PolynomialCameraCal</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1Pose2.html">Class sym::Pose2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1Pose3.html">Class sym::Pose3</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Class sym::PosedCamera</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1Rot2.html">Class sym::Rot2</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1Rot3.html">Class sym::Rot3</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1SphericalCameraCal.html">Class sym::SphericalCameraCal</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../classlist.html">Class list</a><ul>
+      <li>Previous: <a href="classsym_1_1Pose3.html" title="previous chapter">Class sym::Pose3</a></li>
+      <li>Next: <a href="classsym_1_1Rot2.html" title="next chapter">Class sym::Rot2</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/api-gen-cpp/class/classsym_1_1PosedCamera.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

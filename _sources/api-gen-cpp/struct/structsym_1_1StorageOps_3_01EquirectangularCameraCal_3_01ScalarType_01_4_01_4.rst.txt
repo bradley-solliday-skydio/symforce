@@ -1,0 +1,5 @@
+Struct sym::StorageOps< EquirectangularCameraCal< ScalarType > >
+================================================================
+
+.. doxygenstruct:: sym::StorageOps< EquirectangularCameraCal< ScalarType > >
+   :project: api-gen-cpp

@@ -1,0 +1,5 @@
+File prior_factor_pose3_rotation.h
+==================================
+
+.. doxygenfile:: prior_factor_pose3_rotation.h
+   :project: api-gen-cpp

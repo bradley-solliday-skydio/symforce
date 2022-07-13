@@ -1,0 +1,5 @@
+Class sym::GncOptimizer
+=======================
+
+.. doxygenclass:: sym::GncOptimizer
+   :project: api-cpp

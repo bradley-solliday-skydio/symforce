@@ -1,0 +1,5 @@
+File posed_camera.h
+===================
+
+.. doxygenfile:: posed_camera.h
+   :project: api-gen-cpp

@@ -1,0 +1,20 @@
+symforce.examples package
+=========================
+
+.. automodule:: symforce.examples
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.examples.bundle_adjustment
+   symforce.examples.bundle_adjustment_fixed_size
+   symforce.examples.bundle_adjustment_in_the_large
+   symforce.examples.custom_factor_generation
+   symforce.examples.robot_2d_localization
+   symforce.examples.robot_3d_localization

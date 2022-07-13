@@ -1,0 +1,422 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>symforce.codegen.geo_package_codegen &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for symforce.codegen.geo_package_codegen</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># SymForce - Copyright 2022, Skydio, Inc.</span>
+<span class="c1"># This source code is under the Apache 2.0 license found in the LICENSE file.</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span> <span class="nn">tempfile</span>
+<span class="kn">import</span> <span class="nn">textwrap</span>
+<span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">python_util</span>
+<span class="kn">import</span> <span class="nn">symforce.symbolic</span> <span class="k">as</span> <span class="nn">sf</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">typing</span> <span class="k">as</span> <span class="n">T</span>
+<span class="kn">from</span> <span class="nn">symforce.codegen</span> <span class="kn">import</span> <span class="n">Codegen</span>
+<span class="kn">from</span> <span class="nn">symforce.codegen</span> <span class="kn">import</span> <span class="n">CodegenConfig</span>
+<span class="kn">from</span> <span class="nn">symforce.codegen</span> <span class="kn">import</span> <span class="n">CppConfig</span>
+<span class="kn">from</span> <span class="nn">symforce.codegen</span> <span class="kn">import</span> <span class="n">PythonConfig</span>
+<span class="kn">from</span> <span class="nn">symforce.codegen</span> <span class="kn">import</span> <span class="n">codegen_util</span>
+<span class="kn">from</span> <span class="nn">symforce.codegen</span> <span class="kn">import</span> <span class="n">lcm_types_codegen</span>
+<span class="kn">from</span> <span class="nn">symforce.codegen</span> <span class="kn">import</span> <span class="n">template_util</span>
+<span class="kn">from</span> <span class="nn">symforce.codegen.ops_codegen_util</span> <span class="kn">import</span> <span class="n">make_group_ops_funcs</span>
+<span class="kn">from</span> <span class="nn">symforce.codegen.ops_codegen_util</span> <span class="kn">import</span> <span class="n">make_lie_group_ops_funcs</span>
+
+<span class="c1"># Default geo types to generate</span>
+<span class="n">DEFAULT_GEO_TYPES</span> <span class="o">=</span> <span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">Rot2</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Pose2</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Pose3</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="geo_class_common_data"><a class="viewcode-back" href="../../../api/symforce.codegen.geo_package_codegen.html#symforce.codegen.geo_package_codegen.geo_class_common_data">[docs]</a><span class="k">def</span> <span class="nf">geo_class_common_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">CodegenConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">T</span><span class="o">.</span><span class="n">Any</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Data for template generation of this class. Contains all useful info common</span>
+<span class="sd">    to all class-specific templates.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">Codegen</span><span class="o">.</span><span class="n">common_data</span><span class="p">()</span>
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;cls&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">cls</span>
+
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;specs&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span><span class="nb">list</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">make_group_ops_funcs</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;specs&quot;</span><span class="p">][</span><span class="s2">&quot;GroupOps&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">make_lie_group_ops_funcs</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">config</span><span class="p">):</span>
+        <span class="n">data</span><span class="p">[</span><span class="s2">&quot;specs&quot;</span><span class="p">][</span><span class="s2">&quot;LieGroupOps&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;doc&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__doc__</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__doc__</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">data</span><span class="p">[</span><span class="s2">&quot;is_lie_group&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;from_tangent&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">data</span></div>
+
+
+<span class="k">def</span> <span class="nf">_matrix_type_aliases</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span> <span class="n">T</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a dictionary d where d[datatype] is a mapping</span>
+<span class="sd">    between C++ types and their type aliases that are used in</span>
+<span class="sd">    the generated code of type datatype.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="n">sf</span><span class="o">.</span><span class="n">Rot2</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Eigen::Matrix&lt;Scalar, 2, 1&gt;&quot;</span><span class="p">:</span> <span class="s2">&quot;Vector2&quot;</span><span class="p">},</span>
+        <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Eigen::Matrix&lt;Scalar, 3, 1&gt;&quot;</span><span class="p">:</span> <span class="s2">&quot;Vector3&quot;</span><span class="p">},</span>
+        <span class="n">sf</span><span class="o">.</span><span class="n">Pose2</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Eigen::Matrix&lt;Scalar, 2, 1&gt;&quot;</span><span class="p">:</span> <span class="s2">&quot;Vector2&quot;</span><span class="p">},</span>
+        <span class="n">sf</span><span class="o">.</span><span class="n">Pose3</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;Eigen::Matrix&lt;Scalar, 3, 1&gt;&quot;</span><span class="p">:</span> <span class="s2">&quot;Vector3&quot;</span><span class="p">},</span>
+    <span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">_custom_generated_methods</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">CodegenConfig</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">Codegen</span><span class="p">]]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns a dictionary d where d[datatype] is a list of codegened functions</span>
+<span class="sd">    we wish to be added to type datatype&#39;s generated code.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        config (CodegenConfig): Specifies the target language of the codegened functions.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">pose2_inverse_compose</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Pose2</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Vector2</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Vector2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span> <span class="o">*</span> <span class="n">point</span>
+
+    <span class="k">def</span> <span class="nf">pose3_inverse_compose</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Pose3</span><span class="p">,</span> <span class="n">point</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Vector3</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Vector3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span> <span class="o">*</span> <span class="n">point</span>
+
+    <span class="k">def</span> <span class="nf">codegen_mul</span><span class="p">(</span><span class="n">group</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span> <span class="n">multiplicand_type</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Codegen</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A helper to generate a Codegen object for groups with the method __mul__ taking</span>
+<span class="sd">        an instance of group and composing it with an instance of multiplicand_type</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">Codegen</span><span class="o">.</span><span class="n">function</span><span class="p">(</span>
+            <span class="n">func</span><span class="o">=</span><span class="n">group</span><span class="o">.</span><span class="fm">__mul__</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;compose&quot;</span><span class="p">,</span>
+            <span class="n">input_types</span><span class="o">=</span><span class="p">[</span><span class="n">group</span><span class="p">,</span> <span class="n">multiplicand_type</span><span class="p">],</span>
+            <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="n">sf</span><span class="o">.</span><span class="n">Rot2</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">codegen_mul</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">Rot2</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Vector2</span><span class="p">),</span>
+            <span class="n">Codegen</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">Rot2</span><span class="o">.</span><span class="n">from_angle</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">),</span>
+            <span class="n">Codegen</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">Rot2</span><span class="o">.</span><span class="n">to_rotation_matrix</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">codegen_mul</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Vector3</span><span class="p">),</span>
+            <span class="n">Codegen</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">to_rotation_matrix</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">),</span>
+            <span class="n">Codegen</span><span class="o">.</span><span class="n">function</span><span class="p">(</span>
+                <span class="n">func</span><span class="o">=</span><span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">random_from_uniform_samples</span><span class="p">,</span> <span class="n">pi</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">pi</span><span class="p">),</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;random_from_uniform_samples&quot;</span><span class="p">,</span>
+                <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="n">Codegen</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">from_yaw_pitch_roll</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">),</span>
+            <span class="n">Codegen</span><span class="o">.</span><span class="n">function</span><span class="p">(</span>
+                <span class="n">func</span><span class="o">=</span><span class="k">lambda</span> <span class="n">ypr</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">from_yaw_pitch_roll</span><span class="p">(</span><span class="o">*</span><span class="n">ypr</span><span class="p">),</span>
+                <span class="n">input_types</span><span class="o">=</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">V3</span><span class="p">],</span>
+                <span class="n">name</span><span class="o">=</span><span class="s2">&quot;from_yaw_pitch_roll&quot;</span><span class="p">,</span>
+                <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">],</span>
+        <span class="n">sf</span><span class="o">.</span><span class="n">Pose2</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">codegen_mul</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">Pose2</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Vector2</span><span class="p">),</span>
+            <span class="n">Codegen</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">pose2_inverse_compose</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;inverse_compose&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="n">sf</span><span class="o">.</span><span class="n">Pose3</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">codegen_mul</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">Pose3</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Vector3</span><span class="p">),</span>
+            <span class="n">Codegen</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">pose3_inverse_compose</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;inverse_compose&quot;</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">),</span>
+        <span class="p">],</span>
+    <span class="p">}</span>
+
+
+<div class="viewcode-block" id="generate"><a class="viewcode-back" href="../../../api/symforce.codegen.geo_package_codegen.html#symforce.codegen.geo_package_codegen.generate">[docs]</a><span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="n">config</span><span class="p">:</span> <span class="n">CodegenConfig</span><span class="p">,</span> <span class="n">output_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate the geo package for the given language.</span>
+
+<span class="sd">    TODO(hayk): Take scalar_type list here.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create output directory if needed</span>
+    <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">output_dir</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">(</span>
+            <span class="n">prefix</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;sf_codegen_</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">config</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">_&quot;</span><span class="p">,</span> <span class="nb">dir</span><span class="o">=</span><span class="s2">&quot;/tmp&quot;</span>
+        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Creating temp directory: </span><span class="si">{</span><span class="n">output_dir</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># Subdirectory for everything we&#39;ll generate</span>
+    <span class="n">package_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="s2">&quot;sym&quot;</span><span class="p">)</span>
+    <span class="n">templates</span> <span class="o">=</span> <span class="n">template_util</span><span class="o">.</span><span class="n">TemplateList</span><span class="p">()</span>
+
+    <span class="n">matrix_type_aliases</span> <span class="o">=</span> <span class="n">_matrix_type_aliases</span><span class="p">()</span>
+    <span class="n">custom_generated_methods</span> <span class="o">=</span> <span class="n">_custom_generated_methods</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">PythonConfig</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Creating Python package at: &quot;</span><span class="si">{</span><span class="n">package_dir</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+        <span class="n">template_dir</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">template_dir</span><span class="p">()</span>
+
+        <span class="c1"># Build up templates for each type</span>
+
+        <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">DEFAULT_GEO_TYPES</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">geo_class_common_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;matrix_type_aliases&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">matrix_type_aliases</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;custom_generated_methods&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">custom_generated_methods</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">base_dir</span><span class="p">,</span> <span class="n">relative_path</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="p">(</span><span class="s2">&quot;geo_package&quot;</span><span class="p">,</span> <span class="s2">&quot;CLASS.py&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;ops/CLASS/__init__.py&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;ops/CLASS/group_ops.py&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;ops/CLASS/lie_group_ops.py&quot;</span><span class="p">),</span>
+            <span class="p">):</span>
+                <span class="n">template_path</span> <span class="o">=</span> <span class="n">template_dir</span> <span class="o">/</span> <span class="n">base_dir</span> <span class="o">/</span> <span class="p">(</span><span class="n">relative_path</span> <span class="o">+</span> <span class="s2">&quot;.jinja&quot;</span><span class="p">)</span>
+                <span class="n">output_path</span> <span class="o">=</span> <span class="n">package_dir</span> <span class="o">/</span> <span class="n">relative_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;CLASS&quot;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+                <span class="n">templates</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">template_path</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="n">templates</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+            <span class="n">template_path</span><span class="o">=</span><span class="n">template_dir</span> <span class="o">/</span> <span class="s2">&quot;ops&quot;</span> <span class="o">/</span> <span class="s2">&quot;__init__.py.jinja&quot;</span><span class="p">,</span>
+            <span class="n">output_path</span><span class="o">=</span><span class="n">package_dir</span> <span class="o">/</span> <span class="s2">&quot;ops&quot;</span> <span class="o">/</span> <span class="s2">&quot;__init__.py&quot;</span><span class="p">,</span>
+            <span class="n">data</span><span class="o">=</span><span class="p">{},</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Package init</span>
+        <span class="n">templates</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+            <span class="n">template_dir</span> <span class="o">/</span> <span class="s2">&quot;geo_package&quot;</span> <span class="o">/</span> <span class="s2">&quot;__init__.py.jinja&quot;</span><span class="p">,</span>
+            <span class="n">package_dir</span> <span class="o">/</span> <span class="s2">&quot;__init__.py&quot;</span><span class="p">,</span>
+            <span class="nb">dict</span><span class="p">(</span><span class="n">Codegen</span><span class="o">.</span><span class="n">common_data</span><span class="p">(),</span> <span class="n">all_types</span><span class="o">=</span><span class="n">DEFAULT_GEO_TYPES</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="c1"># Test example</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;geo_package_python_test.py&quot;</span><span class="p">,):</span>
+            <span class="n">templates</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                <span class="n">template_dir</span> <span class="o">/</span> <span class="s2">&quot;tests&quot;</span> <span class="o">/</span> <span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.jinja&quot;</span><span class="p">),</span>
+                <span class="n">Path</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="s2">&quot;tests&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
+                <span class="nb">dict</span><span class="p">(</span><span class="n">Codegen</span><span class="o">.</span><span class="n">common_data</span><span class="p">(),</span> <span class="n">all_types</span><span class="o">=</span><span class="n">DEFAULT_GEO_TYPES</span><span class="p">),</span>
+            <span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">CppConfig</span><span class="p">):</span>
+        <span class="c1"># First generate the sym/util package as it&#39;s a dependency of the geo package</span>
+        <span class="kn">from</span> <span class="nn">symforce.codegen</span> <span class="kn">import</span> <span class="n">sym_util_package_codegen</span>
+
+        <span class="n">sym_util_package_codegen</span><span class="o">.</span><span class="n">generate</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Creating C++ package at: &quot;</span><span class="si">{</span><span class="n">package_dir</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+        <span class="n">template_dir</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">template_dir</span><span class="p">()</span>
+
+        <span class="c1"># Build up templates for each type</span>
+        <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">DEFAULT_GEO_TYPES</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">geo_class_common_data</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">config</span><span class="p">)</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;matrix_type_aliases&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">matrix_type_aliases</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span>
+            <span class="n">data</span><span class="p">[</span><span class="s2">&quot;custom_generated_methods&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">custom_generated_methods</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span>
+
+            <span class="k">for</span> <span class="n">base_dir</span><span class="p">,</span> <span class="n">relative_path</span> <span class="ow">in</span> <span class="p">(</span>
+                <span class="p">(</span><span class="s2">&quot;geo_package&quot;</span><span class="p">,</span> <span class="s2">&quot;CLASS.h&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">&quot;geo_package&quot;</span><span class="p">,</span> <span class="s2">&quot;CLASS.cc&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;ops/CLASS/storage_ops.h&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;ops/CLASS/storage_ops.cc&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;ops/CLASS/group_ops.h&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;ops/CLASS/group_ops.cc&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;ops/CLASS/lie_group_ops.h&quot;</span><span class="p">),</span>
+                <span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="s2">&quot;ops/CLASS/lie_group_ops.cc&quot;</span><span class="p">),</span>
+            <span class="p">):</span>
+                <span class="n">template_path</span> <span class="o">=</span> <span class="n">template_dir</span> <span class="o">/</span> <span class="n">base_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">relative_path</span><span class="si">}</span><span class="s2">.jinja&quot;</span>
+                <span class="n">output_path</span> <span class="o">=</span> <span class="n">package_dir</span> <span class="o">/</span> <span class="n">relative_path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;CLASS&quot;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+                <span class="n">templates</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">template_path</span><span class="p">,</span> <span class="n">output_path</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+        <span class="c1"># Render non geo type specific templates</span>
+        <span class="k">for</span> <span class="n">template_name</span> <span class="ow">in</span> <span class="n">python_util</span><span class="o">.</span><span class="n">files_in_dir</span><span class="p">(</span>
+            <span class="n">template_dir</span> <span class="o">/</span> <span class="s2">&quot;geo_package&quot;</span> <span class="o">/</span> <span class="s2">&quot;ops&quot;</span><span class="p">,</span> <span class="n">relative</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="s2">&quot;CLASS&quot;</span> <span class="ow">in</span> <span class="n">template_name</span><span class="p">:</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">template_name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;.jinja&quot;</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="n">templates</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                <span class="n">template_dir</span> <span class="o">/</span> <span class="s2">&quot;geo_package&quot;</span> <span class="o">/</span> <span class="s2">&quot;ops&quot;</span> <span class="o">/</span> <span class="n">template_name</span><span class="p">,</span>
+                <span class="n">package_dir</span> <span class="o">/</span> <span class="s2">&quot;ops&quot;</span> <span class="o">/</span> <span class="n">template_name</span><span class="p">[:</span> <span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s2">&quot;.jinja&quot;</span><span class="p">)],</span>
+                <span class="nb">dict</span><span class="p">(</span><span class="n">Codegen</span><span class="o">.</span><span class="n">common_data</span><span class="p">()),</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Test example</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;geo_package_cpp_test.cc&quot;</span><span class="p">,):</span>
+            <span class="n">templates</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+                <span class="n">template_dir</span> <span class="o">/</span> <span class="s2">&quot;tests&quot;</span> <span class="o">/</span> <span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&quot;.jinja&quot;</span><span class="p">),</span>
+                <span class="n">Path</span><span class="p">(</span><span class="n">output_dir</span><span class="p">,</span> <span class="s2">&quot;tests&quot;</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span>
+                <span class="nb">dict</span><span class="p">(</span>
+                    <span class="n">Codegen</span><span class="o">.</span><span class="n">common_data</span><span class="p">(),</span>
+                    <span class="n">all_types</span><span class="o">=</span><span class="n">DEFAULT_GEO_TYPES</span><span class="p">,</span>
+                    <span class="n">cpp_geo_types</span><span class="o">=</span><span class="p">[</span>
+                        <span class="sa">f</span><span class="s2">&quot;sym::</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">scalar</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
+                        <span class="k">for</span> <span class="bp">cls</span> <span class="ow">in</span> <span class="n">DEFAULT_GEO_TYPES</span>
+                        <span class="k">for</span> <span class="n">scalar</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;scalar_types&quot;</span><span class="p">]</span>
+                    <span class="p">],</span>
+                    <span class="n">cpp_matrix_types</span><span class="o">=</span><span class="p">[</span>
+                        <span class="sa">f</span><span class="s2">&quot;sym::Vector</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">scalar</span><span class="si">}</span><span class="s2">&gt;&quot;</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">scalar</span> <span class="ow">in</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;scalar_types&quot;</span><span class="p">]</span>
+                    <span class="p">],</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown config type: &quot;</span><span class="si">{</span><span class="n">config</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span>
+
+    <span class="c1"># LCM type_t</span>
+    <span class="n">templates</span><span class="o">.</span><span class="n">add</span><span class="p">(</span>
+        <span class="n">template_util</span><span class="o">.</span><span class="n">LCM_TEMPLATE_DIR</span> <span class="o">/</span> <span class="s2">&quot;symforce_types.lcm.jinja&quot;</span><span class="p">,</span>
+        <span class="n">package_dir</span> <span class="o">/</span> <span class="s2">&quot;..&quot;</span> <span class="o">/</span> <span class="s2">&quot;lcmtypes&quot;</span> <span class="o">/</span> <span class="s2">&quot;lcmtypes&quot;</span> <span class="o">/</span> <span class="s2">&quot;symforce_types.lcm&quot;</span><span class="p">,</span>
+        <span class="n">lcm_types_codegen</span><span class="o">.</span><span class="n">lcm_symforce_types_data</span><span class="p">(),</span>
+    <span class="p">)</span>
+
+    <span class="n">templates</span><span class="o">.</span><span class="n">render</span><span class="p">()</span>
+
+    <span class="c1"># Codegen for LCM type_t</span>
+    <span class="n">codegen_util</span><span class="o">.</span><span class="n">generate_lcm_types</span><span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">package_dir</span> <span class="o">/</span> <span class="s2">&quot;..&quot;</span> <span class="o">/</span> <span class="s2">&quot;lcmtypes&quot;</span> <span class="o">/</span> <span class="s2">&quot;lcmtypes&quot;</span><span class="p">),</span> <span class="p">[</span><span class="s2">&quot;symforce_types.lcm&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">output_dir</span></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  <li><a href="../../symforce.html">symforce</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

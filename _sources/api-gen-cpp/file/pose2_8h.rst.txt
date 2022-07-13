@@ -1,0 +1,5 @@
+File pose2.h
+============
+
+.. doxygenfile:: pose2.h
+   :project: api-gen-cpp

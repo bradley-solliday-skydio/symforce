@@ -1,0 +1,5 @@
+Class sym::Rot2
+===============
+
+.. doxygenclass:: sym::Rot2
+   :project: api-gen-cpp

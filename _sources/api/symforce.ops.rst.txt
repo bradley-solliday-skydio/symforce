@@ -1,0 +1,27 @@
+symforce.ops package
+====================
+
+.. automodule:: symforce.ops
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.ops.impl
+   symforce.ops.interfaces
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.ops.group_ops
+   symforce.ops.lie_group_ops
+   symforce.ops.ops
+   symforce.ops.storage_ops

@@ -1,0 +1,5 @@
+File spherical_camera_cal.cc
+============================
+
+.. doxygenfile:: spherical_camera_cal.cc
+   :project: api-gen-cpp

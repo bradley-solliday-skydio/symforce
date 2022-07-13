@@ -1,0 +1,5 @@
+Struct sym::ValuesLcmTypeHelper
+===============================
+
+.. doxygenstruct:: sym::ValuesLcmTypeHelper
+   :project: api-cpp

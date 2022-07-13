@@ -1,0 +1,32 @@
+symforce.opt package
+====================
+
+.. automodule:: symforce.opt
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.opt.objectives
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.opt.barrier_functions
+   symforce.opt.factor
+   symforce.opt.noise_models
+   symforce.opt.numeric_factor
+   symforce.opt.objective
+   symforce.opt.optimization_problem
+   symforce.opt.optimizer
+   symforce.opt.residual_block
+   symforce.opt.sub_problem
+   symforce.opt.timestep_sub_problem

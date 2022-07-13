@@ -1,0 +1,5 @@
+Class sym::SparseCholeskySolver
+===============================
+
+.. doxygenclass:: sym::SparseCholeskySolver
+   :project: api-cpp

@@ -1,0 +1,5 @@
+File optimization_stats.h
+=========================
+
+.. doxygenfile:: optimization_stats.h
+   :project: api-cpp

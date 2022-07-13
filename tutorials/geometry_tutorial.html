@@ -1,0 +1,1223 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Geometry Tutorial &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <link rel="shortcut icon" href="../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Ops Tutorial" href="ops_tutorial.html" />
+    <link rel="prev" title="SymPy Tutorial" href="sympy_tutorial.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  
+<style>
+/* CSS for nbsphinx extension */
+
+/* remove conflicting styling from Sphinx themes */
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt *,
+div.nbinput.container div.input_area pre,
+div.nboutput.container div.output_area pre,
+div.nbinput.container div.input_area .highlight,
+div.nboutput.container div.output_area .highlight {
+    border: none;
+    padding: 0;
+    margin: 0;
+    box-shadow: none;
+}
+
+div.nbinput.container > div[class*=highlight],
+div.nboutput.container > div[class*=highlight] {
+    margin: 0;
+}
+
+div.nbinput.container div.prompt *,
+div.nboutput.container div.prompt * {
+    background: none;
+}
+
+div.nboutput.container div.output_area .highlight,
+div.nboutput.container div.output_area pre {
+    background: unset;
+}
+
+div.nboutput.container div.output_area div.highlight {
+    color: unset;  /* override Pygments text color */
+}
+
+/* avoid gaps between output lines */
+div.nboutput.container div[class*=highlight] pre {
+    line-height: normal;
+}
+
+/* input/output containers */
+div.nbinput.container,
+div.nboutput.container {
+    display: -webkit-flex;
+    display: flex;
+    align-items: flex-start;
+    margin: 0;
+    width: 100%;
+}
+@media (max-width: 540px) {
+    div.nbinput.container,
+    div.nboutput.container {
+        flex-direction: column;
+    }
+}
+
+/* input container */
+div.nbinput.container {
+    padding-top: 5px;
+}
+
+/* last container */
+div.nblast.container {
+    padding-bottom: 5px;
+}
+
+/* input prompt */
+div.nbinput.container div.prompt pre {
+    color: #307FC1;
+}
+
+/* output prompt */
+div.nboutput.container div.prompt pre {
+    color: #BF5B3D;
+}
+
+/* all prompts */
+div.nbinput.container div.prompt,
+div.nboutput.container div.prompt {
+    width: 4.5ex;
+    padding-top: 5px;
+    position: relative;
+    user-select: none;
+}
+
+div.nbinput.container div.prompt > div,
+div.nboutput.container div.prompt > div {
+    position: absolute;
+    right: 0;
+    margin-right: 0.3ex;
+}
+
+@media (max-width: 540px) {
+    div.nbinput.container div.prompt,
+    div.nboutput.container div.prompt {
+        width: unset;
+        text-align: left;
+        padding: 0.4em;
+    }
+    div.nboutput.container div.prompt.empty {
+        padding: 0;
+    }
+
+    div.nbinput.container div.prompt > div,
+    div.nboutput.container div.prompt > div {
+        position: unset;
+    }
+}
+
+/* disable scrollbars on prompts */
+div.nbinput.container div.prompt pre,
+div.nboutput.container div.prompt pre {
+    overflow: hidden;
+}
+
+/* input/output area */
+div.nbinput.container div.input_area,
+div.nboutput.container div.output_area {
+    -webkit-flex: 1;
+    flex: 1;
+    overflow: auto;
+}
+@media (max-width: 540px) {
+    div.nbinput.container div.input_area,
+    div.nboutput.container div.output_area {
+        width: 100%;
+    }
+}
+
+/* input area */
+div.nbinput.container div.input_area {
+    border: 1px solid #e0e0e0;
+    border-radius: 2px;
+    /*background: #f5f5f5;*/
+}
+
+/* override MathJax center alignment in output cells */
+div.nboutput.container div[class*=MathJax] {
+    text-align: left !important;
+}
+
+/* override sphinx.ext.imgmath center alignment in output cells */
+div.nboutput.container div.math p {
+    text-align: left;
+}
+
+/* standard error */
+div.nboutput.container div.output_area.stderr {
+    background: #fdd;
+}
+
+/* ANSI colors */
+.ansi-black-fg { color: #3E424D; }
+.ansi-black-bg { background-color: #3E424D; }
+.ansi-black-intense-fg { color: #282C36; }
+.ansi-black-intense-bg { background-color: #282C36; }
+.ansi-red-fg { color: #E75C58; }
+.ansi-red-bg { background-color: #E75C58; }
+.ansi-red-intense-fg { color: #B22B31; }
+.ansi-red-intense-bg { background-color: #B22B31; }
+.ansi-green-fg { color: #00A250; }
+.ansi-green-bg { background-color: #00A250; }
+.ansi-green-intense-fg { color: #007427; }
+.ansi-green-intense-bg { background-color: #007427; }
+.ansi-yellow-fg { color: #DDB62B; }
+.ansi-yellow-bg { background-color: #DDB62B; }
+.ansi-yellow-intense-fg { color: #B27D12; }
+.ansi-yellow-intense-bg { background-color: #B27D12; }
+.ansi-blue-fg { color: #208FFB; }
+.ansi-blue-bg { background-color: #208FFB; }
+.ansi-blue-intense-fg { color: #0065CA; }
+.ansi-blue-intense-bg { background-color: #0065CA; }
+.ansi-magenta-fg { color: #D160C4; }
+.ansi-magenta-bg { background-color: #D160C4; }
+.ansi-magenta-intense-fg { color: #A03196; }
+.ansi-magenta-intense-bg { background-color: #A03196; }
+.ansi-cyan-fg { color: #60C6C8; }
+.ansi-cyan-bg { background-color: #60C6C8; }
+.ansi-cyan-intense-fg { color: #258F8F; }
+.ansi-cyan-intense-bg { background-color: #258F8F; }
+.ansi-white-fg { color: #C5C1B4; }
+.ansi-white-bg { background-color: #C5C1B4; }
+.ansi-white-intense-fg { color: #A1A6B2; }
+.ansi-white-intense-bg { background-color: #A1A6B2; }
+
+.ansi-default-inverse-fg { color: #FFFFFF; }
+.ansi-default-inverse-bg { background-color: #000000; }
+
+.ansi-bold { font-weight: bold; }
+.ansi-underline { text-decoration: underline; }
+
+
+div.nbinput.container div.input_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight] > pre,
+div.nboutput.container div.output_area div[class*=highlight].math,
+div.nboutput.container div.output_area.rendered_html,
+div.nboutput.container div.output_area > div.output_javascript,
+div.nboutput.container div.output_area:not(.rendered_html) > img{
+    padding: 5px;
+    margin: 0;
+}
+
+/* fix copybtn overflow problem in chromium (needed for 'sphinx_copybutton') */
+div.nbinput.container div.input_area > div[class^='highlight'],
+div.nboutput.container div.output_area > div[class^='highlight']{
+    overflow-y: hidden;
+}
+
+/* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
+.prompt .copybtn {
+    display: none;
+}
+
+/* Some additional styling taken form the Jupyter notebook CSS */
+div.rendered_html table {
+  border: none;
+  border-collapse: collapse;
+  border-spacing: 0;
+  color: black;
+  font-size: 12px;
+  table-layout: fixed;
+}
+div.rendered_html thead {
+  border-bottom: 1px solid black;
+  vertical-align: bottom;
+}
+div.rendered_html tr,
+div.rendered_html th,
+div.rendered_html td {
+  text-align: right;
+  vertical-align: middle;
+  padding: 0.5em 0.5em;
+  line-height: normal;
+  white-space: normal;
+  max-width: none;
+  border: none;
+}
+div.rendered_html th {
+  font-weight: bold;
+}
+div.rendered_html tbody tr:nth-child(odd) {
+  background: #f5f5f5;
+}
+div.rendered_html tbody tr:hover {
+  background: rgba(66, 165, 245, 0.2);
+}
+</style>
+<section id="Geometry-Tutorial">
+<h1>Geometry Tutorial<a class="headerlink" href="#Geometry-Tutorial" title="Permalink to this headline">¶</a></h1>
+<p>This is an introductory walkthrough of the symbolic <a class="reference external" href="../api/symforce.sf.html">geometry package</a> in symforce. Symforce natively contains the following geometry objects: complex numbers, quaternions, dual quaternions, matrices, 2D and 3D rotations, and 2D and 3D poses (translation + rotation).</p>
+<p>In this tutorial we will demonstrate a few of the ways these geometry objects can be constructed and composed. Here we pay special attention to 3D rotations, poses, and vectors, as they are typically the most commonly used geometric objects.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Setup</span>
+<span class="kn">import</span> <span class="nn">symforce</span>
+
+<span class="n">symforce</span><span class="o">.</span><span class="n">set_symbolic_api</span><span class="p">(</span><span class="s2">&quot;sympy&quot;</span><span class="p">)</span>
+<span class="n">symforce</span><span class="o">.</span><span class="n">set_log_level</span><span class="p">(</span><span class="s2">&quot;warning&quot;</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">symforce.notebook_util</span> <span class="kn">import</span> <span class="n">display</span>
+<span class="kn">import</span> <span class="nn">symforce.symbolic</span> <span class="k">as</span> <span class="nn">sf</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">ops</span>
+</pre></div>
+</div>
+</div>
+<section id="Rotations">
+<h2>Rotations<a class="headerlink" href="#Rotations" title="Permalink to this headline">¶</a></h2>
+<p>Rotations can be defined from and converted to a number of different representations as shown below, but always use a quaternion as the underlying representation. We use the notation world_R_body to represent a rotation that rotates a point written in the body frame into the world frame.</p>
+<p>Note that in some cases a small epsilon can be provided to prevent numerical errors (e.g. division by zero) when converting to/from rotation representations. Furthermore, converting between certain representations can require additional symbolic expressions to guard against degenerate cases. For example, a rotation constructed from a rotation matrix results in more complexity than when constructed using an axis-angle representation as shown below.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Identity definition</span>
+<span class="n">display</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[0, 0, 0, 1]&gt;&gt;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Symbolic definition</span>
+<span class="n">display</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[R_x, R_y, R_z, R_w]&gt;&gt;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># To/From rotation matrix</span>
+
+<span class="c1"># Rotate about x-axis</span>
+<span class="n">theta</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;theta&quot;</span><span class="p">)</span>
+<span class="n">R_mat</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span>
+    <span class="p">[</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="o">-</span><span class="n">sf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">)],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="p">),</span> <span class="n">sf</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="p">)],</span>
+    <span class="p">]</span>
+<span class="p">)</span>
+<span class="n">R</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">from_rotation_matrix</span><span class="p">(</span><span class="n">R_mat</span><span class="p">)</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">R_mat</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>  <span class="c1"># Note the additional expressions required to avoid numerical errors</span>
+<span class="n">display</span><span class="p">(</span><span class="n">R</span><span class="o">.</span><span class="n">to_rotation_matrix</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}1 &amp; 0 &amp; 0\\0 &amp; \cos{\left(\theta \right)} &amp; - \sin{\left(\theta \right)}\\0 &amp; \sin{\left(\theta \right)} &amp; \cos{\left(\theta \right)}\end{matrix}\right]$</div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[(1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1)))*(sqrt(Max(0, 2 - 2*cos(theta)))/2 + Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1))/2) + 2*sin(theta)*Min(1 - Max(0, sign(-2*cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta)) - 1)), 1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1)), Min(1 - Max(0, sign(-cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta)))), Max(1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1))), 1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1)), Min(1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1))), 1 - Max(0, sign(-cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta))))))))))/(2*sqrt(Max(0, 2*cos(theta) + 2)) - 2*Min(1 - Max(0, sign(-2*cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta)) - 1)), 1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1)), Min(1 - Max(0, sign(-cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta)))), Max(1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1))), 1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1)), Min(1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1))), 1 - Max(0, sign(-cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta)))))))))) + 2), (1/2 - Min(1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1))), 1 - Max(0, sign(-cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta)))))/2)*Min(1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1))), 1 - Max(0, sign(-cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta))))), (1/2 - Min(1 - Max(0, sign(-cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta)))), 1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1)), Min(1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1))), 1 - Max(0, sign(-cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta)))))))/2)*Min(1 - Max(0, sign(-cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta)))), 1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1)), Min(1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1))), 1 - Max(0, sign(-cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta))))))), 2*(1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1)))*sin(theta)/(2*sqrt(Max(0, 2 - 2*cos(theta))) + 2*Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1))) + (sqrt(Max(0, 2*cos(theta) + 2))/2 - Min(1 - Max(0, sign(-2*cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta)) - 1)), 1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1)), Min(1 - Max(0, sign(-cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta)))), Max(1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1))), 1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1)), Min(1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1))), 1 - Max(0, sign(-cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta))))))))))/2 + 1/2)*Min(1 - Max(0, sign(-2*cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta)) - 1)), 1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1)), Min(1 - Max(0, sign(-cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta)))), Max(1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1))), 1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1)), Min(1 - Max(0, 1 - Max(0, sign(Max(1, 2*cos(theta) + 1, cos(theta)) - 1))), 1 - Max(0, sign(-cos(theta) + Max(1, 2*cos(theta) + 1, cos(theta))))))))))]&gt;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}- 2 \left(\frac{1}{2} - \frac{\min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)}{2}\right)^{2} \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)^{2} - 2 \left(\frac{1}{2} - \frac{\min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)}{2}\right)^{2} \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)^{2} + 1 &amp; \left(\frac{1}{2} - \frac{\min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)}{2}\right) \left(2 \cdot \left(1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right) \left(\frac{\sqrt{\max\left(0, 2 - 2 \cos{\left(\theta \right)}\right)}}{2} + \frac{\max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)}{2}\right) + \frac{4 \sin{\left(\theta \right)} \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)}{2 \sqrt{\max\left(0, 2 \cos{\left(\theta \right)} + 2\right)} - 2 \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right) + 2}\right) \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right) - 2 \cdot \left(\frac{1}{2} - \frac{\min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)}{2}\right) \left(\frac{2 \cdot \left(1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right) \sin{\left(\theta \right)}}{2 \sqrt{\max\left(0, 2 - 2 \cos{\left(\theta \right)}\right)} + 2 \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)} + \left(\frac{\sqrt{\max\left(0, 2 \cos{\left(\theta \right)} + 2\right)}}{2} - \frac{\min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)}{2} + \frac{1}{2}\right) \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)\right) \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right) &amp; 2 \cdot \left(\frac{1}{2} - \frac{\min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)}{2}\right) \left(\frac{2 \cdot \left(1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right) \sin{\left(\theta \right)}}{2 \sqrt{\max\left(0, 2 - 2 \cos{\left(\theta \right)}\right)} + 2 \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)} + \left(\frac{\sqrt{\max\left(0, 2 \cos{\left(\theta \right)} + 2\right)}}{2} - \frac{\min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)}{2} + \frac{1}{2}\right) \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)\right) \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right) + \left(\frac{1}{2} - \frac{\min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)}{2}\right) \left(2 \cdot \left(1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right) \left(\frac{\sqrt{\max\left(0, 2 - 2 \cos{\left(\theta \right)}\right)}}{2} + \frac{\max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)}{2}\right) + \frac{4 \sin{\left(\theta \right)} \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)}{2 \sqrt{\max\left(0, 2 \cos{\left(\theta \right)} + 2\right)} - 2 \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right) + 2}\right) \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\\\left(\frac{1}{2} - \frac{\min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)}{2}\right) \left(2 \cdot \left(1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right) \left(\frac{\sqrt{\max\left(0, 2 - 2 \cos{\left(\theta \right)}\right)}}{2} + \frac{\max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)}{2}\right) + \frac{4 \sin{\left(\theta \right)} \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)}{2 \sqrt{\max\left(0, 2 \cos{\left(\theta \right)} + 2\right)} - 2 \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right) + 2}\right) \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right) + 2 \cdot \left(\frac{1}{2} - \frac{\min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)}{2}\right) \left(\frac{2 \cdot \left(1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right) \sin{\left(\theta \right)}}{2 \sqrt{\max\left(0, 2 - 2 \cos{\left(\theta \right)}\right)} + 2 \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)} + \left(\frac{\sqrt{\max\left(0, 2 \cos{\left(\theta \right)} + 2\right)}}{2} - \frac{\min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)}{2} + \frac{1}{2}\right) \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)\right) \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right) &amp; - 2 \left(\frac{1}{2} - \frac{\min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)}{2}\right)^{2} \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)^{2} - 2 \left(\left(1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right) \left(\frac{\sqrt{\max\left(0, 2 - 2 \cos{\left(\theta \right)}\right)}}{2} + \frac{\max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)}{2}\right) + \frac{2 \sin{\left(\theta \right)} \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)}{2 \sqrt{\max\left(0, 2 \cos{\left(\theta \right)} + 2\right)} - 2 \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right) + 2}\right)^{2} + 1 &amp; 2 \cdot \left(\frac{1}{2} - \frac{\min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)}{2}\right) \left(\frac{1}{2} - \frac{\min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)}{2}\right) \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right) \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right) - \left(2 \cdot \left(1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right) \left(\frac{\sqrt{\max\left(0, 2 - 2 \cos{\left(\theta \right)}\right)}}{2} + \frac{\max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)}{2}\right) + \frac{4 \sin{\left(\theta \right)} \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)}{2 \sqrt{\max\left(0, 2 \cos{\left(\theta \right)} + 2\right)} - 2 \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right) + 2}\right) \left(\frac{2 \cdot \left(1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right) \sin{\left(\theta \right)}}{2 \sqrt{\max\left(0, 2 - 2 \cos{\left(\theta \right)}\right)} + 2 \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)} + \left(\frac{\sqrt{\max\left(0, 2 \cos{\left(\theta \right)} + 2\right)}}{2} - \frac{\min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)}{2} + \frac{1}{2}\right) \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)\right)\\- 2 \cdot \left(\frac{1}{2} - \frac{\min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)}{2}\right) \left(\frac{2 \cdot \left(1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right) \sin{\left(\theta \right)}}{2 \sqrt{\max\left(0, 2 - 2 \cos{\left(\theta \right)}\right)} + 2 \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)} + \left(\frac{\sqrt{\max\left(0, 2 \cos{\left(\theta \right)} + 2\right)}}{2} - \frac{\min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)}{2} + \frac{1}{2}\right) \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)\right) \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right) + \left(\frac{1}{2} - \frac{\min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)}{2}\right) \left(2 \cdot \left(1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right) \left(\frac{\sqrt{\max\left(0, 2 - 2 \cos{\left(\theta \right)}\right)}}{2} + \frac{\max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)}{2}\right) + \frac{4 \sin{\left(\theta \right)} \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)}{2 \sqrt{\max\left(0, 2 \cos{\left(\theta \right)} + 2\right)} - 2 \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right) + 2}\right) \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right) &amp; 2 \cdot \left(\frac{1}{2} - \frac{\min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)}{2}\right) \left(\frac{1}{2} - \frac{\min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)}{2}\right) \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right) \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right) + \left(2 \cdot \left(1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right) \left(\frac{\sqrt{\max\left(0, 2 - 2 \cos{\left(\theta \right)}\right)}}{2} + \frac{\max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)}{2}\right) + \frac{4 \sin{\left(\theta \right)} \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)}{2 \sqrt{\max\left(0, 2 \cos{\left(\theta \right)} + 2\right)} - 2 \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right) + 2}\right) \left(\frac{2 \cdot \left(1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right) \sin{\left(\theta \right)}}{2 \sqrt{\max\left(0, 2 - 2 \cos{\left(\theta \right)}\right)} + 2 \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)} + \left(\frac{\sqrt{\max\left(0, 2 \cos{\left(\theta \right)} + 2\right)}}{2} - \frac{\min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)}{2} + \frac{1}{2}\right) \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)\right) &amp; - 2 \left(\frac{1}{2} - \frac{\min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)}{2}\right)^{2} \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)^{2} - 2 \left(\left(1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right) \left(\frac{\sqrt{\max\left(0, 2 - 2 \cos{\left(\theta \right)}\right)}}{2} + \frac{\max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)}{2}\right) + \frac{2 \sin{\left(\theta \right)} \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right)}{2 \sqrt{\max\left(0, 2 \cos{\left(\theta \right)} + 2\right)} - 2 \min\left(1 - \max\left(0, \operatorname{sign}{\left(- 2 \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right), \max\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right), \min\left(1 - \max\left(0, 1 - \max\left(0, \operatorname{sign}{\left(\max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) - 1 \right)}\right)\right), 1 - \max\left(0, \operatorname{sign}{\left(- \cos{\left(\theta \right)} + \max\left(1, 2 \cos{\left(\theta \right)} + 1, \cos{\left(\theta \right)}\right) \right)}\right)\right)\right)\right)\right)\right)\right) + 2}\right)^{2} + 1\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># To/From Euler angles</span>
+<span class="n">R</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">from_yaw_pitch_roll</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">theta</span><span class="p">)</span>  <span class="c1"># Yaw rotation only</span>
+<span class="n">ypr</span> <span class="o">=</span> <span class="n">R</span><span class="o">.</span><span class="n">to_yaw_pitch_roll</span><span class="p">()</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">ops</span><span class="o">.</span><span class="n">StorageOps</span><span class="o">.</span><span class="n">simplify</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">ypr</span><span class="p">)))</span>  <span class="c1"># Simplify YPR expression</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[sin(theta/2), 0, 0, cos(theta/2)]&gt;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[ 0, \  0, \  \operatorname{atan_{2}}{\left(\sin{\left(\theta \right)},\cos{\left(\theta \right)} \right)}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># From axis-angle representation</span>
+
+<span class="c1"># Rotate about x-axis</span>
+<span class="n">R</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">from_angle_axis</span><span class="p">(</span><span class="n">angle</span><span class="o">=</span><span class="n">theta</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">Vector3</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">R</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[sin(theta/2), 0, 0, cos(theta/2)]&gt;&gt;
+</pre></div></div>
+</div>
+<p>Now that we can construct rotations, we can use them to rotate vectors as one would expect.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Rotation defining orientation of body frame wrt world frame</span>
+<span class="n">world_R_body</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">)</span>
+
+<span class="c1"># Point written in body frame</span>
+<span class="n">body_t_point</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Vector3</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="s2">&quot;p&quot;</span><span class="p">)</span>
+
+<span class="c1"># Point written in world frame</span>
+<span class="n">world_t_point</span> <span class="o">=</span> <span class="n">world_R_body</span> <span class="o">*</span> <span class="n">body_t_point</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">world_t_point</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}p_{0} \left(- 2 R_{y}^{2} - 2 R_{z}^{2} + 1\right) + p_{1} \left(- 2 R_{w} R_{z} + 2 R_{x} R_{y}\right) + p_{2} \cdot \left(2 R_{w} R_{y} + 2 R_{x} R_{z}\right)\\p_{0} \cdot \left(2 R_{w} R_{z} + 2 R_{x} R_{y}\right) + p_{1} \left(- 2 R_{x}^{2} - 2 R_{z}^{2} + 1\right) + p_{2} \left(- 2 R_{w} R_{x} + 2 R_{y} R_{z}\right)\\p_{0} \left(- 2 R_{w} R_{y} + 2 R_{x} R_{z}\right) + p_{1} \cdot \left(2 R_{w} R_{x} + 2 R_{y} R_{z}\right) + p_{2} \left(- 2 R_{x}^{2} - 2 R_{y}^{2} + 1\right)\end{matrix}\right]$</div></div>
+</div>
+<p>Chaining rotations and inverting rotations works as one would expect as well:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">body_R_cam</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="s2">&quot;R_cam&quot;</span><span class="p">)</span>
+<span class="n">world_R_cam</span> <span class="o">=</span> <span class="n">world_R_body</span> <span class="o">*</span> <span class="n">body_R_cam</span>
+
+<span class="c1"># Rotation inverse = negate vector part of quaternion</span>
+<span class="n">cam_R_body</span> <span class="o">=</span> <span class="n">body_R_cam</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span>
+<span class="n">display</span><span class="p">(</span><span class="n">body_R_cam</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">cam_R_body</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[R_cam_x, R_cam_y, R_cam_z, R_cam_w]&gt;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[-R_cam_x, -R_cam_y, -R_cam_z, R_cam_w]&gt;&gt;
+</pre></div></div>
+</div>
+<p>We can also easily substitute numerical values into symbolic expressions using geo objects themselves. This makes it very convenient to substitute numeric values into large symbolic expressions constructed using many different geo objects.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">world_R_body_numeric</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">from_yaw_pitch_roll</span><span class="p">(</span><span class="mf">0.1</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.3</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">world_t_point</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">world_R_body</span><span class="p">,</span> <span class="n">world_R_body_numeric</span><span class="p">))</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}- 0.662947416398295 p_{0} - 0.554353314451006 p_{1} - 0.503182994394693 p_{2}\\- 0.0665166116342196 p_{0} + 0.713061539471145 p_{1} - 0.697938952419008 p_{2}\\0.74570521217672 p_{0} - 0.429226797490819 p_{1} - 0.509596009450867 p_{2}\end{matrix}\right]$</div></div>
+</div>
+</section>
+<section id="Poses">
+<h2>Poses<a class="headerlink" href="#Poses" title="Permalink to this headline">¶</a></h2>
+<p>Poses are defined as a rotation plus a translation, and are constructed as such. We use the notation world_T_body to represent a pose that transforms from the body frame to the world frame.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Symbolic construction</span>
+<span class="n">world_T_body</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Pose3</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="s2">&quot;T&quot;</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">world_T_body</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Pose3 R=&lt;Rot3 &lt;Q xyzw=[T.R_x, T.R_y, T.R_z, T.R_w]&gt;&gt;, t=(T.t0, T.t1, T.t2)&gt;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Construction from a rotation and translation</span>
+
+<span class="c1"># Orientation of body frame wrt world frame</span>
+<span class="n">world_R_body</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">)</span>
+
+<span class="c1"># Position of body frame wrt world frame written in the world frame</span>
+<span class="n">world_t_body</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Vector3</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="s2">&quot;t&quot;</span><span class="p">)</span>
+
+<span class="n">world_T_body</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Pose3</span><span class="p">(</span><span class="n">R</span><span class="o">=</span><span class="n">world_R_body</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">world_t_body</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">world_T_body</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Pose3 R=&lt;Rot3 &lt;Q xyzw=[R_x, R_y, R_z, R_w]&gt;&gt;, t=(t0, t1, t2)&gt;
+</pre></div></div>
+</div>
+<p>Similar to rotations, we can compose poses with poses, compose poses with 3D points, and invert poses as one would expect.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Compose pose with a pose</span>
+<span class="n">body_T_cam</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Pose3</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="s2">&quot;T_cam&quot;</span><span class="p">)</span>
+<span class="n">world_T_cam</span> <span class="o">=</span> <span class="n">world_T_body</span> <span class="o">*</span> <span class="n">body_T_cam</span>
+
+<span class="c1"># Compose pose with a point</span>
+<span class="n">body_t_point</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Vector3</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="s2">&quot;p&quot;</span><span class="p">)</span>  <span class="c1"># Position in body frame</span>
+<span class="c1"># Equivalent to: world_R_body * body_t_point + world_t_body</span>
+<span class="n">world_t_point</span> <span class="o">=</span> <span class="n">world_T_body</span> <span class="o">*</span> <span class="n">body_t_point</span>
+<span class="n">display</span><span class="p">(</span><span class="n">world_t_point</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}p_{0} \left(- 2 R_{y}^{2} - 2 R_{z}^{2} + 1\right) + p_{1} \left(- 2 R_{w} R_{z} + 2 R_{x} R_{y}\right) + p_{2} \cdot \left(2 R_{w} R_{y} + 2 R_{x} R_{z}\right) + t_{0}\\p_{0} \cdot \left(2 R_{w} R_{z} + 2 R_{x} R_{y}\right) + p_{1} \left(- 2 R_{x}^{2} - 2 R_{z}^{2} + 1\right) + p_{2} \left(- 2 R_{w} R_{x} + 2 R_{y} R_{z}\right) + t_{1}\\p_{0} \left(- 2 R_{w} R_{y} + 2 R_{x} R_{z}\right) + p_{1} \cdot \left(2 R_{w} R_{x} + 2 R_{y} R_{z}\right) + p_{2} \left(- 2 R_{x}^{2} - 2 R_{y}^{2} + 1\right) + t_{2}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Invert a pose</span>
+<span class="n">body_T_world</span> <span class="o">=</span> <span class="n">world_T_body</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span>
+<span class="n">display</span><span class="p">(</span><span class="n">world_T_body</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">body_T_world</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Pose3 R=&lt;Rot3 &lt;Q xyzw=[R_x, R_y, R_z, R_w]&gt;&gt;, t=(t0, t1, t2)&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Pose3 R=&lt;Rot3 &lt;Q xyzw=[-R_x, -R_y, -R_z, R_w]&gt;&gt;, t=(-t0*(-2*R_y**2 - 2*R_z**2 + 1) - t1*(2*R_w*R_z + 2*R_x*R_y) - t2*(-2*R_w*R_y + 2*R_x*R_z), -t0*(-2*R_w*R_z + 2*R_x*R_y) - t1*(-2*R_x**2 - 2*R_z**2 + 1) - t2*(2*R_w*R_x + 2*R_y*R_z), -t0*(2*R_w*R_y + 2*R_x*R_z) - t1*(-2*R_w*R_x + 2*R_y*R_z) - t2*(-2*R_x**2 - 2*R_y**2 + 1))&gt;
+</pre></div></div>
+</div>
+</section>
+<section id="Vectors-and-Matrices">
+<h2>Vectors and Matrices<a class="headerlink" href="#Vectors-and-Matrices" title="Permalink to this headline">¶</a></h2>
+<p>Vectors and matrices are all represented using subclasses of sf.Matrix class, and can be constructed in several different ways as shown below.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Matrix construction. The statements below all create the same 2x3 matrix object</span>
+
+<span class="c1"># Construction from 2D list</span>
+<span class="n">m1</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]])</span>
+
+<span class="c1"># Construction using specified size + data</span>
+<span class="n">m2</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+
+<span class="c1"># sf.MatrixNM creates a matrix with shape NxM (defined by default for 6x6</span>
+<span class="c1"># matrices and smaller)</span>
+<span class="n">m3</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix23</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="n">m4</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix23</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+
+<span class="c1"># Construction using aliases</span>
+<span class="n">m5</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">M</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="p">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">]])</span>
+<span class="n">m6</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+<span class="n">m7</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">M23</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+<span class="n">m8</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">M23</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">])</span>
+
+<span class="c1"># Construction from block matrices of appropriate dimensions</span>
+<span class="n">m9</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix23</span><span class="o">.</span><span class="n">block_matrix</span><span class="p">([[</span><span class="n">sf</span><span class="o">.</span><span class="n">M13</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])],</span> <span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">M13</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">])]])</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[15]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Vector constructors. The statements below all create the same 3x1 vector object</span>
+
+<span class="c1"># Construction from 2D list</span>
+<span class="n">v1</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">([[</span><span class="mi">1</span><span class="p">],</span> <span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
+
+<span class="c1"># Construction from 1D list. We assume a 1D list represents a column vector.</span>
+<span class="n">v2</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">])</span>
+
+<span class="c1"># Construction using aliases (defined by default for 9x1 vectors and smaller)</span>
+<span class="n">v3</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix31</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">v4</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">M31</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">v5</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Vector3</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">v6</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">V3</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>We can also use a few typical matrix constructors:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[16]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Matrix of zeros</span>
+<span class="n">z1</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix23</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span>
+<span class="n">z2</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+
+<span class="c1"># Matrix of ones</span>
+<span class="n">o1</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix23</span><span class="o">.</span><span class="n">one</span><span class="p">()</span>
+<span class="n">o2</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>Note that the Matrix class itself does not contain group or lie group methods, to prevent confusion between the identity matrix and inverse matrix, and the group operations under addition. The group operations are implemented separately for matrices under addition, and are accessed through ops.GroupOps and ops.LieGroupOps.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[17]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">zero_matrix</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix33</span><span class="o">.</span><span class="n">zero</span><span class="p">()</span>
+<span class="n">identity_matrix</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix33</span><span class="o">.</span><span class="n">eye</span><span class="p">()</span>
+
+<span class="c1"># We could also write:</span>
+<span class="n">zero_matrix</span> <span class="o">=</span> <span class="n">ops</span><span class="o">.</span><span class="n">GroupOps</span><span class="o">.</span><span class="n">identity</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">Matrix33</span><span class="p">)</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">zero_matrix</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">identity_matrix</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0\\0 &amp; 0 &amp; 0\end{matrix}\right]$</div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}1 &amp; 0 &amp; 0\\0 &amp; 1 &amp; 0\\0 &amp; 0 &amp; 1\end{matrix}\right]$</div></div>
+</div>
+<p>And, of course, matrix math works as one would expect:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[18]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Matrix multiplication</span>
+<span class="n">m23</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">M23</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="s2">&quot;lhs&quot;</span><span class="p">)</span>
+<span class="n">m31</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">V3</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="s2">&quot;rhs&quot;</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">m23</span> <span class="o">*</span> <span class="n">m31</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}lhs_{0 0} rhs_{0} + lhs_{0 1} rhs_{1} + lhs_{0 2} rhs_{2}\\lhs_{1 0} rhs_{0} + lhs_{1 1} rhs_{1} + lhs_{1 2} rhs_{2}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[19]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Vector operations</span>
+<span class="n">norm</span> <span class="o">=</span> <span class="n">m31</span><span class="o">.</span><span class="n">norm</span><span class="p">()</span>
+<span class="n">squared_norm</span> <span class="o">=</span> <span class="n">m31</span><span class="o">.</span><span class="n">squared_norm</span><span class="p">()</span>
+<span class="n">unit_vec</span> <span class="o">=</span> <span class="n">m31</span><span class="o">.</span><span class="n">normalized</span><span class="p">()</span>
+<span class="n">display</span><span class="p">(</span><span class="n">unit_vec</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}\frac{rhs_{0}}{\sqrt{rhs_{0}^{2} + rhs_{1}^{2} + rhs_{2}^{2}}}\\\frac{rhs_{1}}{\sqrt{rhs_{0}^{2} + rhs_{1}^{2} + rhs_{2}^{2}}}\\\frac{rhs_{2}}{\sqrt{rhs_{0}^{2} + rhs_{1}^{2} + rhs_{2}^{2}}}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[20]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m33</span> <span class="o">=</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix33</span><span class="o">.</span><span class="n">eye</span><span class="p">()</span>  <span class="c1"># Element-wise multiplication with scalar</span>
+<span class="n">display</span><span class="p">(</span><span class="n">m33</span><span class="o">.</span><span class="n">inv</span><span class="p">())</span>  <span class="c1"># Matrix inverse</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}\frac{1}{5} &amp; 0 &amp; 0\\0 &amp; \frac{1}{5} &amp; 0\\0 &amp; 0 &amp; \frac{1}{5}\end{matrix}\right]$</div></div>
+</div>
+<p>One of the most powerful operations we can use matrices for is to compute jacobians with respect to other geo objects. By default we compute jacobians with respect to the tangent space of the given object.</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[21]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">R0</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="s2">&quot;R0&quot;</span><span class="p">)</span>
+<span class="n">R1</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="s2">&quot;R1&quot;</span><span class="p">)</span>
+<span class="n">residual</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">R0</span><span class="o">.</span><span class="n">local_coordinates</span><span class="p">(</span><span class="n">R1</span><span class="p">))</span>
+<span class="n">display</span><span class="p">(</span><span class="n">residual</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[\begin{matrix}\frac{2 \cdot \left(2 \min\left(0, \operatorname{sign}{\left(R_{0 w} R_{1 w} + R_{0 x} R_{1 x} + R_{0 y} R_{1 y} + R_{0 z} R_{1 z} \right)}\right) + 1\right) \left(R_{0 w} R_{1 x} - R_{0 x} R_{1 w} - R_{0 y} R_{1 z} + R_{0 z} R_{1 y}\right) \operatorname{acos}{\left(\min\left(1.0, \left|{R_{0 w} R_{1 w} + R_{0 x} R_{1 x} + R_{0 y} R_{1 y} + R_{0 z} R_{1 z}}\right|\right) \right)}}{\sqrt{1 - \min\left(1.0, \left|{R_{0 w} R_{1 w} + R_{0 x} R_{1 x} + R_{0 y} R_{1 y} + R_{0 z} R_{1 z}}\right|\right)^{2}}}\\\frac{2 \cdot \left(2 \min\left(0, \operatorname{sign}{\left(R_{0 w} R_{1 w} + R_{0 x} R_{1 x} + R_{0 y} R_{1 y} + R_{0 z} R_{1 z} \right)}\right) + 1\right) \left(R_{0 w} R_{1 y} + R_{0 x} R_{1 z} - R_{0 y} R_{1 w} - R_{0 z} R_{1 x}\right) \operatorname{acos}{\left(\min\left(1.0, \left|{R_{0 w} R_{1 w} + R_{0 x} R_{1 x} + R_{0 y} R_{1 y} + R_{0 z} R_{1 z}}\right|\right) \right)}}{\sqrt{1 - \min\left(1.0, \left|{R_{0 w} R_{1 w} + R_{0 x} R_{1 x} + R_{0 y} R_{1 y} + R_{0 z} R_{1 z}}\right|\right)^{2}}}\\\frac{2 \cdot \left(2 \min\left(0, \operatorname{sign}{\left(R_{0 w} R_{1 w} + R_{0 x} R_{1 x} + R_{0 y} R_{1 y} + R_{0 z} R_{1 z} \right)}\right) + 1\right) \left(R_{0 w} R_{1 z} - R_{0 x} R_{1 y} + R_{0 y} R_{1 x} - R_{0 z} R_{1 w}\right) \operatorname{acos}{\left(\min\left(1.0, \left|{R_{0 w} R_{1 w} + R_{0 x} R_{1 x} + R_{0 y} R_{1 y} + R_{0 z} R_{1 z}}\right|\right) \right)}}{\sqrt{1 - \min\left(1.0, \left|{R_{0 w} R_{1 w} + R_{0 x} R_{1 x} + R_{0 y} R_{1 y} + R_{0 z} R_{1 z}}\right|\right)^{2}}}\end{matrix}\right]$</div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[22]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">jacobian</span> <span class="o">=</span> <span class="n">residual</span><span class="o">.</span><span class="n">jacobian</span><span class="p">(</span><span class="n">R1</span><span class="p">)</span>
+<span class="c1"># The jacobian is quite a complex symbolic expression, so we don&#39;t display it for</span>
+<span class="c1"># convenience.</span>
+<span class="c1"># The shape is equal to (dimension of residual) x (dimension of tangent space)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">jacobian</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left( 3, \  3\right)$</div></div>
+</div>
+</section>
+<section id="General-properties-of-geo-objects">
+<h2>General properties of geo objects<a class="headerlink" href="#General-properties-of-geo-objects" title="Permalink to this headline">¶</a></h2>
+<section id="Storage-operations">
+<h3>Storage operations<a class="headerlink" href="#Storage-operations" title="Permalink to this headline">¶</a></h3>
+<p>All geometric types implement the “Storage” interface. This means that they can:</p>
+<ol class="arabic simple">
+<li><p>Be serialized into a list of scalar expressions (<code class="docutils literal notranslate"><span class="pre">.to_storage()</span></code>)</p></li>
+<li><p>Be reconstructed from a list of scalar expressions (<code class="docutils literal notranslate"><span class="pre">.from_storage()</span></code>)</p></li>
+<li><p>Use common symbolic operations (symbolic construction, substitution, simplification, etc.)</p></li>
+</ol>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[23]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Serialization to scalar list</span>
+<span class="n">rot</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="p">()</span>
+<span class="n">elements</span> <span class="o">=</span> <span class="n">rot</span><span class="o">.</span><span class="n">to_storage</span><span class="p">()</span>
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span> <span class="o">==</span> <span class="n">rot</span><span class="o">.</span><span class="n">storage_dim</span><span class="p">()</span>
+<span class="n">display</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[ 0, \  0, \  0, \  1\right]$</div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Construction from scalar list</span>
+<span class="n">rot2</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">from_storage</span><span class="p">(</span><span class="n">elements</span><span class="p">)</span>
+<span class="k">assert</span> <span class="n">rot</span> <span class="o">==</span> <span class="n">rot2</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[25]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Symbolic operations</span>
+<span class="n">rot_sym</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="s2">&quot;rot_sym&quot;</span><span class="p">)</span>
+<span class="n">rot_num</span> <span class="o">=</span> <span class="n">rot_sym</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">rot_sym</span><span class="p">,</span> <span class="n">rot</span><span class="p">)</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">rot_sym</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">rot_num</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">rot_num</span><span class="o">.</span><span class="n">simplify</span><span class="p">())</span>  <span class="c1"># Simplify internal symbolic expressions</span>
+<span class="n">display</span><span class="p">(</span><span class="n">rot_num</span><span class="o">.</span><span class="n">evalf</span><span class="p">())</span>  <span class="c1"># Numerical evaluation</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[rot_sym_x, rot_sym_y, rot_sym_z, rot_sym_w]&gt;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[0, 0, 0, 1]&gt;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[0, 0, 0, 1]&gt;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[0, 0, 0, 1.00000000000000]&gt;&gt;
+</pre></div></div>
+</div>
+</section>
+<section id="Group-operations">
+<h3>Group operations<a class="headerlink" href="#Group-operations" title="Permalink to this headline">¶</a></h3>
+<p>All geometric types also implement the “Group” interface, meaning that geometric objects:</p>
+<ol class="arabic simple">
+<li><p>Can be composed with objects of the same type to produce an object of the same type (<code class="docutils literal notranslate"><span class="pre">.compose()</span></code>)</p></li>
+<li><p>Have an identity element (<code class="docutils literal notranslate"><span class="pre">.identity()</span></code>)</p></li>
+<li><p>Can be inverted (<code class="docutils literal notranslate"><span class="pre">.inverse()</span></code>)</p></li>
+<li><p>Can be created to represent the relation between two other objects of the same type (<code class="docutils literal notranslate"><span class="pre">.between()</span></code>)</p></li>
+</ol>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[26]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Construct two random rotations</span>
+<span class="n">R1</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+<span class="n">R2</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+
+<span class="c1"># Composition</span>
+<span class="n">display</span><span class="p">(</span><span class="n">R1</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span><span class="n">R2</span><span class="p">))</span>  <span class="c1"># For rotations this is the same as R1 * R2</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[-0.176519111703536, 0.593703914017153, 0.716082811874938, -0.321841688134694]&gt;&gt;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Identity</span>
+<span class="n">R_identity</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">identity</span><span class="p">()</span>
+<span class="n">display</span><span class="p">(</span><span class="n">R1</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">R_identity</span> <span class="o">*</span> <span class="n">R1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[0.254383539526708, -0.881145359107729, -0.398041938593197, -0.0208443292467258]&gt;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[0.254383539526708, -0.881145359107729, -0.398041938593197, -0.0208443292467258]&gt;&gt;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[28]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Inverse</span>
+<span class="n">R1_inv</span> <span class="o">=</span> <span class="n">R1</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span>
+<span class="n">display</span><span class="p">(</span><span class="n">R_identity</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">R1_inv</span> <span class="o">*</span> <span class="n">R1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[0, 0, 0, 1]&gt;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[0, 0, 0, 1.00000000000000]&gt;&gt;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[29]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Between</span>
+<span class="n">R_delta</span> <span class="o">=</span> <span class="n">R1</span><span class="o">.</span><span class="n">between</span><span class="p">(</span><span class="n">R2</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">R1</span> <span class="o">*</span> <span class="n">R_delta</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">R2</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[0.480204639812301, -0.184066998868365, -0.138522262371037, -0.846365421468730]&gt;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[0.480204639812301, -0.184066998868365, -0.138522262371037, -0.846365421468730]&gt;&gt;
+</pre></div></div>
+</div>
+</section>
+<section id="Lie-Group-operations">
+<h3>Lie Group operations<a class="headerlink" href="#Lie-Group-operations" title="Permalink to this headline">¶</a></h3>
+<p>Rotations, poses, and matrices all implement the “LieGroup” interface, meaning that they each have a tangent space. There are many great references on Lie groups out there already, so instead of introducing them here, we recommend checking out <a class="reference external" href="https://github.com/borglab/gtsam/blob/develop/doc/LieGroups.pdf">Frank Dellaert’s</a>, <a class="reference external" href="https://www.ethaneade.com/lie.pdf">Ethan Eade’s</a>, or <a class="reference external" href="https://ingmec.ual.es/~jlblanco/papers/jlblanco2010geometry3D_techrep.pdf">JL Blanco’s</a> tutorials. In
+SymForce, objects which are a Lie Group can:</p>
+<ol class="arabic simple">
+<li><p>Be used to compute the tangent space vector about the identity element (<code class="docutils literal notranslate"><span class="pre">.to_tangent()</span></code>)</p></li>
+<li><p>Be constructed from a tangent space vector about the identity element (<code class="docutils literal notranslate"><span class="pre">.from_tangent()</span></code>)</p></li>
+<li><p>Be perturbed by a tangent space vector about the given element (<code class="docutils literal notranslate"><span class="pre">.retract()</span></code>)</p></li>
+<li><p>Be used to compute the tangent space perturbation needed to obtain another given element (<code class="docutils literal notranslate"><span class="pre">.local_coordinates()</span></code>)</p></li>
+<li><p>Be used to compute a jacobian describing the relation between the underlying data of the object (e.g. a quaternion for a rotation) and the tangent space vector about the given element (<code class="docutils literal notranslate"><span class="pre">.storage_D_tangent()</span></code>)</p></li>
+</ol>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[30]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># To/From tangent space vector about identity element</span>
+<span class="n">R1</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">random</span><span class="p">()</span>
+<span class="n">tangent_vec</span> <span class="o">=</span> <span class="n">R1</span><span class="o">.</span><span class="n">to_tangent</span><span class="p">()</span>
+<span class="n">R1_recovered</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">Rot3</span><span class="o">.</span><span class="n">from_tangent</span><span class="p">(</span><span class="n">tangent_vec</span><span class="p">)</span>
+
+<span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">tangent_vec</span><span class="p">)</span> <span class="o">==</span> <span class="n">R1</span><span class="o">.</span><span class="n">tangent_dim</span><span class="p">()</span>
+<span class="n">display</span><span class="p">(</span><span class="n">R1</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">R1_recovered</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[0.856027763101898, 0.436696755373535, -0.0149436352161953, 0.276204816054161]&gt;&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;Rot3 &lt;Q xyzw=[0.856027763101898, 0.436696755373535, -0.0149436352161953, 0.276204816054161]&gt;&gt;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[31]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Tangent space perturbations</span>
+
+<span class="c1"># Perturb R1 by the given vector in the tangent space around R1</span>
+<span class="n">R2</span> <span class="o">=</span> <span class="n">R1</span><span class="o">.</span><span class="n">retract</span><span class="p">([</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">2.3</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">])</span>
+
+<span class="c1"># Compute the tangent vector pointing from R1 to R2, in the tangent space</span>
+<span class="c1"># around R1</span>
+<span class="n">recovered_tangent_vec</span> <span class="o">=</span> <span class="n">R1</span><span class="o">.</span><span class="n">local_coordinates</span><span class="p">(</span><span class="n">R2</span><span class="p">)</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">recovered_tangent_vec</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="math notranslate nohighlight">
+$\displaystyle \left[ 0.0999999999999998, \  2.3, \  -0.5\right]$</div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Jacobian of storage w.r.t tangent space perturbation</span>
+
+<span class="c1"># We chain storage_D_tangent together with jacobians of larger symbolic</span>
+<span class="c1"># expressions taken with respect to the symbolic elements of the object (e.g. a</span>
+<span class="c1"># quaternion for rotations) to compute the jacobian wrt the tanget space about</span>
+<span class="c1"># the element.</span>
+<span class="c1"># I.e. residual_D_tangent = residual_D_storage * storage_D_tangent</span>
+
+<span class="n">jacobian</span> <span class="o">=</span> <span class="n">R1</span><span class="o">.</span><span class="n">storage_D_tangent</span><span class="p">()</span>
+<span class="k">assert</span> <span class="n">jacobian</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="n">R1</span><span class="o">.</span><span class="n">storage_dim</span><span class="p">(),</span> <span class="n">R1</span><span class="o">.</span><span class="n">tangent_dim</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+<p>For more details on Storage/Group/LieGroup operations, see the <a class="reference external" href="../notebooks/ops_tutorial.html">Ops tutorial</a>.</p>
+</section>
+</section>
+<section id="Poses-and-SE(n)">
+<h2>Poses and SE(n)<a class="headerlink" href="#Poses-and-SE(n)" title="Permalink to this headline">¶</a></h2>
+<p>Poses in robotics are often represented using the <a class="reference external" href="https://en.wikipedia.org/wiki/Euclidean_group">Special Euclidean group</a>, SE(2) and SE(3) for 2D and 3D respectively. Additionally, the manifold is often defined so that the <code class="docutils literal notranslate"><span class="pre">from_tangent</span></code> function is the matrix exponential of a linear combination of generators.</p>
+<p>This has the advantage of simpler theoretical treatment in some cases, but has disadvantages in terms of the number of operations required to implement commonly used functions like <code class="docutils literal notranslate"><span class="pre">retract</span></code>. For these reasons, instead of using the SE(n) <code class="docutils literal notranslate"><span class="pre">from_tangent</span></code> and <code class="docutils literal notranslate"><span class="pre">to_tangent</span></code> functions, ours decouple the perturbations to rotation and translation. This means our <code class="docutils literal notranslate"><span class="pre">Pose2</span></code> and <code class="docutils literal notranslate"><span class="pre">Pose3</span></code> objects represent neither <code class="docutils literal notranslate"><span class="pre">SE(n)</span></code> nor <code class="docutils literal notranslate"><span class="pre">SO(n)</span> <span class="pre">x</span> <span class="pre">R^n</span></code>; they compose like objects on <code class="docutils literal notranslate"><span class="pre">SE(n)</span></code> but have tangent
+space operations analogous to <code class="docutils literal notranslate"><span class="pre">SO(n)</span> <span class="pre">x</span> <span class="pre">R^n</span></code>.</p>
+<p>For most users, this should all happen under the hood. The most common observable difference is that <code class="docutils literal notranslate"><span class="pre">retract(g,</span> <span class="pre">v)</span> <span class="pre">!=</span> <span class="pre">compose(g,</span> <span class="pre">from_tangent(v))</span></code>, so simplifications done by hand that rely on this fact must be treated with care. We do also provide a <code class="docutils literal notranslate"><span class="pre">Pose3_SE3</span></code> class for users who need this functionality.</p>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Geometry Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#Rotations">Rotations</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Poses">Poses</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#Vectors-and-Matrices">Vectors and Matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#General-properties-of-geo-objects">General properties of geo objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#Storage-operations">Storage operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Group-operations">Group operations</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#Lie-Group-operations">Lie Group operations</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#Poses-and-SE(n)">Poses and SE(n)</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="sympy_tutorial.html" title="previous chapter">SymPy Tutorial</a></li>
+      <li>Next: <a href="ops_tutorial.html" title="next chapter">Ops Tutorial</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/tutorials/geometry_tutorial.ipynb.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

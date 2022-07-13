@@ -1,0 +1,5 @@
+File type_ops.h
+===============
+
+.. doxygenfile:: type_ops.h
+   :project: api-gen-cpp

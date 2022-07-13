@@ -1,0 +1,5 @@
+File sparse_schur_solver.h
+==========================
+
+.. doxygenfile:: sparse_schur_solver.h
+   :project: api-cpp

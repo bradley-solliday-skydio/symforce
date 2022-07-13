@@ -1,0 +1,7 @@
+symforce.codegen.lcm\_types\_codegen module
+===========================================
+
+.. automodule:: symforce.codegen.lcm_types_codegen
+   :members:
+   :undoc-members:
+   :show-inheritance:

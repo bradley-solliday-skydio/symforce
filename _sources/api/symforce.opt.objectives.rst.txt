@@ -1,0 +1,17 @@
+symforce.opt.objectives package
+===============================
+
+.. automodule:: symforce.opt.objectives
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.opt.objectives.min_max_barrier_objective
+   symforce.opt.objectives.norm_barrier_objective
+   symforce.opt.objectives.prior_value_objective

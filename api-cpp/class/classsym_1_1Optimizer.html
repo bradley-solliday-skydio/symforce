@@ -1,0 +1,337 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Class sym::Optimizer &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
+    <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Class sym::SparseCholeskySolver" href="classsym_1_1SparseCholeskySolver.html" />
+    <link rel="prev" title="Class sym::Linearizer" href="classsym_1_1Linearizer.html" />
+   
+  <link rel="stylesheet" href="../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="class-sym-optimizer">
+<h1>Class sym::Optimizer<a class="headerlink" href="#class-sym-optimizer" title="Permalink to this headline">¶</a></h1>
+<dl class="cpp class">
+<dt class="sig sig-object cpp" id="_CPPv4I00EN3sym9OptimizerE">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ScalarType</span></span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NonlinearSolverType</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="classsym_1_1LevenbergMarquardtSolver.html#_CPPv4I00EN3sym24LevenbergMarquardtSolverE" title="sym::LevenbergMarquardtSolver"><span class="n"><span class="pre">LevenbergMarquardtSolver</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4I00EN3sym9OptimizerE" title="sym::Optimizer::ScalarType"><span class="n"><span class="pre">ScalarType</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Optimizer"></span><span class="k"><span class="pre">class</span></span><span class="w"> </span><span class="sig-prename descclassname"><a class="reference internal" href="../file/assert_8h.html#_CPPv43sym" title="sym"><span class="n"><span class="pre">sym</span></span></a><span class="p"><span class="pre">::</span></span></span><span class="sig-name descname"><span class="n"><span class="pre">Optimizer</span></span></span><a class="headerlink" href="#_CPPv4I00EN3sym9OptimizerE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Class for optimizing a nonlinear least-squares problem specified as a list of Factors. For efficient use, create once and call <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Optimizer_1a2daca7b1c9480065542e12e085c2956e"><span class="std std-ref">Optimize()</span></a> multiple times with different initial guesses, as long as the factors remain constant and the structure of the <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values"><span class="std std-ref">Values</span></a> is identical.</p>
+<p>Not thread safe! Create one per thread.</p>
+<p>Example usage:</p>
+<p>// Create a <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Values"><span class="std std-ref">Values</span></a> <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Key"><span class="std std-ref">sym::Key</span></a> key0{‘R’, 0}; <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Key"><span class="std std-ref">sym::Key</span></a> key1{‘R’, 1}; sym::Valuesd values; values.Set(key0, sym::Rot3d::Identity()); values.Set(key1, sym::Rot3d::Identity());</p>
+<p>// Create some factors std::vector&lt;sym::Factord&gt; factors; factors.push_back(<a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Factor_1af7e9c43cbcda9bc634f778d8b7e551cc"><span class="std std-ref">sym::Factord::Jacobian</span></a>( [epsilon](const sym::Rot3d&amp; rot, Eigen::Vector3d* const res, Eigen::Matrix3d* const jac) { const sym::Rot3d prior = sym::Rot3d::Random(); const Eigen::Matrix3d sqrt_info = Eigen::Vector3d::Ones().asDiagonal(); sym::PriorFactorRot3&lt;double&gt;(rot, prior, sqrt_info, epsilon, res, jac); }, {key0})); factors.push_back(<a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Factor_1af7e9c43cbcda9bc634f778d8b7e551cc"><span class="std std-ref">sym::Factord::Jacobian</span></a>( [epsilon](const sym::Rot3d&amp; rot, Eigen::Vector3d* const res, Eigen::Matrix3d* const jac) { const sym::Rot3d prior = sym::Rot3d::Random(); const Eigen::Matrix3d sqrt_info = Eigen::Vector3d::Ones().asDiagonal(); sym::PriorFactorRot3&lt;double&gt;(rot, prior, sqrt_info, epsilon, res, jac); }, {key1})); factors.push_back(<a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Factor_1af7e9c43cbcda9bc634f778d8b7e551cc"><span class="std std-ref">sym::Factord::Jacobian</span></a>( [epsilon](const sym::Rot3d&amp; a, const sym::Rot3d&amp; b, Eigen::Vector3d* const res, Eigen::Matrix&lt;double, 3, 6&gt;* const jac) { const Eigen::Matrix3d sqrt_info = Eigen::Vector3d::Ones().asDiagonal(); const sym::Rot3d a_T_b = sym::Rot3d::Random(); sym::BetweenFactorRot3&lt;double&gt;(a, b, a_T_b, sqrt_info, epsilon, res, jac); }, {key0, key1}));</p>
+<p>// Set up the params sym::optimizer_params_t params = DefaultLmParams(); params.iterations = 50; params.early_exit_min_reduction = 0.0001;</p>
+<p>// Optimize sym::Optimizer&lt;double&gt; optimizer(params, factors, epsilon); optimizer.Optimize(&amp;values);</p>
+<p>See symforce/test/symforce_optimizer_test.cc for more examples </p>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-types">Public Types</p>
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9Optimizer6ScalarE">
+<span class="target" id="classsym_1_1Optimizer_1a2b5a94a6ccd6032a8ffffbc2a96bd994"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Scalar</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN3sym9OptimizerE" title="sym::Optimizer::ScalarType"><span class="n"><span class="pre">ScalarType</span></span></a><a class="headerlink" href="#_CPPv4N3sym9Optimizer6ScalarE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp type">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9Optimizer15NonlinearSolverE">
+<span class="target" id="classsym_1_1Optimizer_1a57a267b2448c56975e183a4725e5c5f5"></span><span class="k"><span class="pre">using</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">NonlinearSolver</span></span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN3sym9OptimizerE" title="sym::Optimizer::NonlinearSolverType"><span class="n"><span class="pre">NonlinearSolverType</span></span></a><a class="headerlink" href="#_CPPv4N3sym9Optimizer15NonlinearSolverE" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+</div>
+<div class="breathe-sectiondef docutils container">
+<p class="breathe-sectiondef-title rubric" id="breathe-section-title-public-functions">Public Functions</p>
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9Optimizer9OptimizerERK18optimizer_params_tRKNSt6vectorI6FactorI6ScalarEEEK6ScalarRKNSt6stringERKNSt6vectorI3KeyEEbb">
+<span class="target" id="classsym_1_1Optimizer_1a50fdad530c0977b5c80a0de00ad67a6f"></span><span class="sig-name descname"><span class="n"><span class="pre">Optimizer</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">optimizer_params_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">params</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../file/key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor"><span class="n"><span class="pre">Factor</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">factors</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">epsilon</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">1e-9</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../file/key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">name</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="s"><span class="pre">&quot;sym::Optimize&quot;</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../file/key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="p"><span class="pre">{</span></span><span class="p"><span class="pre">}</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">debug_stats</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">false</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">check_derivatives</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">false</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3sym9Optimizer9OptimizerERK18optimizer_params_tRKNSt6vectorI6FactorI6ScalarEEEK6ScalarRKNSt6stringERKNSt6vectorI3KeyEEbb" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Constructor that copies in factors and keys </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4IDpEN3sym9Optimizer9OptimizerERK18optimizer_params_tRKNSt6vectorI6FactorI6ScalarEEEK6ScalarRKNSt6stringERKNSt6vectorI3KeyEEbbDpRR19NonlinearSolverArgs">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="sig-name descname"><span class="n"><span class="pre">NonlinearSolverArgs</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Optimizer_1af5de77ce1fc40b50a72fef4bf88e9dc0"></span><span class="sig-name descname"><span class="n"><span class="pre">Optimizer</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">optimizer_params_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">params</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../file/key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor"><span class="n"><span class="pre">Factor</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">factors</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">epsilon</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../file/key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">name</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../file/key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">debug_stats</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">check_derivatives</span></span>, <a class="reference internal" href="#_CPPv4IDpEN3sym9Optimizer9OptimizerERK18optimizer_params_tRKNSt6vectorI6FactorI6ScalarEEEK6ScalarRKNSt6stringERKNSt6vectorI3KeyEEbbDpRR19NonlinearSolverArgs" title="sym::Optimizer::Optimizer::NonlinearSolverArgs"><span class="n"><span class="pre">NonlinearSolverArgs</span></span></a><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">...</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">args</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4IDpEN3sym9Optimizer9OptimizerERK18optimizer_params_tRKNSt6vectorI6FactorI6ScalarEEEK6ScalarRKNSt6stringERKNSt6vectorI3KeyEEbbDpRR19NonlinearSolverArgs" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Constructor that copies in factors and keys, with arguments for the nonlinear solver </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9Optimizer9OptimizerERK18optimizer_params_tRRNSt6vectorI6FactorI6ScalarEEEK6ScalarRKNSt6stringERRNSt6vectorI3KeyEEbb">
+<span class="target" id="classsym_1_1Optimizer_1a94db5ff3e420fa9a40e8fc7c05f0ba59"></span><span class="sig-name descname"><span class="n"><span class="pre">Optimizer</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">optimizer_params_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">params</span></span>, <a class="reference internal" href="../file/key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor"><span class="n"><span class="pre">Factor</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">factors</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">epsilon</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="m"><span class="pre">1e-9</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../file/key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">name</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="s"><span class="pre">&quot;sym::Optimize&quot;</span></span>, <a class="reference internal" href="../file/key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="p"><span class="pre">{</span></span><span class="p"><span class="pre">}</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">debug_stats</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">false</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">check_derivatives</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">false</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3sym9Optimizer9OptimizerERK18optimizer_params_tRRNSt6vectorI6FactorI6ScalarEEEK6ScalarRKNSt6stringERRNSt6vectorI3KeyEEbb" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Constructor with move constructors for factors and keys. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4IDpEN3sym9Optimizer9OptimizerERK18optimizer_params_tRRNSt6vectorI6FactorI6ScalarEEEK6ScalarRKNSt6stringERRNSt6vectorI3KeyEEbbDpRR19NonlinearSolverArgs">
+<span class="k"><span class="pre">template</span></span><span class="p"><span class="pre">&lt;</span></span><span class="k"><span class="pre">typename</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="sig-name descname"><span class="n"><span class="pre">NonlinearSolverArgs</span></span></span><span class="p"><span class="pre">&gt;</span></span><br /><span class="target" id="classsym_1_1Optimizer_1a8eff0beb9db0c70459f8a0b5cb8d0766"></span><span class="sig-name descname"><span class="n"><span class="pre">Optimizer</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">optimizer_params_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">params</span></span>, <a class="reference internal" href="../file/key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor"><span class="n"><span class="pre">Factor</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">factors</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="w"> </span><span class="n sig-param"><span class="pre">epsilon</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../file/key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">string</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">name</span></span>, <a class="reference internal" href="../file/key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">debug_stats</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">check_derivatives</span></span>, <a class="reference internal" href="#_CPPv4IDpEN3sym9Optimizer9OptimizerERK18optimizer_params_tRRNSt6vectorI6FactorI6ScalarEEEK6ScalarRKNSt6stringERRNSt6vectorI3KeyEEbbDpRR19NonlinearSolverArgs" title="sym::Optimizer::Optimizer::NonlinearSolverArgs"><span class="n"><span class="pre">NonlinearSolverArgs</span></span></a><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">...</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">args</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4IDpEN3sym9Optimizer9OptimizerERK18optimizer_params_tRRNSt6vectorI6FactorI6ScalarEEEK6ScalarRKNSt6stringERRNSt6vectorI3KeyEEbbDpRR19NonlinearSolverArgs" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Constructor with move constructors for factors and keys, with arguments for the nonlinear solver </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9Optimizer9OptimizerERR9Optimizer">
+<span class="target" id="classsym_1_1Optimizer_1a7cc1d73a76afe517fe89fa3544f38ddf"></span><span class="sig-name descname"><span class="n"><span class="pre">Optimizer</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4N3sym9Optimizer9OptimizerERR9Optimizer" title="sym::Optimizer::Optimizer"><span class="n"><span class="pre">Optimizer</span></span></a><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">delete</span></span><a class="headerlink" href="#_CPPv4N3sym9Optimizer9OptimizerERR9Optimizer" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9OptimizeraSERR9Optimizer">
+<span class="target" id="classsym_1_1Optimizer_1aef8e52cb7e17be6b7a91c7dd749e424e"></span><a class="reference internal" href="#_CPPv4I00EN3sym9OptimizerE" title="sym::Optimizer"><span class="n"><span class="pre">Optimizer</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">=</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="#_CPPv4I00EN3sym9OptimizerE" title="sym::Optimizer"><span class="n"><span class="pre">Optimizer</span></span></a><span class="p"><span class="pre">&amp;</span></span><span class="p"><span class="pre">&amp;</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">delete</span></span><a class="headerlink" href="#_CPPv4N3sym9OptimizeraSERR9Optimizer" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9Optimizer9OptimizerERK9Optimizer">
+<span class="target" id="classsym_1_1Optimizer_1a85968e6c34e40adc6a293a414f3cf5ff"></span><span class="sig-name descname"><span class="n"><span class="pre">Optimizer</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4N3sym9Optimizer9OptimizerERK9Optimizer" title="sym::Optimizer::Optimizer"><span class="n"><span class="pre">Optimizer</span></span></a><span class="p"><span class="pre">&amp;</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">delete</span></span><a class="headerlink" href="#_CPPv4N3sym9Optimizer9OptimizerERK9Optimizer" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9OptimizeraSERK9Optimizer">
+<span class="target" id="classsym_1_1Optimizer_1a3e2d4dfb3cc677ca876d3233c215e9b2"></span><a class="reference internal" href="#_CPPv4I00EN3sym9OptimizerE" title="sym::Optimizer"><span class="n"><span class="pre">Optimizer</span></span></a><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="k"><span class="pre">operator</span></span><span class="o"><span class="pre">=</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="#_CPPv4I00EN3sym9OptimizerE" title="sym::Optimizer"><span class="n"><span class="pre">Optimizer</span></span></a><span class="p"><span class="pre">&amp;</span></span><span class="sig-paren">)</span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">delete</span></span><a class="headerlink" href="#_CPPv4N3sym9OptimizeraSERK9Optimizer" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9OptimizerD0Ev">
+<span class="target" id="classsym_1_1Optimizer_1ac1c33670fdff2f1a53d2cb396da0a9d1"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">~Optimizer</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">default</span></span><a class="headerlink" href="#_CPPv4N3sym9OptimizerD0Ev" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9Optimizer8OptimizeEP6ValuesI6ScalarEib">
+<span class="target" id="classsym_1_1Optimizer_1a2daca7b1c9480065542e12e085c2956e"></span><a class="reference internal" href="../file/optimization__stats_8h.html#_CPPv4I0EN3sym17OptimizationStatsE" title="sym::OptimizationStats"><span class="n"><span class="pre">OptimizationStats</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Optimize</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">values</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_iterations</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="o"><span class="pre">-</span></span><span class="m"><span class="pre">1</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">populate_best_linearization</span></span><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="k"><span class="pre">false</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3sym9Optimizer8OptimizeEP6ValuesI6ScalarEib" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Optimize the given values in-place</p>
+<p>Args: num_iterations: If &lt; 0 (the default), uses the number of iterations specified by the params at construction populate_best_linearization: If true, the linearization at the best values will be filled out in the stats</p>
+<p>Returns: The optimization stats </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9Optimizer8OptimizeEP6ValuesI6ScalarEibP17OptimizationStatsI6ScalarE">
+<span class="target" id="classsym_1_1Optimizer_1af3eccd7aaeed2e81673934cb2d7b814f"></span><span class="k"><span class="pre">virtual</span></span><span class="w"> </span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Optimize</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">values</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_iterations</span></span>, <span class="kt"><span class="pre">bool</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">populate_best_linearization</span></span>, <a class="reference internal" href="../file/optimization__stats_8h.html#_CPPv4I0EN3sym17OptimizationStatsE" title="sym::OptimizationStats"><span class="n"><span class="pre">OptimizationStats</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">stats</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3sym9Optimizer8OptimizeEP6ValuesI6ScalarEibP17OptimizationStatsI6ScalarE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Optimize the given values in-place</p>
+<p>This overload takes the stats as an argument, and stores into there. This allows users to avoid reallocating memory for any of the entries in the stats, for use cases where that’s important. If passed, stats must not be nullptr.</p>
+<p>Args: num_iterations: If &lt; 0 (the default), uses the number of iterations specified by the params at construction populate_best_linearization: If true, the linearization at the best values will be filled out in the stats stats: An <a class="reference internal" href="../struct/structsym_1_1OptimizationStats.html#structsym_1_1OptimizationStats"><span class="std std-ref">OptimizationStats</span></a> to fill out with the result - if filling out dynamically allocated fields here, will not reallocate if memory is already allocated in the required shape (e.g. for repeated calls to Optimize) </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9Optimizer8OptimizeEP6ValuesI6ScalarEiP17OptimizationStatsI6ScalarE">
+<span class="target" id="classsym_1_1Optimizer_1ab7b69208c318348f8ffac0f3e44010a4"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Optimize</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">values</span></span>, <span class="kt"><span class="pre">int</span></span><span class="w"> </span><span class="n sig-param"><span class="pre">num_iterations</span></span>, <a class="reference internal" href="../file/optimization__stats_8h.html#_CPPv4I0EN3sym17OptimizationStatsE" title="sym::OptimizationStats"><span class="n"><span class="pre">OptimizationStats</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">stats</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3sym9Optimizer8OptimizeEP6ValuesI6ScalarEiP17OptimizationStatsI6ScalarE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Optimize the given values in-place</p>
+<p>This overload takes the stats as an argument, and stores into there. This allows users to avoid reallocating memory for any of the entries in the stats, for use cases where that’s important. If passed, stats must not be nullptr.</p>
+<p>Args: num_iterations: If &lt; 0 (the default), uses the number of iterations specified by the params at construction stats: An <a class="reference internal" href="../struct/structsym_1_1OptimizationStats.html#structsym_1_1OptimizationStats"><span class="std std-ref">OptimizationStats</span></a> to fill out with the result - if filling out dynamically allocated fields here, will not reallocate if memory is already allocated in the required shape (e.g. for repeated calls to Optimize) </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9Optimizer8OptimizeEP6ValuesI6ScalarEP17OptimizationStatsI6ScalarE">
+<span class="target" id="classsym_1_1Optimizer_1a45176bf0c29fe9dc1b9a34163313df4d"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Optimize</span></span></span><span class="sig-paren">(</span><a class="reference internal" href="classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">values</span></span>, <a class="reference internal" href="../file/optimization__stats_8h.html#_CPPv4I0EN3sym17OptimizationStatsE" title="sym::OptimizationStats"><span class="n"><span class="pre">OptimizationStats</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">stats</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3sym9Optimizer8OptimizeEP6ValuesI6ScalarEP17OptimizationStatsI6ScalarE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Optimize the given values in-place</p>
+<p>This overload takes the stats as an argument, and stores into there. This allows users to avoid reallocating memory for any of the entries in the stats, for use cases where that’s important. If passed, stats must not be nullptr.</p>
+<p>Args: stats: An <a class="reference internal" href="../struct/structsym_1_1OptimizationStats.html#structsym_1_1OptimizationStats"><span class="std std-ref">OptimizationStats</span></a> to fill out with the result - if filling out dynamically allocated fields here, will not reallocate if memory is already allocated in the required shape (e.g. for repeated calls to Optimize) </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9Optimizer9LinearizeERK6ValuesI6ScalarE">
+<span class="target" id="classsym_1_1Optimizer_1a89c594956add67ab625ec4b95006be95"></span><a class="reference internal" href="../file/linearization_8h.html#_CPPv4I0EN3sym13LinearizationE" title="sym::Linearization"><span class="n"><span class="pre">Linearization</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">Linearize</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="classsym_1_1Values.html#_CPPv4I0EN3sym6ValuesE" title="sym::Values"><span class="n"><span class="pre">Values</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">values</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3sym9Optimizer9LinearizeERK6ValuesI6ScalarE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Linearize the problem around the given values </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9Optimizer21ComputeAllCovariancesERK13LinearizationI6ScalarEPNSt13unordered_mapI3Key7MatrixXI6ScalarEEE">
+<span class="target" id="classsym_1_1Optimizer_1a8141a8e23858638ea277606d66c31a60"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ComputeAllCovariances</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../file/linearization_8h.html#_CPPv4I0EN3sym13LinearizationE" title="sym::Linearization"><span class="n"><span class="pre">Linearization</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">linearization</span></span>, <a class="reference internal" href="../file/key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">unordered_map</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7MatrixXE" title="sym::MatrixX"><span class="n"><span class="pre">MatrixX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">covariances_by_key</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3sym9Optimizer21ComputeAllCovariancesERK13LinearizationI6ScalarEPNSt13unordered_mapI3Key7MatrixXI6ScalarEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get covariances for each optimized key at the given linearization</p>
+<p>Will reuse entries in covariances_by_key, allocating new entries so that the result contains exactly the set of keys optimized by this <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Optimizer"><span class="std std-ref">Optimizer</span></a>. <code class="docutils literal notranslate"><span class="pre">covariances_by_key</span></code> must not contain any keys that are not optimized by this <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Optimizer"><span class="std std-ref">Optimizer</span></a>.</p>
+<p>May not be called before either Optimize or Linearize has been called. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9Optimizer18ComputeCovariancesERK13LinearizationI6ScalarERKNSt6vectorI3KeyEEPNSt13unordered_mapI3Key7MatrixXI6ScalarEEE">
+<span class="target" id="classsym_1_1Optimizer_1af41949d01264c90bb5fd85df7871c587"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">ComputeCovariances</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../file/linearization_8h.html#_CPPv4I0EN3sym13LinearizationE" title="sym::Linearization"><span class="n"><span class="pre">Linearization</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">linearization</span></span>, <span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../file/key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">keys</span></span>, <a class="reference internal" href="../file/key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">unordered_map</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../api-gen-cpp/file/typedefs_8h.html#_CPPv4I0EN3sym7MatrixXE" title="sym::MatrixX"><span class="n"><span class="pre">MatrixX</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">*</span></span><span class="n sig-param"><span class="pre">covariances_by_key</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3sym9Optimizer18ComputeCovariancesERK13LinearizationI6ScalarERKNSt6vectorI3KeyEEPNSt13unordered_mapI3Key7MatrixXI6ScalarEEE" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get covariances for the given subset of keys at the given linearization. This version is potentially much more efficient than computing the covariances for all keys in the problem.</p>
+<p>Currently requires that <code class="docutils literal notranslate"><span class="pre">keys</span></code> corresponds to a set of keys at the start of the list of keys for the full problem, and in the same order. It uses the Schur complement trick, so will be most efficient if the hessian is of the following form, with C block diagonal: <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">A</span> <span class="o">=</span> <span class="p">(</span> <span class="n">B</span>    <span class="n">E</span> <span class="p">)</span>
+    <span class="p">(</span> <span class="n">E</span><span class="o">^</span><span class="n">T</span>  <span class="n">C</span> <span class="p">)</span>
+</pre></div>
+</div>
+</p>
+<p>Will reuse entries in covariances_by_key, allocating new entries so that the result contains exactly the set of keys requested. <code class="docutils literal notranslate"><span class="pre">covariances_by_key</span></code> must not contain any keys that are not in <code class="docutils literal notranslate"><span class="pre">keys</span></code>. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym9Optimizer4KeysEv">
+<span class="target" id="classsym_1_1Optimizer_1a1e4c4f01b275dd46b9ef50e80eb89c4c"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../file/key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="classsym_1_1Key.html#_CPPv4N3sym3KeyE" title="sym::Key"><span class="n"><span class="pre">Key</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">Keys</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3sym9Optimizer4KeysEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get the optimized keys </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym9Optimizer7FactorsEv">
+<span class="target" id="classsym_1_1Optimizer_1acb02dfa0ade3579f85cb54c570a3a726"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../file/key_8cc.html#_CPPv4St" title="std"><span class="n"><span class="pre">std</span></span></a><span class="p"><span class="pre">::</span></span><span class="n"><span class="pre">vector</span></span><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="classsym_1_1Factor.html#_CPPv4I0EN3sym6FactorE" title="sym::Factor"><span class="n"><span class="pre">Factor</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">Factors</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3sym9Optimizer7FactorsEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get the factors. </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4NK3sym9Optimizer10LinearizerEv">
+<span class="target" id="classsym_1_1Optimizer_1a54fa8a999c98d014f6b9709af367d7cb"></span><span class="k"><span class="pre">const</span></span><span class="w"> </span><a class="reference internal" href="../file/assert_8h.html#_CPPv43sym" title="sym"><span class="n"><span class="pre">sym</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classsym_1_1Linearizer.html#_CPPv4I0EN3sym10LinearizerE" title="sym::Linearizer"><span class="n"><span class="pre">Linearizer</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">Linearizer</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><span class="w"> </span><span class="k"><span class="pre">const</span></span><a class="headerlink" href="#_CPPv4NK3sym9Optimizer10LinearizerEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Get the <a class="reference internal" href="../namespace/namespacesym.html#classsym_1_1Linearizer"><span class="std std-ref">Linearizer</span></a> object </p>
+</dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9Optimizer10LinearizerEv">
+<span class="target" id="classsym_1_1Optimizer_1a90cc86cc7f3ee013bedb44fc1ec65ecf"></span><a class="reference internal" href="../file/assert_8h.html#_CPPv43sym" title="sym"><span class="n"><span class="pre">sym</span></span></a><span class="p"><span class="pre">::</span></span><a class="reference internal" href="classsym_1_1Linearizer.html#_CPPv4I0EN3sym10LinearizerE" title="sym::Linearizer"><span class="n"><span class="pre">Linearizer</span></span></a><span class="p"><span class="pre">&lt;</span></span><a class="reference internal" href="#_CPPv4N3sym9Optimizer6ScalarE" title="sym::Optimizer::Scalar"><span class="n"><span class="pre">Scalar</span></span></a><span class="p"><span class="pre">&gt;</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="sig-name descname"><span class="n"><span class="pre">Linearizer</span></span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3sym9Optimizer10LinearizerEv" title="Permalink to this definition">¶</a><br /></dt>
+<dd></dd></dl>
+
+<dl class="cpp function">
+<dt class="sig sig-object cpp" id="_CPPv4N3sym9Optimizer12UpdateParamsERK18optimizer_params_t">
+<span class="target" id="classsym_1_1Optimizer_1aee7dcb49548656da2d58e78f4ee0be2a"></span><span class="kt"><span class="pre">void</span></span><span class="w"> </span><span class="sig-name descname"><span class="n"><span class="pre">UpdateParams</span></span></span><span class="sig-paren">(</span><span class="k"><span class="pre">const</span></span><span class="w"> </span><span class="n"><span class="pre">optimizer_params_t</span></span><span class="w"> </span><span class="p"><span class="pre">&amp;</span></span><span class="n sig-param"><span class="pre">params</span></span><span class="sig-paren">)</span><a class="headerlink" href="#_CPPv4N3sym9Optimizer12UpdateParamsERK18optimizer_params_t" title="Permalink to this definition">¶</a><br /></dt>
+<dd><p>Update the optimizer params </p>
+</dd></dl>
+
+</div>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../classlist.html">Class list</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1Factor.html">Class sym::Factor</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1GncOptimizer.html">Class sym::GncOptimizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1Interpolator.html">Class sym::Interpolator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1Key.html">Class sym::Key</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1LevenbergMarquardtSolver.html">Class sym::LevenbergMarquardtSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1Linearizer.html">Class sym::Linearizer</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Class sym::Optimizer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1SparseCholeskySolver.html">Class sym::SparseCholeskySolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1SparseSchurSolver.html">Class sym::SparseSchurSolver</a></li>
+<li class="toctree-l2"><a class="reference internal" href="classsym_1_1Values.html">Class sym::Values</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../index.html">Documentation overview</a><ul>
+  <li><a href="../classlist.html">Class list</a><ul>
+      <li>Previous: <a href="classsym_1_1Linearizer.html" title="previous chapter">Class sym::Linearizer</a></li>
+      <li>Next: <a href="classsym_1_1SparseCholeskySolver.html" title="next chapter">Class sym::SparseCholeskySolver</a></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../../_sources/api-cpp/class/classsym_1_1Optimizer.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

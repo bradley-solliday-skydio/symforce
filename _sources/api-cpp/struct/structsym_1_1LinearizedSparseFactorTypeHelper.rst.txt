@@ -1,0 +1,5 @@
+Struct sym::LinearizedSparseFactorTypeHelper
+============================================
+
+.. doxygenstruct:: sym::LinearizedSparseFactorTypeHelper
+   :project: api-cpp

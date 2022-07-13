@@ -1,0 +1,564 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>symforce.examples.robot_3d_localization.robot_3d_localization &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for symforce.examples.robot_3d_localization.robot_3d_localization</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># SymForce - Copyright 2022, Skydio, Inc.</span>
+<span class="c1"># This source code is under the Apache 2.0 license found in the LICENSE file.</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Demonstrates solving a 3D localization problem with SymForce. A robot moving</span>
+<span class="sd">in 3D performs scan matching and gets relative translation constraints to landmarks</span>
+<span class="sd">in the environment. It also has odometry constraints between its poses. The goal is</span>
+<span class="sd">to estimate the trajectory of the robot given known landmarks and noisy measurements.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c1"># pylint: disable=ungrouped-imports</span>
+
+<span class="c1"># -----------------------------------------------------------------------------</span>
+<span class="c1"># Define residual functions</span>
+<span class="c1"># -----------------------------------------------------------------------------</span>
+<span class="kn">import</span> <span class="nn">symforce</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">import</span> <span class="nn">symforce.symbolic</span> <span class="k">as</span> <span class="nn">sf</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">typing</span> <span class="k">as</span> <span class="n">T</span>
+
+<span class="k">if</span> <span class="n">symforce</span><span class="o">.</span><span class="n">get_symbolic_api</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;symengine&quot;</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;The 3D Localization example is very slow on sympy. Use symengine.&quot;</span><span class="p">)</span>
+
+<span class="n">NUM_POSES</span> <span class="o">=</span> <span class="mi">5</span>
+<span class="n">NUM_LANDMARKS</span> <span class="o">=</span> <span class="mi">20</span>
+
+
+<div class="viewcode-block" id="matching_residual"><a class="viewcode-back" href="../../../../api/symforce.examples.robot_3d_localization.robot_3d_localization.html#symforce.examples.robot_3d_localization.robot_3d_localization.matching_residual">[docs]</a><span class="k">def</span> <span class="nf">matching_residual</span><span class="p">(</span>
+    <span class="n">world_T_body</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Pose3</span><span class="p">,</span> <span class="n">world_t_landmark</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">V3</span><span class="p">,</span> <span class="n">body_t_landmark</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">V3</span><span class="p">,</span> <span class="n">sigma</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">V3</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Residual from a relative translation mesurement of a 3D pose to a landmark.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        world_T_body: 3D pose of the robot in the world frame</span>
+<span class="sd">        world_t_landmark: World location of the landmark</span>
+<span class="sd">        body_t_landmark: Measured body-frame location of the landmark</span>
+<span class="sd">        sigma: Isotropic standard deviation of the measurement [m]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">body_t_landmark_predicted</span> <span class="o">=</span> <span class="n">world_T_body</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span> <span class="o">*</span> <span class="n">world_t_landmark</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">body_t_landmark_predicted</span> <span class="o">-</span> <span class="n">body_t_landmark</span><span class="p">)</span> <span class="o">/</span> <span class="n">sigma</span></div>
+
+
+<div class="viewcode-block" id="odometry_residual"><a class="viewcode-back" href="../../../../api/symforce.examples.robot_3d_localization.robot_3d_localization.html#symforce.examples.robot_3d_localization.robot_3d_localization.odometry_residual">[docs]</a><span class="k">def</span> <span class="nf">odometry_residual</span><span class="p">(</span>
+    <span class="n">world_T_a</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Pose3</span><span class="p">,</span>
+    <span class="n">world_T_b</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Pose3</span><span class="p">,</span>
+    <span class="n">a_T_b</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Pose3</span><span class="p">,</span>
+    <span class="n">diagonal_sigmas</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">V6</span><span class="p">,</span>
+    <span class="n">epsilon</span><span class="p">:</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">V6</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Residual on the relative pose between two timesteps of the robot.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        world_T_a: First pose in the world frame</span>
+<span class="sd">        world_T_b: Second pose in the world frame</span>
+<span class="sd">        a_T_b: Relative pose measurement between the poses</span>
+<span class="sd">        diagonal_sigmas: Diagonal standard deviation of the tangent-space error</span>
+<span class="sd">        epsilon: Small number for singularity handling</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a_T_b_predicted</span> <span class="o">=</span> <span class="n">world_T_a</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span> <span class="o">*</span> <span class="n">world_T_b</span>
+    <span class="n">tangent_error</span> <span class="o">=</span> <span class="n">a_T_b_predicted</span><span class="o">.</span><span class="n">local_coordinates</span><span class="p">(</span><span class="n">a_T_b</span><span class="p">,</span> <span class="n">epsilon</span><span class="o">=</span><span class="n">epsilon</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">T</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">V6</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">M</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">diagonal_sigmas</span><span class="o">.</span><span class="n">to_flat_list</span><span class="p">())</span><span class="o">.</span><span class="n">inv</span><span class="p">()</span> <span class="o">*</span> <span class="n">sf</span><span class="o">.</span><span class="n">V6</span><span class="p">(</span><span class="n">tangent_error</span><span class="p">))</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------------------------</span>
+<span class="c1"># Create a set of factors to represent the full problem</span>
+<span class="c1"># -----------------------------------------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">symforce.opt.factor</span> <span class="kn">import</span> <span class="n">Factor</span>
+
+
+<div class="viewcode-block" id="build_factors"><a class="viewcode-back" href="../../../../api/symforce.examples.robot_3d_localization.robot_3d_localization.html#symforce.examples.robot_3d_localization.robot_3d_localization.build_factors">[docs]</a><span class="k">def</span> <span class="nf">build_factors</span><span class="p">(</span><span class="n">num_poses</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_landmarks</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Iterator</span><span class="p">[</span><span class="n">Factor</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Build factors for a problem of the given dimensionality.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_poses</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_landmarks</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="n">Factor</span><span class="p">(</span>
+                <span class="n">residual</span><span class="o">=</span><span class="n">matching_residual</span><span class="p">,</span>
+                <span class="n">keys</span><span class="o">=</span><span class="p">[</span>
+                    <span class="sa">f</span><span class="s2">&quot;world_T_body[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;world_t_landmark[</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">&quot;body_t_landmark_measurements[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">][</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;matching_sigma&quot;</span><span class="p">,</span>
+                <span class="p">],</span>
+            <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_poses</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">Factor</span><span class="p">(</span>
+            <span class="n">residual</span><span class="o">=</span><span class="n">odometry_residual</span><span class="p">,</span>
+            <span class="n">keys</span><span class="o">=</span><span class="p">[</span>
+                <span class="sa">f</span><span class="s2">&quot;world_T_body[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;world_T_body[</span><span class="si">{</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;odometry_relative_pose_measurements[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;odometry_diagonal_sigmas&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;epsilon&quot;</span><span class="p">,</span>
+            <span class="p">],</span>
+        <span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------------------------</span>
+<span class="c1"># Instantiate, optimize, and visualize</span>
+<span class="c1"># -----------------------------------------------------------------------------</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">symforce.opt.optimizer</span> <span class="kn">import</span> <span class="n">Optimizer</span>
+<span class="kn">from</span> <span class="nn">symforce.values</span> <span class="kn">import</span> <span class="n">Values</span>
+<span class="kn">import</span> <span class="nn">sym</span>
+
+
+<div class="viewcode-block" id="build_residual"><a class="viewcode-back" href="../../../../api/symforce.examples.robot_3d_localization.robot_3d_localization.html#symforce.examples.robot_3d_localization.robot_3d_localization.build_residual">[docs]</a><span class="k">def</span> <span class="nf">build_residual</span><span class="p">(</span><span class="n">num_poses</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_landmarks</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">Values</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">:</span>
+    <span class="n">residuals</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_poses</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_landmarks</span><span class="p">):</span>
+            <span class="n">residuals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">matching_residual</span><span class="p">(</span>
+                    <span class="n">values</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">world_T_body</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                    <span class="n">values</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">world_t_landmark</span><span class="p">[</span><span class="n">j</span><span class="p">],</span>
+                    <span class="n">values</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">body_t_landmark_measurements</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">j</span><span class="p">],</span>
+                    <span class="n">values</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">matching_sigma</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_poses</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="n">residuals</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">odometry_residual</span><span class="p">(</span>
+                <span class="n">values</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">world_T_body</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">values</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">world_T_body</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">],</span>
+                <span class="n">values</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">odometry_relative_pose_measurements</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">values</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">odometry_diagonal_sigmas</span><span class="p">,</span>
+                <span class="n">values</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">epsilon</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="o">.</span><span class="n">block_matrix</span><span class="p">([[</span><span class="n">residual</span><span class="p">]</span> <span class="k">for</span> <span class="n">residual</span> <span class="ow">in</span> <span class="n">residuals</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="build_values"><a class="viewcode-back" href="../../../../api/symforce.examples.robot_3d_localization.robot_3d_localization.html#symforce.examples.robot_3d_localization.robot_3d_localization.build_values">[docs]</a><span class="k">def</span> <span class="nf">build_values</span><span class="p">(</span><span class="n">num_poses</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Values</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+    <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">42</span><span class="p">)</span>
+
+    <span class="c1"># Create a problem setup and initial guess</span>
+    <span class="n">values</span> <span class="o">=</span> <span class="n">Values</span><span class="p">()</span>
+
+    <span class="c1"># Create sample ground-truth poses</span>
+    <span class="n">gt_world_T_body</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_poses</span><span class="p">):</span>
+        <span class="c1"># Pick a nonlinear shape of motion to make it interesting</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">i</span> <span class="o">/</span> <span class="n">num_poses</span>
+        <span class="n">tangent_vec</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="o">-</span><span class="mi">1</span> <span class="o">*</span> <span class="n">t</span><span class="p">,</span>
+                <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="n">t</span><span class="p">,</span>
+                <span class="o">-</span><span class="mi">3</span> <span class="o">*</span> <span class="n">t</span><span class="p">,</span>
+                <span class="mi">8</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">1.3</span><span class="p">),</span>
+                <span class="mi">9</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mi">2</span><span class="p">),</span>
+                <span class="mi">5</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">t</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span> <span class="o">/</span> <span class="mf">1.8</span><span class="p">),</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">gt_world_T_body</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="n">sym</span><span class="o">.</span><span class="n">Pose3</span><span class="o">.</span><span class="n">from_tangent</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">tangent_vec</span><span class="p">),</span> <span class="n">epsilon</span><span class="o">=</span><span class="n">sf</span><span class="o">.</span><span class="n">numeric_epsilon</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Set the initial guess either to ground truth or identity</span>
+    <span class="n">use_gt_poses</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">use_gt_poses</span><span class="p">:</span>
+        <span class="n">values</span><span class="p">[</span><span class="s2">&quot;world_T_body&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">gt_world_T_body</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">values</span><span class="p">[</span><span class="s2">&quot;world_T_body&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">sym</span><span class="o">.</span><span class="n">Pose3</span><span class="o">.</span><span class="n">identity</span><span class="p">()</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_poses</span><span class="p">)]</span>
+
+    <span class="c1"># Set landmark locations</span>
+    <span class="n">values</span><span class="p">[</span><span class="s2">&quot;world_t_landmark&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="n">low</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="n">high</span><span class="o">=</span><span class="mf">10.0</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">NUM_LANDMARKS</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">num_landmarks</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="s2">&quot;world_t_landmark&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Set odometry measurements</span>
+    <span class="n">values</span><span class="p">[</span><span class="s2">&quot;odometry_diagonal_sigmas&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">])</span>
+    <span class="n">values</span><span class="p">[</span><span class="s2">&quot;odometry_relative_pose_measurements&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_poses</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+        <span class="c1"># Get ground truth</span>
+        <span class="n">gt_relative_pose</span> <span class="o">=</span> <span class="n">gt_world_T_body</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span> <span class="o">*</span> <span class="n">gt_world_T_body</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># Perturb</span>
+        <span class="n">tangent_perturbation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span> <span class="o">*</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;odometry_diagonal_sigmas&quot;</span><span class="p">]</span>
+        <span class="n">relative_pose_meas</span> <span class="o">=</span> <span class="n">gt_relative_pose</span><span class="o">.</span><span class="n">retract</span><span class="p">(</span><span class="n">tangent_perturbation</span><span class="p">)</span>
+
+        <span class="n">values</span><span class="p">[</span><span class="s2">&quot;odometry_relative_pose_measurements&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">relative_pose_meas</span><span class="p">)</span>
+
+    <span class="c1"># Set landmark measurements</span>
+    <span class="n">values</span><span class="p">[</span><span class="s2">&quot;matching_sigma&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.1</span>
+    <span class="n">values</span><span class="p">[</span><span class="s2">&quot;body_t_landmark_measurements&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">num_poses</span><span class="p">,</span> <span class="n">num_landmarks</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_poses</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_landmarks</span><span class="p">):</span>
+            <span class="c1"># Get ground truth</span>
+            <span class="n">gt_body_t_landmark</span> <span class="o">=</span> <span class="n">gt_world_T_body</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">inverse</span><span class="p">()</span> <span class="o">*</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;world_t_landmark&quot;</span><span class="p">][</span><span class="n">j</span><span class="p">]</span>
+
+            <span class="c1"># Perturb</span>
+            <span class="n">perturbation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="n">values</span><span class="p">[</span><span class="s2">&quot;matching_sigma&quot;</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+            <span class="n">body_t_landmark_meas</span> <span class="o">=</span> <span class="n">gt_body_t_landmark</span> <span class="o">+</span> <span class="n">perturbation</span>
+
+            <span class="n">values</span><span class="p">[</span><span class="s2">&quot;body_t_landmark_measurements&quot;</span><span class="p">][</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="n">body_t_landmark_meas</span>
+
+    <span class="c1"># Turn first two axes into python lists so they are individual keys, not part of a tensor</span>
+    <span class="n">values</span><span class="p">[</span><span class="s2">&quot;body_t_landmark_measurements&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">m</span><span class="p">)</span> <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">values</span><span class="p">[</span><span class="s2">&quot;body_t_landmark_measurements&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="n">values</span><span class="p">[</span><span class="s2">&quot;epsilon&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">numeric_epsilon</span>
+
+    <span class="k">return</span> <span class="n">values</span><span class="p">,</span> <span class="n">num_landmarks</span></div>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../../../api/symforce.examples.robot_3d_localization.robot_3d_localization.html#symforce.examples.robot_3d_localization.robot_3d_localization.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">num_poses</span> <span class="o">=</span> <span class="n">NUM_POSES</span>
+
+    <span class="n">values</span><span class="p">,</span> <span class="n">num_landmarks</span> <span class="o">=</span> <span class="n">build_values</span><span class="p">(</span><span class="n">num_poses</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">items_recursive</span><span class="p">():</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">to_storage</span><span class="p">())</span>
+
+    <span class="c1"># Create factors</span>
+    <span class="n">factors</span> <span class="o">=</span> <span class="n">build_factors</span><span class="p">(</span><span class="n">num_poses</span><span class="o">=</span><span class="n">num_poses</span><span class="p">,</span> <span class="n">num_landmarks</span><span class="o">=</span><span class="n">num_landmarks</span><span class="p">)</span>
+
+    <span class="c1"># Select the keys to optimize - the rest will be held constant</span>
+    <span class="n">optimized_keys</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;world_T_body[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_poses</span><span class="p">)]</span>
+
+    <span class="c1"># Create the optimizer</span>
+    <span class="n">optimizer</span> <span class="o">=</span> <span class="n">Optimizer</span><span class="p">(</span>
+        <span class="n">factors</span><span class="o">=</span><span class="n">factors</span><span class="p">,</span>
+        <span class="n">optimized_keys</span><span class="o">=</span><span class="n">optimized_keys</span><span class="p">,</span>
+        <span class="c1"># Return problem stats for every iteration</span>
+        <span class="n">debug_stats</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="c1"># Customize optimizer behavior</span>
+        <span class="n">params</span><span class="o">=</span><span class="n">Optimizer</span><span class="o">.</span><span class="n">Params</span><span class="p">(</span><span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">initial_lambda</span><span class="o">=</span><span class="mf">1e4</span><span class="p">,</span> <span class="n">lambda_down_factor</span><span class="o">=</span><span class="mi">1</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Solve and return the result</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">optimizer</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+    <span class="c1"># Print some values</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Num iterations: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">iteration_stats</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Final error: </span><span class="si">{</span><span class="n">result</span><span class="o">.</span><span class="n">error</span><span class="p">()</span><span class="si">:</span><span class="s2">.6f</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">pose</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">optimized_values</span><span class="p">[</span><span class="s2">&quot;world_T_body&quot;</span><span class="p">]):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;world_T_body </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: t = </span><span class="si">{</span><span class="n">pose</span><span class="o">.</span><span class="n">position</span><span class="p">()</span><span class="si">}</span><span class="s2">, R = </span><span class="si">{</span><span class="n">pose</span><span class="o">.</span><span class="n">rotation</span><span class="p">()</span><span class="o">.</span><span class="n">to_tangent</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Plot the result</span>
+    <span class="kn">from</span> <span class="nn">symforce.examples.robot_3d_localization.plotting</span> <span class="kn">import</span> <span class="n">plot_solution</span>
+
+    <span class="c1"># With animated=True, it will save a video called &quot;robot_3d_localization.mp4&quot;.</span>
+    <span class="c1"># With animated=False, it will load an interactive figure with a slider.</span>
+    <span class="n">plot_solution</span><span class="p">(</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">animated</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<span class="c1"># -----------------------------------------------------------------------------</span>
+<span class="c1"># (Optional) Generate C++ functions for residuals with on-manifold jacobians</span>
+<span class="c1"># -----------------------------------------------------------------------------</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">symforce.codegen</span> <span class="kn">import</span> <span class="n">Codegen</span><span class="p">,</span> <span class="n">CodegenConfig</span><span class="p">,</span> <span class="n">CppConfig</span><span class="p">,</span> <span class="n">values_codegen</span><span class="p">,</span> <span class="n">template_util</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
+<span class="kn">import</span> <span class="nn">textwrap</span>
+
+
+<div class="viewcode-block" id="build_codegen_object"><a class="viewcode-back" href="../../../../api/symforce.examples.robot_3d_localization.robot_3d_localization.html#symforce.examples.robot_3d_localization.robot_3d_localization.build_codegen_object">[docs]</a><span class="k">def</span> <span class="nf">build_codegen_object</span><span class="p">(</span><span class="n">num_poses</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">config</span><span class="p">:</span> <span class="n">CodegenConfig</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Codegen</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Create Codegen object for the linearization function</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">CppConfig</span><span class="p">()</span>
+
+    <span class="n">values</span><span class="p">,</span> <span class="n">num_landmarks</span> <span class="o">=</span> <span class="n">build_values</span><span class="p">(</span><span class="n">num_poses</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">symbolic</span><span class="p">(</span><span class="n">k</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">v</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Any</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">sym</span><span class="o">.</span><span class="n">Pose3</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">sf</span><span class="o">.</span><span class="n">Pose3</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">sf</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="o">*</span><span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">.</span><span class="n">symbolic</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">sf</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="kc">False</span><span class="p">,</span> <span class="n">k</span>
+
+    <span class="n">values</span> <span class="o">=</span> <span class="n">Values</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">symbolic</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">items_recursive</span><span class="p">()})</span>
+    <span class="n">residual</span> <span class="o">=</span> <span class="n">build_residual</span><span class="p">(</span><span class="n">num_poses</span><span class="p">,</span> <span class="n">num_landmarks</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+
+    <span class="n">flat_keys</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;[\.\[\]]+&quot;</span><span class="p">,</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">keys_recursive</span><span class="p">()}</span>
+
+    <span class="n">inputs</span> <span class="o">=</span> <span class="n">Values</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">flat_keys</span><span class="p">[</span><span class="n">key</span><span class="p">]:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">items_recursive</span><span class="p">()})</span>
+    <span class="n">outputs</span> <span class="o">=</span> <span class="n">Values</span><span class="p">(</span><span class="n">residual</span><span class="o">=</span><span class="n">residual</span><span class="p">)</span>
+
+    <span class="n">optimized_keys</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;world_T_body[</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">]&quot;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_poses</span><span class="p">)]</span>
+
+    <span class="n">linearization_func</span> <span class="o">=</span> <span class="n">Codegen</span><span class="p">(</span>
+        <span class="n">inputs</span><span class="o">=</span><span class="n">inputs</span><span class="p">,</span>
+        <span class="n">outputs</span><span class="o">=</span><span class="n">outputs</span><span class="p">,</span>
+        <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span>
+        <span class="n">docstring</span><span class="o">=</span><span class="n">textwrap</span><span class="o">.</span><span class="n">dedent</span><span class="p">(</span>
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            This function was autogenerated. Do not modify by hand.</span>
+
+<span class="sd">            Computes the linearization of the residual around the given state,</span>
+<span class="sd">            and returns the relevant information about the resulting linear system.</span>
+
+<span class="sd">            Input args: The state to linearize around</span>
+
+<span class="sd">            Output args:</span>
+<span class="sd">                residual (Eigen::Matrix*): The residual vector</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+        <span class="p">),</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">with_linearization</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;linearization&quot;</span><span class="p">,</span>
+        <span class="n">which_args</span><span class="o">=</span><span class="p">[</span><span class="n">flat_keys</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">optimized_keys</span><span class="p">],</span>
+        <span class="n">sparse_linearization</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">linearization_func</span></div>
+
+
+<div class="viewcode-block" id="generate_matching_residual_code"><a class="viewcode-back" href="../../../../api/symforce.examples.robot_3d_localization.robot_3d_localization.html#symforce.examples.robot_3d_localization.robot_3d_localization.generate_matching_residual_code">[docs]</a><span class="k">def</span> <span class="nf">generate_matching_residual_code</span><span class="p">(</span><span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">print_code</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate C++ code for the matching residual function. A C++ Factor can then be</span>
+<span class="sd">    constructed and optimized from this function without any Python dependency.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create a Codegen object for the symbolic residual function, targeted at C++</span>
+    <span class="n">codegen</span> <span class="o">=</span> <span class="n">Codegen</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">matching_residual</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">CppConfig</span><span class="p">())</span>
+
+    <span class="c1"># Create a Codegen object that computes a linearization from the residual Codegen object,</span>
+    <span class="c1"># by introspecting and symbolically differentiating the given arguments</span>
+    <span class="n">codegen_with_linearization</span> <span class="o">=</span> <span class="n">codegen</span><span class="o">.</span><span class="n">with_linearization</span><span class="p">(</span><span class="n">which_args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;world_T_body&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Generate the function and print the code</span>
+    <span class="n">generated_paths</span> <span class="o">=</span> <span class="n">codegen_with_linearization</span><span class="o">.</span><span class="n">generate_function</span><span class="p">(</span>
+        <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">skip_directory_nesting</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">print_code</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">generated_paths</span><span class="o">.</span><span class="n">generated_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+
+    <span class="c1"># generate_function writes to a new temporary directory if output_dir is None. Delete the</span>
+    <span class="c1"># temporary directory.</span>
+    <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">generated_paths</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="generate_odometry_residual_code"><a class="viewcode-back" href="../../../../api/symforce.examples.robot_3d_localization.robot_3d_localization.html#symforce.examples.robot_3d_localization.robot_3d_localization.generate_odometry_residual_code">[docs]</a><span class="k">def</span> <span class="nf">generate_odometry_residual_code</span><span class="p">(</span><span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">print_code</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Generate C++ code for the odometry residual function. A C++ Factor can then be</span>
+<span class="sd">    constructed and optimized from this function without any Python dependency.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Create a Codegen object for the symbolic residual function, targeted at C++</span>
+    <span class="n">codegen</span> <span class="o">=</span> <span class="n">Codegen</span><span class="o">.</span><span class="n">function</span><span class="p">(</span><span class="n">odometry_residual</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">CppConfig</span><span class="p">())</span>
+
+    <span class="c1"># Create a Codegen object that computes a linearization from the residual Codegen object,</span>
+    <span class="c1"># by introspecting and symbolically differentiating the given arguments</span>
+    <span class="c1"># TODO(hayk): This creates a 12x12 hessian</span>
+    <span class="n">codegen_with_linearization</span> <span class="o">=</span> <span class="n">codegen</span><span class="o">.</span><span class="n">with_linearization</span><span class="p">(</span><span class="n">which_args</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;world_T_a&quot;</span><span class="p">,</span> <span class="s2">&quot;world_T_b&quot;</span><span class="p">])</span>
+
+    <span class="c1"># Generate the function and print the code</span>
+    <span class="n">generated_paths</span> <span class="o">=</span> <span class="n">codegen_with_linearization</span><span class="o">.</span><span class="n">generate_function</span><span class="p">(</span>
+        <span class="n">output_dir</span><span class="o">=</span><span class="n">output_dir</span><span class="p">,</span> <span class="n">skip_directory_nesting</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">print_code</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">generated_paths</span><span class="o">.</span><span class="n">generated_files</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+
+    <span class="c1"># generate_function writes to a new temporary directory if output_dir is None. Delete the</span>
+    <span class="c1"># temporary directory.</span>
+    <span class="k">if</span> <span class="n">output_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">generated_paths</span><span class="o">.</span><span class="n">output_dir</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="generate"><a class="viewcode-back" href="../../../../api/symforce.examples.robot_3d_localization.robot_3d_localization.html#symforce.examples.robot_3d_localization.robot_3d_localization.generate">[docs]</a><span class="k">def</span> <span class="nf">generate</span><span class="p">(</span><span class="n">output_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">generate_matching_residual_code</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+    <span class="n">generate_odometry_residual_code</span><span class="p">(</span><span class="n">output_dir</span><span class="p">)</span>
+    <span class="n">values_codegen</span><span class="o">.</span><span class="n">generate_values_keys</span><span class="p">(</span>
+        <span class="n">build_values</span><span class="p">(</span><span class="n">NUM_POSES</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="n">output_dir</span><span class="p">,</span> <span class="n">skip_directory_nesting</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+    <span class="n">build_codegen_object</span><span class="p">(</span><span class="n">NUM_POSES</span><span class="p">)</span><span class="o">.</span><span class="n">generate_function</span><span class="p">(</span>
+        <span class="n">output_dir</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s2">&quot;robot_3d_localization&quot;</span><span class="p">,</span> <span class="n">skip_directory_nesting</span><span class="o">=</span><span class="kc">True</span>
+    <span class="p">)</span>
+
+    <span class="n">values</span> <span class="o">=</span> <span class="n">build_values</span><span class="p">(</span><span class="n">NUM_POSES</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">template_util</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span>
+        <span class="n">template_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;templates&quot;</span> <span class="o">/</span> <span class="s2">&quot;measurements.cc.jinja&quot;</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">body_t_landmark_measurements</span><span class="o">=</span><span class="n">values</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">body_t_landmark_measurements</span><span class="p">,</span>
+            <span class="n">odometry_relative_pose_measurements</span><span class="o">=</span><span class="n">values</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">odometry_relative_pose_measurements</span><span class="p">,</span>
+            <span class="n">landmarks</span><span class="o">=</span><span class="n">values</span><span class="o">.</span><span class="n">attr</span><span class="o">.</span><span class="n">world_t_landmark</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">output_path</span><span class="o">=</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;measurements.cc&quot;</span><span class="p">,</span>
+        <span class="n">template_dir</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">template_util</span><span class="o">.</span><span class="n">render_template</span><span class="p">(</span>
+        <span class="n">template_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s2">&quot;templates&quot;</span> <span class="o">/</span> <span class="s2">&quot;measurements.h.jinja&quot;</span><span class="p">,</span>
+        <span class="n">data</span><span class="o">=</span><span class="p">{},</span>
+        <span class="n">output_path</span><span class="o">=</span><span class="n">output_dir</span> <span class="o">/</span> <span class="s2">&quot;measurements.h&quot;</span><span class="p">,</span>
+        <span class="n">template_dir</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;__main__&quot;</span><span class="p">:</span>
+    <span class="n">main</span><span class="p">()</span>
+
+    <span class="c1"># Uncomment this to print generated C++ code</span>
+    <span class="c1"># generate_matching_residual_code(print_code=True)</span>
+    <span class="c1"># generate_odometry_residual_code(print_code=True)</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  <li><a href="../../../symforce.html">symforce</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

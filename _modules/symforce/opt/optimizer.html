@@ -1,0 +1,457 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>symforce.opt.optimizer &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for symforce.opt.optimizer</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># SymForce - Copyright 2022, Skydio, Inc.</span>
+<span class="c1"># This source code is under the Apache 2.0 license found in the LICENSE file.</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">dataclasses</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
+
+<span class="kn">from</span> <span class="nn">lcmtypes.sym._index_entry_t</span> <span class="kn">import</span> <span class="n">index_entry_t</span>
+<span class="kn">from</span> <span class="nn">lcmtypes.sym._optimization_iteration_t</span> <span class="kn">import</span> <span class="n">optimization_iteration_t</span>
+<span class="kn">from</span> <span class="nn">lcmtypes.sym._optimizer_params_t</span> <span class="kn">import</span> <span class="n">optimizer_params_t</span>
+<span class="kn">from</span> <span class="nn">lcmtypes.sym._values_t</span> <span class="kn">import</span> <span class="n">values_t</span>
+
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">typing</span> <span class="k">as</span> <span class="n">T</span>
+<span class="kn">from</span> <span class="nn">symforce.opt.factor</span> <span class="kn">import</span> <span class="n">Factor</span>
+<span class="kn">from</span> <span class="nn">symforce.opt.numeric_factor</span> <span class="kn">import</span> <span class="n">NumericFactor</span>
+<span class="kn">from</span> <span class="nn">symforce.values</span> <span class="kn">import</span> <span class="n">Values</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">cc_sym</span>
+
+
+<div class="viewcode-block" id="Optimizer"><a class="viewcode-back" href="../../../api/symforce.opt.optimizer.html#symforce.opt.optimizer.Optimizer">[docs]</a><span class="k">class</span> <span class="nc">Optimizer</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A nonlinear least-squares optimizer</span>
+
+<span class="sd">    Typical usage is to construct an Optimizer from a set of factors and keys to optimize, and then</span>
+<span class="sd">    call `optimize` repeatedly with a `Values`.</span>
+
+<span class="sd">    Example creation with an `OptimizationProblem` using `make_numeric_factors()`. The linearization</span>
+<span class="sd">    functions are generated in `make_numeric_factors()` and are linearized with respect to</span>
+<span class="sd">    `problem.optimized_keys()`.</span>
+
+<span class="sd">        problem = OptimizationProblem(subproblems=[...], residual_blocks=...)</span>
+<span class="sd">        factors = problem.make_numeric_factors(&quot;my_problem&quot;)</span>
+<span class="sd">        optimizer = Optimizer(factors)</span>
+
+<span class="sd">    Example creation with an `OptimizationProblem` using `make_symbolic_factors()`. The symbolic</span>
+<span class="sd">    factors are converted into numeric factors when the optimizer is created, and are linearized</span>
+<span class="sd">    with respect to the &quot;optimized keys&quot; passed to the optimizer. The linearization functions</span>
+<span class="sd">    are generated when converting to numeric factors when the optimizer is created.</span>
+
+<span class="sd">        problem = OptimizationProblem(subproblems=[...], residual_blocks=...)</span>
+<span class="sd">        factors = problem.make_symbolic_factors(&quot;my_problem&quot;)</span>
+<span class="sd">        optimizer = Optimizer(factors, problem.optimized_keys())</span>
+
+<span class="sd">    Example creation with a single `Factor`:</span>
+
+<span class="sd">        factor = Factor(</span>
+<span class="sd">            [my_key_0, my_key_1, my_key_2], my_residual_function</span>
+<span class="sd">        )</span>
+<span class="sd">        optimizer = Optimizer(</span>
+<span class="sd">            factors=[factor],</span>
+<span class="sd">            optimized_keys=[my_key_0, my_key_1],</span>
+<span class="sd">        )</span>
+
+<span class="sd">    And usage:</span>
+
+<span class="sd">        initial_guess = Values(...)</span>
+<span class="sd">        result = optimizer.optimize(initial_guess)</span>
+<span class="sd">        print(result.optimized_values)</span>
+
+<span class="sd">    Wraps the C++ `sym::Optimizer` class in `opt/optimizer.h`, so the API is mostly the same and</span>
+<span class="sd">    optimization results will be identical.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        factors: A sequence of either Factor or NumericFactor objects representing the</span>
+<span class="sd">            residuals in the problem. If (symbolic) Factors are passed, they are convered to</span>
+<span class="sd">            NumericFactors by generating linearization functions of the residual with respect to the</span>
+<span class="sd">            keys in `optimized_keys`.</span>
+<span class="sd">        optimized_keys: A set of the keys to be optimized. Only required if symbolic factors are</span>
+<span class="sd">            passed to the optimizer.</span>
+<span class="sd">        params: Params for the optimizer</span>
+<span class="sd">        debug_stats: Whether the optimizer should record debuggins stats such as the optimized</span>
+<span class="sd">            values, residual, jacobian, etc. computed at each iteration of the optimization.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Optimizer.Params"><a class="viewcode-back" href="../../../api/symforce.opt.optimizer.html#symforce.opt.optimizer.Optimizer.Params">[docs]</a>    <span class="nd">@dataclass</span>
+    <span class="k">class</span> <span class="nc">Params</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Parameters for the Python Optimizer</span>
+
+<span class="sd">        Mirrors the optimizer_params_t LCM type, see documentation there for information on each</span>
+<span class="sd">        parameter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">initial_lambda</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
+        <span class="n">lambda_up_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4.0</span>
+        <span class="n">lambda_down_factor</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="mf">4.0</span>
+        <span class="n">lambda_lower_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+        <span class="n">lambda_upper_bound</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1000000.0</span>
+        <span class="n">use_diagonal_damping</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">use_unit_damping</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">keep_max_diagonal_damping</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">diagonal_damping_min</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span>
+        <span class="n">iterations</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">50</span>
+        <span class="n">early_exit_min_reduction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span>
+        <span class="n">enable_bold_updates</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span></div>
+
+<div class="viewcode-block" id="Optimizer.Result"><a class="viewcode-back" href="../../../api/symforce.opt.optimizer.html#symforce.opt.optimizer.Optimizer.Result">[docs]</a>    <span class="nd">@dataclass</span>
+    <span class="k">class</span> <span class="nc">Result</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        The result of an optimization, with additional stats and debug information</span>
+
+<span class="sd">        initial_values:</span>
+<span class="sd">            The initial guess used for this optimization</span>
+
+<span class="sd">        optimized_values:</span>
+<span class="sd">            The best Values achieved during the optimization (Values with the smallest error)</span>
+
+<span class="sd">        iteration_stats:</span>
+<span class="sd">            Per-iteration stats, if requested, like the error per iteration.  If debug stats are</span>
+<span class="sd">            turned on, also the Values and linearization per iteration.</span>
+
+<span class="sd">        early_exited:</span>
+<span class="sd">            Did the optimization early exit?  This can happen because it converged successfully,</span>
+<span class="sd">            of because it was unable to make progress</span>
+
+<span class="sd">        best_index:</span>
+<span class="sd">            The index into iteration_stats for the iteration that produced the smallest error.  I.e.</span>
+<span class="sd">            `result.iteration_stats[best_index].values == optimized_values`.  This is not guaranteed</span>
+<span class="sd">            to be the last iteration, if the optimizer tried additional steps which did not reduce</span>
+<span class="sd">            the error</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">Values</span>
+        <span class="n">optimized_values</span><span class="p">:</span> <span class="n">Values</span>
+        <span class="n">iteration_stats</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">optimization_iteration_t</span><span class="p">]</span>
+        <span class="n">early_exited</span><span class="p">:</span> <span class="nb">bool</span>
+        <span class="n">best_index</span><span class="p">:</span> <span class="nb">int</span>
+
+<div class="viewcode-block" id="Optimizer.Result.error"><a class="viewcode-back" href="../../../api/symforce.opt.optimizer.html#symforce.opt.optimizer.Optimizer.Result.error">[docs]</a>        <span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteration_stats</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">best_index</span><span class="p">]</span><span class="o">.</span><span class="n">new_error</span></div></div>
+
+<div class="viewcode-block" id="Optimizer.__init__"><a class="viewcode-back" href="../../../api/symforce.opt.optimizer.html#symforce.opt.optimizer.Optimizer.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">factors</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="n">Factor</span><span class="p">,</span> <span class="n">NumericFactor</span><span class="p">]],</span>
+        <span class="n">optimized_keys</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">params</span><span class="p">:</span> <span class="n">Optimizer</span><span class="o">.</span><span class="n">Params</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">debug_stats</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">optimized_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># This will be filled with the optimized keys of the numeric factors</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optimized_keys</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">optimized_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">optimized_keys</span><span class="p">)</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">optimized_keys</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span>
+                <span class="nb">set</span><span class="p">(</span><span class="n">optimized_keys</span><span class="p">)</span>
+            <span class="p">),</span> <span class="sa">f</span><span class="s2">&quot;Duplicates in optimized keys: </span><span class="si">{</span><span class="n">optimized_keys</span><span class="si">}</span><span class="s2">&quot;</span>
+
+        <span class="n">numeric_factors</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">factor</span> <span class="ow">in</span> <span class="n">factors</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">factor</span><span class="p">,</span> <span class="n">Factor</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">optimized_keys</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;You must specify keys to optimize when passing symbolic factors.&quot;</span>
+                    <span class="p">)</span>
+                <span class="c1"># We compute the linearization in the same order as `optimized_keys`</span>
+                <span class="c1"># so that e.g. columns of the generated jacobians are in the same order</span>
+                <span class="n">factor_opt_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">opt_key</span> <span class="k">for</span> <span class="n">opt_key</span> <span class="ow">in</span> <span class="n">optimized_keys</span> <span class="k">if</span> <span class="n">opt_key</span> <span class="ow">in</span> <span class="n">factor</span><span class="o">.</span><span class="n">keys</span><span class="p">]</span>
+                <span class="n">numeric_factors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">factor</span><span class="o">.</span><span class="n">to_numeric_factor</span><span class="p">(</span><span class="n">factor_opt_keys</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Add unique keys to optimized keys</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">optimized_keys</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                    <span class="n">opt_key</span>
+                    <span class="k">for</span> <span class="n">opt_key</span> <span class="ow">in</span> <span class="n">factor</span><span class="o">.</span><span class="n">optimized_keys</span>
+                    <span class="k">if</span> <span class="n">opt_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimized_keys</span>
+                <span class="p">)</span>
+                <span class="n">numeric_factors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">factor</span><span class="p">)</span>
+
+        <span class="c1"># Set default params if none given</span>
+        <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">Optimizer</span><span class="o">.</span><span class="n">Params</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">params</span> <span class="o">=</span> <span class="n">params</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">debug_stats</span> <span class="o">=</span> <span class="n">debug_stats</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialized</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># Create a mapping from python identifier string keys to fixed-size C++ Key objects</span>
+        <span class="c1"># Initialize the keys map with the optimized keys, which are needed to construct the factors</span>
+        <span class="c1"># This works because the factors maintain a reference to this, so everything is fine as long</span>
+        <span class="c1"># as the unoptimized keys are also in here before we attempt to linearize any of the factors</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cc_keys_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">cc_sym</span><span class="o">.</span><span class="n">Key</span><span class="p">(</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">optimized_keys</span><span class="p">)}</span>
+
+        <span class="c1"># This stores the list of keys in the python Values, which are necessary for reconstructing</span>
+        <span class="c1"># a Python Values from C++, in particular for methods that don&#39;t otherwise have a Python</span>
+        <span class="c1"># Values available.  It&#39;s filled out in `_initialize`.  The order is important here, which</span>
+        <span class="c1"># why we can&#39;t just pull the keys out of `_cc_keys_map`, which is constructed out-of-order.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">values_keys_ordered</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Construct the C++ optimizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cc_optimizer</span> <span class="o">=</span> <span class="n">cc_sym</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">(</span>
+            <span class="n">optimizer_params_t</span><span class="p">(</span><span class="o">**</span><span class="n">dataclasses</span><span class="o">.</span><span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">params</span><span class="p">)),</span>
+            <span class="p">[</span><span class="n">factor</span><span class="o">.</span><span class="n">cc_factor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cc_keys_map</span><span class="p">)</span> <span class="k">for</span> <span class="n">factor</span> <span class="ow">in</span> <span class="n">numeric_factors</span><span class="p">],</span>
+            <span class="n">debug_stats</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">debug_stats</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_initialize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">Values</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Add unoptimized keys into the keys map</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">keys_recursive</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cc_keys_map</span><span class="p">:</span>
+                <span class="c1"># Give these a different name (`v`) so we don&#39;t have to deal with numbering</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_cc_keys_map</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">cc_sym</span><span class="o">.</span><span class="n">Key</span><span class="p">(</span><span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">values_keys_ordered</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">keys_recursive</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_initialized</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="nf">_cc_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">Values</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cc_sym</span><span class="o">.</span><span class="n">Values</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Create a cc_sym.Values from the given Python Values</span>
+
+<span class="sd">        This uses the stored cc_keys_map, which will be initialized if it does not exist yet.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">to_numerical</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initialized</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_initialize</span><span class="p">(</span><span class="n">values</span><span class="p">)</span>
+
+        <span class="n">cc_values</span> <span class="o">=</span> <span class="n">cc_sym</span><span class="o">.</span><span class="n">Values</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">cc_key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cc_keys_map</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">cc_values</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cc_key</span><span class="p">,</span> <span class="n">values</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">cc_values</span>
+
+<div class="viewcode-block" id="Optimizer.optimize"><a class="viewcode-back" href="../../../api/symforce.opt.optimizer.html#symforce.opt.optimizer.Optimizer.optimize">[docs]</a>    <span class="k">def</span> <span class="nf">optimize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">initial_guess</span><span class="p">:</span> <span class="n">Values</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optimizer</span><span class="o">.</span><span class="n">Result</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Optimize from the given initial guess, and return the optimized Values and stats</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            initial_guess: A Values containing the initial guess, should contain at least all the</span>
+<span class="sd">                           keys required by the `factors` passed to the constructor</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The optimization results, with additional stats and debug information.  See the</span>
+<span class="sd">            `Optimizer.Result` documentation for more information</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cc_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cc_values</span><span class="p">(</span><span class="n">initial_guess</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cc_optimizer</span><span class="o">.</span><span class="n">optimize</span><span class="p">(</span><span class="n">cc_values</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ZeroDivisionError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ZeroDivisionError</span><span class="p">(</span><span class="s2">&quot;ERROR: Division by zero - check your use of epsilon!&quot;</span><span class="p">)</span> <span class="kn">from</span> <span class="nn">ex</span>
+
+        <span class="n">optimized_values</span> <span class="o">=</span> <span class="n">Values</span><span class="p">(</span>
+            <span class="o">**</span><span class="p">{</span>
+                <span class="n">key</span><span class="p">:</span> <span class="n">cc_values</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cc_keys_map</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">initial_guess</span><span class="o">.</span><span class="n">dataclasses_to_values</span><span class="p">()</span><span class="o">.</span><span class="n">keys_recursive</span><span class="p">()</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">Optimizer</span><span class="o">.</span><span class="n">Result</span><span class="p">(</span>
+            <span class="n">initial_values</span><span class="o">=</span><span class="n">initial_guess</span><span class="p">,</span>
+            <span class="n">optimized_values</span><span class="o">=</span><span class="n">optimized_values</span><span class="p">,</span>
+            <span class="n">iteration_stats</span><span class="o">=</span><span class="n">stats</span><span class="o">.</span><span class="n">iterations</span><span class="p">,</span>
+            <span class="n">best_index</span><span class="o">=</span><span class="n">stats</span><span class="o">.</span><span class="n">best_index</span><span class="p">,</span>
+            <span class="n">early_exited</span><span class="o">=</span><span class="n">stats</span><span class="o">.</span><span class="n">early_exited</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Optimizer.linearize"><a class="viewcode-back" href="../../../api/symforce.opt.optimizer.html#symforce.opt.optimizer.Optimizer.linearize">[docs]</a>    <span class="k">def</span> <span class="nf">linearize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">Values</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">cc_sym</span><span class="o">.</span><span class="n">Linearization</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute and return the linearization at the given Values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cc_optimizer</span><span class="o">.</span><span class="n">linearize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cc_values</span><span class="p">(</span><span class="n">values</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Optimizer.load_iteration_values"><a class="viewcode-back" href="../../../api/symforce.opt.optimizer.html#symforce.opt.optimizer.Optimizer.load_iteration_values">[docs]</a>    <span class="k">def</span> <span class="nf">load_iteration_values</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values_msg</span><span class="p">:</span> <span class="n">values_t</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Values</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load a values_t message into a Python Values by first creating a C++ Values, then</span>
+<span class="sd">        converting back to the python key names.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cc_values</span> <span class="o">=</span> <span class="n">cc_sym</span><span class="o">.</span><span class="n">Values</span><span class="p">(</span><span class="n">values_msg</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">values_keys_ordered</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="n">py_values</span> <span class="o">=</span> <span class="n">Values</span><span class="p">(</span>
+            <span class="o">**</span><span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">cc_values</span><span class="o">.</span><span class="n">at</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cc_keys_map</span><span class="p">[</span><span class="n">key</span><span class="p">])</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">values_keys_ordered</span><span class="p">}</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">py_values</span></div>
+
+<div class="viewcode-block" id="Optimizer.linearization_index"><a class="viewcode-back" href="../../../api/symforce.opt.optimizer.html#symforce.opt.optimizer.Optimizer.linearization_index">[docs]</a>    <span class="k">def</span> <span class="nf">linearization_index</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">index_entry_t</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the index mapping keys to their positions in the linearized state vector.  Useful for</span>
+<span class="sd">        extracting blocks from the problem jacobian, hessian, or RHS</span>
+
+<span class="sd">        Returns: The index for the Optimizer&#39;s problem linearization</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cc_optimizer</span><span class="o">.</span><span class="n">linearization_index</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">index</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_cc_keys_map</span><span class="p">[</span><span class="n">key</span><span class="p">]]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimized_keys</span><span class="p">}</span></div>
+
+<div class="viewcode-block" id="Optimizer.linearization_index_entry"><a class="viewcode-back" href="../../../api/symforce.opt.optimizer.html#symforce.opt.optimizer.Optimizer.linearization_index_entry">[docs]</a>    <span class="k">def</span> <span class="nf">linearization_index_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">index_entry_t</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the index entry for a given key in the linearized state vector.  Useful for extracting</span>
+<span class="sd">        blocks from the problem jacobian, hessian, or RHS</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key: The string key for a variable in the Python Values</span>
+
+<span class="sd">        Returns: The index entry for the variable in the Optimizer&#39;s problem linearization</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cc_optimizer</span><span class="o">.</span><span class="n">linearization_index_entry</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cc_keys_map</span><span class="p">[</span><span class="n">key</span><span class="p">])</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  <li><a href="../../symforce.html">symforce</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

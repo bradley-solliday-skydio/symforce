@@ -1,0 +1,5 @@
+File linearizer.tcc
+===================
+
+.. doxygenfile:: linearizer.tcc
+   :project: api-cpp

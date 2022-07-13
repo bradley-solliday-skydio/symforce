@@ -1,0 +1,7 @@
+symforce.codegen.codegen module
+===============================
+
+.. automodule:: symforce.codegen.codegen
+   :members:
+   :undoc-members:
+   :show-inheritance:

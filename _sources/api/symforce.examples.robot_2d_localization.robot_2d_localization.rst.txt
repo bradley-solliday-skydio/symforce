@@ -1,0 +1,7 @@
+symforce.examples.robot\_2d\_localization.robot\_2d\_localization module
+========================================================================
+
+.. automodule:: symforce.examples.robot_2d_localization.robot_2d_localization
+   :members:
+   :undoc-members:
+   :show-inheritance:

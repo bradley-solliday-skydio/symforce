@@ -1,0 +1,5 @@
+Struct sym::StorageOps< ATANCameraCal< ScalarType > >
+=====================================================
+
+.. doxygenstruct:: sym::StorageOps< ATANCameraCal< ScalarType > >
+   :project: api-gen-cpp

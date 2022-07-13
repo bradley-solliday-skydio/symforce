@@ -1,0 +1,5 @@
+Class sym::Factor
+=================
+
+.. doxygenclass:: sym::Factor
+   :project: api-cpp

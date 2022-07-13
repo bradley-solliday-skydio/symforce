@@ -1,0 +1,38 @@
+symforce.codegen package
+========================
+
+.. automodule:: symforce.codegen
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.codegen.backends
+   symforce.codegen.printers
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.codegen.cam_package_codegen
+   symforce.codegen.codegen
+   symforce.codegen.codegen_config
+   symforce.codegen.codegen_util
+   symforce.codegen.format_util
+   symforce.codegen.geo_factors_codegen
+   symforce.codegen.geo_package_codegen
+   symforce.codegen.lcm_types_codegen
+   symforce.codegen.ops_codegen_util
+   symforce.codegen.similarity_index
+   symforce.codegen.slam_factors_codegen
+   symforce.codegen.sym_util_package_codegen
+   symforce.codegen.template_util
+   symforce.codegen.types_package_codegen
+   symforce.codegen.values_codegen

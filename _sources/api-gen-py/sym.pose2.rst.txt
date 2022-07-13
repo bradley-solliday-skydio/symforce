@@ -1,0 +1,7 @@
+sym.pose2 module
+================
+
+.. automodule:: sym.pose2
+   :members:
+   :undoc-members:
+   :show-inheritance:

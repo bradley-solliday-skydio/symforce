@@ -1,0 +1,7 @@
+symforce.codegen.backends.python.python\_config module
+======================================================
+
+.. automodule:: symforce.codegen.backends.python.python_config
+   :members:
+   :undoc-members:
+   :show-inheritance:

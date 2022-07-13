@@ -1,0 +1,7 @@
+symforce.ops.impl.class\_lie\_group\_ops module
+===============================================
+
+.. automodule:: symforce.ops.impl.class_lie_group_ops
+   :members:
+   :undoc-members:
+   :show-inheritance:

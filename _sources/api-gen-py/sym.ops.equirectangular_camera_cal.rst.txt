@@ -1,0 +1,17 @@
+sym.ops.equirectangular\_camera\_cal package
+============================================
+
+.. automodule:: sym.ops.equirectangular_camera_cal
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   sym.ops.equirectangular_camera_cal.camera_ops
+   sym.ops.equirectangular_camera_cal.group_ops
+   sym.ops.equirectangular_camera_cal.lie_group_ops

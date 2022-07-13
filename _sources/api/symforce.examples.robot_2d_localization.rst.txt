@@ -1,0 +1,16 @@
+symforce.examples.robot\_2d\_localization package
+=================================================
+
+.. automodule:: symforce.examples.robot_2d_localization
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.examples.robot_2d_localization.plotting
+   symforce.examples.robot_2d_localization.robot_2d_localization

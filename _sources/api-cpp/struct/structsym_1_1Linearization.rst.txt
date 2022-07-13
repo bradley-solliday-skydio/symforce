@@ -1,0 +1,5 @@
+Struct sym::Linearization
+=========================
+
+.. doxygenstruct:: sym::Linearization
+   :project: api-cpp

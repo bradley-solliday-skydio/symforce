@@ -1,0 +1,7 @@
+symforce.codegen.geo\_package\_codegen module
+=============================================
+
+.. automodule:: symforce.codegen.geo_package_codegen
+   :members:
+   :undoc-members:
+   :show-inheritance:

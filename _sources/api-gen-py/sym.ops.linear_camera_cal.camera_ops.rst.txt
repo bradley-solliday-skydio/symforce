@@ -1,0 +1,7 @@
+sym.ops.linear\_camera\_cal.camera\_ops module
+==============================================
+
+.. automodule:: sym.ops.linear_camera_cal.camera_ops
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,7 @@
+symforce.examples.bundle\_adjustment package
+============================================
+
+.. automodule:: symforce.examples.bundle_adjustment
+   :members:
+   :undoc-members:
+   :show-inheritance:

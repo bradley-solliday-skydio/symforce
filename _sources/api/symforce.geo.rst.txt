@@ -1,0 +1,24 @@
+symforce.geo package
+====================
+
+.. automodule:: symforce.geo
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.geo.complex
+   symforce.geo.dual_quaternion
+   symforce.geo.matrix
+   symforce.geo.pose2
+   symforce.geo.pose2_se2
+   symforce.geo.pose3
+   symforce.geo.pose3_se3
+   symforce.geo.quaternion
+   symforce.geo.rot2
+   symforce.geo.rot3

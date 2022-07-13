@@ -1,0 +1,5 @@
+Struct sym::SparseSchurSolver::SparsityInformation
+==================================================
+
+.. doxygenstruct:: sym::SparseSchurSolver::SparsityInformation
+   :project: api-cpp

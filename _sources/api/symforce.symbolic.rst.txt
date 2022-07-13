@@ -1,0 +1,7 @@
+symforce.symbolic module
+========================
+
+.. automodule:: symforce.symbolic
+   :members:
+   :undoc-members:
+   :show-inheritance:

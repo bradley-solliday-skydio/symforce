@@ -1,0 +1,1501 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>symforce.cc_sym module &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="_static/css/custom.css" />
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="_static/favicon.ico"/>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="symforce-cc-sym-module">
+<h1>symforce.cc_sym module<a class="headerlink" href="#symforce-cc-sym-module" title="Permalink to this headline">¶</a></h1>
+<span class="target" id="module-cc_sym"></span><p>This module wraps many of the C++ optimization classes.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="cc_sym.Factor">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Factor</span></span><a class="headerlink" href="#cc_sym.Factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_builtins.pybind11_object</span></code></p>
+<p>A residual term for optimization.</p>
+<p>Created from a function and a set of Keys that act as inputs. Given a Values as an evaluation
+point, generates a linear approximation to the residual function.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Factor.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cc_sym.Factor.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic">
+<li><p>__init__(self: cc_sym.Factor, hessian_func: Callable[[cc_sym.Values, List[index_entry_t]], tuple], keys: List[cc_sym.Key], sparse: bool = False) -&gt; None</p>
+<blockquote>
+<div><p>Create directly from a hessian functor. This is the lowest-level constructor.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>keys: The set of input arguments, in order, accepted by func.
+sparse: Create a sparse factor if True, dense factor if false. Defaults to dense.</p>
+</dd>
+<dt>Precondition:</dt><dd><p>The jacobian and hessian returned by hessian_func have type scipy.sparse.csc_matrix if and only if sparse = True.</p>
+</dd>
+</dl>
+</div></blockquote>
+</li>
+<li><p>__init__(self: cc_sym.Factor, hessian_func: Callable[[cc_sym.Values, List[index_entry_t]], tuple], keys_to_func: List[cc_sym.Key], keys_to_optimize: List[cc_sym.Key], sparse: bool = False) -&gt; None</p>
+<blockquote>
+<div><p>Create directly from a hessian functor. This is the lowest-level constructor.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>keys_to_func: The set of input arguments, in order, accepted by func.
+keys_to_optimize: The set of input arguments that correspond to the derivative in func. Must be a subset of keys_to_func.
+sparse: Create a sparse factor if True, dense factor if false. Defaults to dense.</p>
+</dd>
+<dt>Precondition:</dt><dd><p>The jacobian and hessian returned by hessian_func have type scipy.sparse.csc_matrix if and only if sparse = True.</p>
+</dd>
+</dl>
+</div></blockquote>
+</li>
+</ol>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Factor.all_keys">
+<span class="sig-name descname"><span class="pre">all_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Factor" title="cc_sym.Factor"><span class="pre">cc_sym.Factor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cc_sym.Factor.all_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all keys required to evaluate this factor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Factor.is_sparse">
+<span class="sig-name descname"><span class="pre">is_sparse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Factor" title="cc_sym.Factor"><span class="pre">cc_sym.Factor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#cc_sym.Factor.is_sparse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Does this factor use a sparse jacobian/hessian matrix?</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Factor.jacobian">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">jacobian</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cc_sym.Factor.jacobian" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic">
+<li><p>jacobian(jacobian_func: Callable[[cc_sym.Values, List[index_entry_t]], tuple], keys: List[cc_sym.Key], sparse: bool = False) -&gt; cc_sym.Factor</p>
+<blockquote>
+<div><p>Create from a function that computes the jacobian. The hessian will be computed using the
+Gauss Newton approximation:</p>
+<blockquote>
+<div><p>H   = J.T * J
+rhs = J.T * b</p>
+</div></blockquote>
+<dl class="simple">
+<dt>Args:</dt><dd><p>keys: The set of input arguments, in order, accepted by func.
+sparse: Create a sparse factor if True, dense factor if false. Defaults to dense.</p>
+</dd>
+<dt>Precondition:</dt><dd><p>The jacobian returned by jacobian_func has type scipy.sparse.csc_matrix if and only if sparse = True.</p>
+</dd>
+</dl>
+</div></blockquote>
+</li>
+<li><p>jacobian(jacobian_func: Callable[[cc_sym.Values, List[index_entry_t]], tuple], keys_to_func: List[cc_sym.Key], keys_to_optimize: List[cc_sym.Key], sparse: bool = False) -&gt; cc_sym.Factor</p>
+<blockquote>
+<div><p>Create from a function that computes the jacobian. The hessian will be computed using the
+Gauss Newton approximation:</p>
+<blockquote>
+<div><p>H   = J.T * J
+rhs = J.T * b</p>
+</div></blockquote>
+<dl>
+<dt>Args:</dt><dd><p>keys_to_func: The set of input arguments, in order, accepted by func.
+keys_to_optimize: The set of input arguments that correspond to the derivative in func. Must be a subset of keys_to_func.
+sparse: Create a sparse factor if True, dense factor if false. Defaults to dense.</p>
+<dl class="simple">
+<dt>Precondition:</dt><dd><p>The jacobian returned by jacobian_func has type scipy.sparse.csc_matrix if and only if sparse = True.</p>
+</dd>
+</dl>
+</dd>
+</dl>
+</div></blockquote>
+</li>
+</ol>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Factor.linearize">
+<span class="sig-name descname"><span class="pre">linearize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Factor" title="cc_sym.Factor"><span class="pre">cc_sym.Factor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">tuple</span></span></span><a class="headerlink" href="#cc_sym.Factor.linearize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the factor at the given linearization point and output just the numerical values of the residual and jacobian.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Factor.linearized_factor">
+<span class="sig-name descname"><span class="pre">linearized_factor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Factor" title="cc_sym.Factor"><span class="pre">cc_sym.Factor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">linearized_dense_factor_t</span></span></span><a class="headerlink" href="#cc_sym.Factor.linearized_factor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluate the factor at the given linearization point and output a LinearizedDenseFactor that
+contains the numerical values of the residual, jacobian, hessian, and right-hand-side.</p>
+<p>This can only be called if is_sparse is false; otherwise, it will throw.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Factor.optimized_keys">
+<span class="sig-name descname"><span class="pre">optimized_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Factor" title="cc_sym.Factor"><span class="pre">cc_sym.Factor</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cc_sym.Factor.optimized_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the optimized keys for this factor.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cc_sym.Key">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Key</span></span><a class="headerlink" href="#cc_sym.Key" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_builtins.pybind11_object</span></code></p>
+<p>Key type for Values. Contains a letter plus an integral subscript and superscript. Can construct with a letter, a letter + sub, or a letter + sub + super, but not a letter + super.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cc_sym.Key.INVALID_LETTER">
+<span class="sig-name descname"><span class="pre">INVALID_LETTER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'\x00'</span></em><a class="headerlink" href="#cc_sym.Key.INVALID_LETTER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cc_sym.Key.INVALID_SUB">
+<span class="sig-name descname"><span class="pre">INVALID_SUB</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-9223372036854775808</span></em><a class="headerlink" href="#cc_sym.Key.INVALID_SUB" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cc_sym.Key.INVALID_SUPER">
+<span class="sig-name descname"><span class="pre">INVALID_SUPER</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">-9223372036854775808</span></em><a class="headerlink" href="#cc_sym.Key.INVALID_SUPER" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Key.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cc_sym.Key.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: cc_sym.Key, letter: str) -&gt; None</p></li>
+<li><p>__init__(self: cc_sym.Key, letter: str, sub: int) -&gt; None</p></li>
+<li><p>__init__(self: cc_sym.Key, letter: str, sub: int, super: int) -&gt; None</p></li>
+</ol>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Key.get_lcm_type">
+<span class="sig-name descname"><span class="pre">get_lcm_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">key_t</span></span></span><a class="headerlink" href="#cc_sym.Key.get_lcm_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cc_sym.Key.letter">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">letter</span></span><a class="headerlink" href="#cc_sym.Key.letter" title="Permalink to this definition">¶</a></dt>
+<dd><p>The letter value of the key.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Key.lexical_less_than">
+<span class="sig-name descname"><span class="pre">lexical_less_than</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#cc_sym.Key.lexical_less_than" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return true if a is LESS than b, in dictionary order of the tuple (letter, sub, super).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cc_sym.Key.sub">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sub</span></span><a class="headerlink" href="#cc_sym.Key.sub" title="Permalink to this definition">¶</a></dt>
+<dd><p>The subscript value of the key (INVALID_SUB if not set).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cc_sym.Key.super">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">super</span></span><a class="headerlink" href="#cc_sym.Key.super" title="Permalink to this definition">¶</a></dt>
+<dd><p>The superscript value of the key (INVALID_SUPER if not set).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Key.with_super">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">with_super</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">super</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a></span></span><a class="headerlink" href="#cc_sym.Key.with_super" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create a new Key from an existing Key and a superscript. The superscript on the existing Key must be empty.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cc_sym.Linearization">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Linearization</span></span><a class="headerlink" href="#cc_sym.Linearization" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_builtins.pybind11_object</span></code></p>
+<p>Class for storing a problem linearization evaluated at a Values (i.e. a residual, jacobian, hessian, and rhs).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Linearization.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Linearization" title="cc_sym.Linearization"><span class="pre">cc_sym.Linearization</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#cc_sym.Linearization.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Linearization.error">
+<span class="sig-name descname"><span class="pre">error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Linearization" title="cc_sym.Linearization"><span class="pre">cc_sym.Linearization</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#cc_sym.Linearization.error" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cc_sym.Linearization.hessian_lower">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">hessian_lower</span></span><a class="headerlink" href="#cc_sym.Linearization.hessian_lower" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Linearization.is_initialized">
+<span class="sig-name descname"><span class="pre">is_initialized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Linearization" title="cc_sym.Linearization"><span class="pre">cc_sym.Linearization</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#cc_sym.Linearization.is_initialized" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns whether the linearization is currently valid for the corresponding values. Accessing any of the members when this is false could result in unexpected behavior.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cc_sym.Linearization.jacobian">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">jacobian</span></span><a class="headerlink" href="#cc_sym.Linearization.jacobian" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Linearization.linear_error">
+<span class="sig-name descname"><span class="pre">linear_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Linearization" title="cc_sym.Linearization"><span class="pre">cc_sym.Linearization</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_update</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span></span></span><a class="headerlink" href="#cc_sym.Linearization.linear_error" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Linearization.reset">
+<span class="sig-name descname"><span class="pre">reset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Linearization" title="cc_sym.Linearization"><span class="pre">cc_sym.Linearization</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#cc_sym.Linearization.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set to invalid.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cc_sym.Linearization.residual">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">residual</span></span><a class="headerlink" href="#cc_sym.Linearization.residual" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cc_sym.Linearization.rhs">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">rhs</span></span><a class="headerlink" href="#cc_sym.Linearization.rhs" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Linearization.set_initialized">
+<span class="sig-name descname"><span class="pre">set_initialized</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Linearization" title="cc_sym.Linearization"><span class="pre">cc_sym.Linearization</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">initialized</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#cc_sym.Linearization.set_initialized" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cc_sym.OptimizationStats">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">OptimizationStats</span></span><a class="headerlink" href="#cc_sym.OptimizationStats" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_builtins.pybind11_object</span></code></p>
+<p>Debug stats for a full optimization run.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.OptimizationStats.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.OptimizationStats" title="cc_sym.OptimizationStats"><span class="pre">cc_sym.OptimizationStats</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#cc_sym.OptimizationStats.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cc_sym.OptimizationStats.best_index">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">best_index</span></span><a class="headerlink" href="#cc_sym.OptimizationStats.best_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Index into iterations of the best iteration (containing the optimal Values).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cc_sym.OptimizationStats.best_linearization">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">best_linearization</span></span><a class="headerlink" href="#cc_sym.OptimizationStats.best_linearization" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cc_sym.OptimizationStats.early_exited">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">early_exited</span></span><a class="headerlink" href="#cc_sym.OptimizationStats.early_exited" title="Permalink to this definition">¶</a></dt>
+<dd><p>Did the optimization early exit? (either because it converged, or because it could not find a good step).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.OptimizationStats.get_lcm_type">
+<span class="sig-name descname"><span class="pre">get_lcm_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.OptimizationStats" title="cc_sym.OptimizationStats"><span class="pre">cc_sym.OptimizationStats</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">optimization_stats_t</span></span></span><a class="headerlink" href="#cc_sym.OptimizationStats.get_lcm_type" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="cc_sym.OptimizationStats.iterations">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">iterations</span></span><a class="headerlink" href="#cc_sym.OptimizationStats.iterations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cc_sym.Optimizer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Optimizer</span></span><a class="headerlink" href="#cc_sym.Optimizer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_builtins.pybind11_object</span></code></p>
+<p>Class for optimizing a nonlinear least-squares problem specified as a list of Factors. For efficient use, create once and call Optimize() multiple times with different initial guesses, as long as the factors remain constant and the structure of the Values is identical.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Optimizer.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Optimizer" title="cc_sym.Optimizer"><span class="pre">cc_sym.Optimizer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">optimizer_params_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cc_sym.Factor" title="cc_sym.Factor"><span class="pre">cc_sym.Factor</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-09</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'sym::Optimize'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">debug_stats</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">check_derivatives</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#cc_sym.Optimizer.__init__" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Optimizer.compute_all_covariances">
+<span class="sig-name descname"><span class="pre">compute_all_covariances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Optimizer" title="cc_sym.Optimizer"><span class="pre">cc_sym.Optimizer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">linearization</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Linearization" title="cc_sym.Linearization"><span class="pre">cc_sym.Linearization</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cc_sym.Optimizer.compute_all_covariances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get covariances for each optimized key at the given linearization</p>
+<p>May not be called before either optimize or Linearize has been called.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Optimizer.compute_covariances">
+<span class="sig-name descname"><span class="pre">compute_covariances</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Optimizer" title="cc_sym.Optimizer"><span class="pre">cc_sym.Optimizer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">linearization</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Linearization" title="cc_sym.Linearization"><span class="pre">cc_sym.Linearization</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">n</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cc_sym.Optimizer.compute_covariances" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get covariances for the given subset of keys at the given linearization.  This version is
+potentially much more efficient than computing the covariances for all keys in the problem.</p>
+<p>Currently requires that <cite>keys</cite> corresponds to a set of keys at the start of the list of keys
+for the full problem, and in the same order.  It uses the Schur complement trick, so will be
+most efficient if the hessian is of the following form, with C block diagonal:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">A</span> <span class="o">=</span> <span class="p">(</span> <span class="n">B</span>    <span class="n">E</span> <span class="p">)</span>
+    <span class="p">(</span> <span class="n">E</span><span class="o">^</span><span class="n">T</span>  <span class="n">C</span> <span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Optimizer.factors">
+<span class="sig-name descname"><span class="pre">factors</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Optimizer" title="cc_sym.Optimizer"><span class="pre">cc_sym.Optimizer</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cc_sym.Factor" title="cc_sym.Factor"><span class="pre">cc_sym.Factor</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cc_sym.Optimizer.factors" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the factors.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Optimizer.keys">
+<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Optimizer" title="cc_sym.Optimizer"><span class="pre">cc_sym.Optimizer</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cc_sym.Optimizer.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the optimized keys.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Optimizer.linearization_index">
+<span class="sig-name descname"><span class="pre">linearization_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Optimizer" title="cc_sym.Optimizer"><span class="pre">cc_sym.Optimizer</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">dict</span></span></span><a class="headerlink" href="#cc_sym.Optimizer.linearization_index" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Optimizer.linearization_index_entry">
+<span class="sig-name descname"><span class="pre">linearization_index_entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Optimizer" title="cc_sym.Optimizer"><span class="pre">cc_sym.Optimizer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">index_entry_t</span></span></span><a class="headerlink" href="#cc_sym.Optimizer.linearization_index_entry" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Optimizer.linearize">
+<span class="sig-name descname"><span class="pre">linearize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Optimizer" title="cc_sym.Optimizer"><span class="pre">cc_sym.Optimizer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cc_sym.Linearization" title="cc_sym.Linearization"><span class="pre">cc_sym.Linearization</span></a></span></span><a class="headerlink" href="#cc_sym.Optimizer.linearize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linearize the problem around the given values.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Optimizer.optimize">
+<span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cc_sym.Optimizer.optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic">
+<li><p>optimize(self: cc_sym.Optimizer, values: cc_sym.Values, num_iterations: int = -1, populate_best_linearization: bool = False) -&gt; cc_sym.OptimizationStats</p>
+<blockquote>
+<div><p>Optimize the given values in-place</p>
+<dl>
+<dt>Args:</dt><dd><p>num_iterations: If &lt; 0 (the default), uses the number of iterations specified by the params at construction.</p>
+<p>populate_best_linearization: If true, the linearization at the best values will be filled out in the stats.</p>
+</dd>
+<dt>Returns:</dt><dd><p>The optimization stats</p>
+</dd>
+</dl>
+</div></blockquote>
+</li>
+<li><p>optimize(self: cc_sym.Optimizer, values: cc_sym.Values, num_iterations: int, populate_best_linearization: bool, stats: cc_sym.OptimizationStats) -&gt; None</p>
+<blockquote>
+<div><p>Optimize the given values in-place</p>
+<p>This overload takes the stats as an argument, and stores into there.  This allows users to
+avoid reallocating memory for any of the entries in the stats, for use cases where that’s
+important.  If passed, stats must not be None.</p>
+<dl>
+<dt>Args:</dt><dd><p>num_iterations: If &lt; 0 (the default), uses the number of iterations specified by the params at construction</p>
+<p>populate_best_linearization: If true, the linearization at the best values will be filled out in the stats</p>
+<p>stats: An OptimizationStats to fill out with the result - if filling out dynamically allocated fields here, will not reallocate if memory is already allocated in the required shape (e.g. for repeated calls to Optimize)</p>
+</dd>
+</dl>
+</div></blockquote>
+</li>
+<li><p>optimize(self: cc_sym.Optimizer, values: cc_sym.Values, num_iterations: int, stats: cc_sym.OptimizationStats) -&gt; None</p>
+<blockquote>
+<div><p>Optimize the given values in-place</p>
+<p>This overload takes the stats as an argument, and stores into there.  This allows users to
+avoid reallocating memory for any of the entries in the stats, for use cases where that’s
+important.  If passed, stats must not be None.</p>
+<dl>
+<dt>Args:</dt><dd><p>num_iterations: If &lt; 0 (the default), uses the number of iterations specified by the params at construction</p>
+<p>stats: An OptimizationStats to fill out with the result - if filling out dynamically allocated fields here, will not reallocate if memory is already allocated in the required shape (e.g. for repeated calls to Optimize)</p>
+</dd>
+</dl>
+</div></blockquote>
+</li>
+<li><p>optimize(self: cc_sym.Optimizer, values: cc_sym.Values, stats: cc_sym.OptimizationStats) -&gt; None</p>
+<blockquote>
+<div><p>Optimize the given values in-place</p>
+<p>This overload takes the stats as an argument, and stores into there.  This allows users to
+avoid reallocating memory for any of the entries in the stats, for use cases where that’s
+important.  If passed, stats must not be None.</p>
+<dl class="simple">
+<dt>Args:</dt><dd><p>stats: An OptimizationStats to fill out with the result - if filling out dynamically allocated fields here, will not reallocate if memory is already allocated in the required shape (e.g. for repeated calls to Optimize)</p>
+</dd>
+</dl>
+</div></blockquote>
+</li>
+</ol>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Optimizer.update_params">
+<span class="sig-name descname"><span class="pre">update_params</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Optimizer" title="cc_sym.Optimizer"><span class="pre">cc_sym.Optimizer</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">optimizer_params_t</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#cc_sym.Optimizer.update_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the optimizer params.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="cc_sym.Values">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Values</span></span><a class="headerlink" href="#cc_sym.Values" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">pybind11_builtins.pybind11_object</span></code></p>
+<p>Efficient polymorphic data structure to store named types with a dict-like interface and
+support efficient repeated operations using a key index. Supports on-manifold optimization.</p>
+<p>Compatible types are given by the type_t enum. All types implement the StorageOps and
+LieGroupOps concepts, which are the core operating mechanisms in this class.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cc_sym.Values.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>__init__(self: cc_sym.Values) -&gt; None</p></li>
+</ol>
+<p>Default construct as empty.</p>
+<ol class="arabic simple" start="2">
+<li><p>__init__(self: cc_sym.Values, msg: values_t) -&gt; None</p></li>
+</ol>
+<p>Construct from serialized form.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.at">
+<span class="sig-name descname"><span class="pre">at</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cc_sym.Values.at" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>at(self: cc_sym.Values, key: cc_sym.Key) -&gt; object</p></li>
+</ol>
+<p>Retrieve a value by key.</p>
+<ol class="arabic simple" start="2">
+<li><p>at(self: cc_sym.Values, entry: index_entry_t) -&gt; object</p></li>
+</ol>
+<p>Retrieve a value by index entry. This avoids a map lookup compared to at(key).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.cleanup">
+<span class="sig-name descname"><span class="pre">cleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cc_sym.Values.cleanup" title="Permalink to this definition">¶</a></dt>
+<dd><p>Repack the data array to get rid of empty space from removed keys. If regularly removing
+keys, it’s up to the user to call this appropriately to avoid storage growth. Returns the
+number of Scalar elements cleaned up from the data array.</p>
+<p>It will INVALIDATE all indices, offset increments, and pointers.
+Re-create an index with create_index().</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.create_index">
+<span class="sig-name descname"><span class="pre">create_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">keys</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">index_t</span></span></span><a class="headerlink" href="#cc_sym.Values.create_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create an index from the given ordered subset of keys. This object can then be used
+for repeated efficient operations on that subset of keys.</p>
+<p>If you want an index of all the keys, call <cite>values.create_index(values.keys())</cite>.</p>
+<dl class="simple">
+<dt>An index will be INVALIDATED if the following happens:</dt><dd><ol class="arabic simple">
+<li><p>remove() is called with a contained key, or remove_all() is called</p></li>
+<li><p>cleanup() is called to re-pack the data array</p></li>
+</ol>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.data">
+<span class="sig-name descname"><span class="pre">data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cc_sym.Values.data" title="Permalink to this definition">¶</a></dt>
+<dd><p>Raw data buffer.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.empty">
+<span class="sig-name descname"><span class="pre">empty</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#cc_sym.Values.empty" title="Permalink to this definition">¶</a></dt>
+<dd><p>Has zero keys.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.get_lcm_type">
+<span class="sig-name descname"><span class="pre">get_lcm_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">values_t</span></span></span><a class="headerlink" href="#cc_sym.Values.get_lcm_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Serialize to LCM.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.has">
+<span class="sig-name descname"><span class="pre">has</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#cc_sym.Values.has" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return whether the key exists.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.items">
+<span class="sig-name descname"><span class="pre">items</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">index_entry_t</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cc_sym.Values.items" title="Permalink to this definition">¶</a></dt>
+<dd><p>Expose map type to allow iteration.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.keys">
+<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sort_by_offset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cc_sym.Values.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all keys.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>sort_by_offset</strong> – Sorts by storage order to make iteration safer and more memory efficient</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.local_coordinates">
+<span class="sig-name descname"><span class="pre">local_coordinates</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">others</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">index_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">numpy.ndarray</span><span class="p"><span class="pre">[</span></span><span class="pre">numpy.float64</span><span class="p"><span class="pre">[</span></span><span class="pre">m</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="m"><span class="pre">1</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#cc_sym.Values.local_coordinates" title="Permalink to this definition">¶</a></dt>
+<dd><p>Express this Values in the local coordinate of others Values, i.e., this ominus others</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>others</strong> – The other Values that the local coordinate is relative to</p></li>
+<li><p><strong>index</strong> – Ordered list of keys to include (MUST be valid for both this and others Values)</p></li>
+<li><p><strong>epsilon</strong> – Small constant to avoid singularities (do not use zero)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.num_entries">
+<span class="sig-name descname"><span class="pre">num_entries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="headerlink" href="#cc_sym.Values.num_entries" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of keys.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.remove">
+<span class="sig-name descname"><span class="pre">remove</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Key" title="cc_sym.Key"><span class="pre">cc_sym.Key</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bool</span></span></span><a class="headerlink" href="#cc_sym.Values.remove" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove the given key. Only removes the index entry, does not change the data array.
+Returns true if removed, false if already not present.</p>
+<p>Call cleanup() to re-pack the data array.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.remove_all">
+<span class="sig-name descname"><span class="pre">remove_all</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#cc_sym.Values.remove_all" title="Permalink to this definition">¶</a></dt>
+<dd><p>Remove all keys and empty out the storage.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.retract">
+<span class="sig-name descname"><span class="pre">retract</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">index_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">delta</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#cc_sym.Values.retract" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a retraction from an update vector.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>index</strong> – Ordered list of keys in the delta vector</p></li>
+<li><p><strong>delta</strong> – Update vector - MUST be the size of index.tangent_dim!</p></li>
+<li><p><strong>epsilon</strong> – Small constant to avoid singularities (do not use zero)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.set">
+<span class="sig-name descname"><span class="pre">set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cc_sym.Values.set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: float) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="2">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: float) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="3">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: Rot2) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="4">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: Rot2) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="5">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: Rot3) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="6">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: Rot3) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="7">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: Pose2) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="8">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: Pose2) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="9">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: Pose3) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="10">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: Pose3) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="11">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: ATANCameraCal) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="12">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: ATANCameraCal) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="13">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: DoubleSphereCameraCal) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="14">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: DoubleSphereCameraCal) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="15">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: EquirectangularCameraCal) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="16">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: EquirectangularCameraCal) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="17">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: LinearCameraCal) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="18">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: LinearCameraCal) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="19">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: PolynomialCameraCal) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="20">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: PolynomialCameraCal) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="21">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: SphericalCameraCal) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="22">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: SphericalCameraCal) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="23">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[9, 9]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="24">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[9, 9]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="25">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[8, 9]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="26">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[8, 9]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="27">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[9, 8]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="28">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[9, 8]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="29">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[7, 9]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="30">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[7, 9]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="31">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[9, 7]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="32">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[9, 7]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="33">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[6, 9]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="34">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[6, 9]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="35">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[9, 6]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="36">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[9, 6]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="37">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[5, 9]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="38">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[5, 9]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="39">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[9, 5]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="40">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[9, 5]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="41">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[4, 9]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="42">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[4, 9]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="43">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[9, 4]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="44">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[9, 4]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="45">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[3, 9]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="46">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[3, 9]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="47">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[9, 3]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="48">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[9, 3]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="49">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[2, 9]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="50">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[2, 9]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="51">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[9, 2]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="52">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[9, 2]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="53">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[1, 9]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="54">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[1, 9]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="55">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[9, 1]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="56">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[9, 1]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="57">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[8, 8]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="58">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[8, 8]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="59">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[7, 8]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="60">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[7, 8]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="61">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[8, 7]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="62">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[8, 7]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="63">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[6, 8]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="64">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[6, 8]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="65">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[8, 6]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="66">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[8, 6]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="67">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[5, 8]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="68">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[5, 8]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="69">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[8, 5]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="70">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[8, 5]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="71">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[4, 8]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="72">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[4, 8]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="73">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[8, 4]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="74">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[8, 4]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="75">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[3, 8]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="76">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[3, 8]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="77">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[8, 3]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="78">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[8, 3]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="79">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[2, 8]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="80">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[2, 8]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="81">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[8, 2]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="82">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[8, 2]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="83">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[1, 8]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="84">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[1, 8]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="85">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[8, 1]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="86">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[8, 1]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="87">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[7, 7]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="88">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[7, 7]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="89">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[6, 7]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="90">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[6, 7]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="91">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[7, 6]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="92">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[7, 6]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="93">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[5, 7]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="94">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[5, 7]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="95">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[7, 5]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="96">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[7, 5]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="97">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[4, 7]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="98">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[4, 7]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="99">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[7, 4]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="100">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[7, 4]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="101">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[3, 7]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="102">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[3, 7]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="103">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[7, 3]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="104">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[7, 3]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="105">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[2, 7]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="106">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[2, 7]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="107">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[7, 2]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="108">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[7, 2]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="109">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[1, 7]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="110">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[1, 7]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="111">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[7, 1]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="112">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[7, 1]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="113">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[6, 6]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="114">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[6, 6]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="115">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[5, 6]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="116">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[5, 6]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="117">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[6, 5]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="118">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[6, 5]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="119">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[4, 6]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="120">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[4, 6]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="121">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[6, 4]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="122">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[6, 4]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="123">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[3, 6]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="124">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[3, 6]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="125">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[6, 3]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="126">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[6, 3]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="127">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[2, 6]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="128">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[2, 6]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="129">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[6, 2]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="130">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[6, 2]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="131">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[1, 6]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="132">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[1, 6]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="133">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[6, 1]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="134">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[6, 1]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="135">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[5, 5]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="136">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[5, 5]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="137">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[4, 5]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="138">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[4, 5]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="139">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[5, 4]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="140">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[5, 4]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="141">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[3, 5]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="142">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[3, 5]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="143">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[5, 3]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="144">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[5, 3]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="145">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[2, 5]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="146">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[2, 5]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="147">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[5, 2]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="148">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[5, 2]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="149">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[1, 5]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="150">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[1, 5]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="151">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[5, 1]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="152">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[5, 1]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="153">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[4, 4]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="154">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[4, 4]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="155">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[3, 4]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="156">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[3, 4]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="157">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[4, 3]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="158">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[4, 3]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="159">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[2, 4]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="160">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[2, 4]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="161">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[4, 2]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="162">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[4, 2]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="163">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[1, 4]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="164">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[1, 4]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="165">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[4, 1]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="166">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[4, 1]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="167">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[3, 3]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="168">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[3, 3]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="169">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[2, 3]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="170">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[2, 3]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="171">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[3, 2]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="172">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[3, 2]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="173">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[1, 3]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="174">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[1, 3]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="175">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[3, 1]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="176">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[3, 1]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="177">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[2, 2]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="178">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[2, 2]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="179">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[1, 2]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="180">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[1, 2]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="181">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[2, 1]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="182">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[2, 1]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+<ol class="arabic simple" start="183">
+<li><p>set(self: cc_sym.Values, key: cc_sym.Key, value: numpy.ndarray[numpy.float64[1, 1]]) -&gt; bool</p></li>
+</ol>
+<p>Add or update a value by key. Returns true if added, false if updated.</p>
+<ol class="arabic simple" start="184">
+<li><p>set(self: cc_sym.Values, key: index_entry_t, value: numpy.ndarray[numpy.float64[1, 1]]) -&gt; None</p></li>
+</ol>
+<p>Update a value by index entry with no map lookup (compared to Set(key)). This does NOT add new values and assumes the key exists already.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cc_sym.Values.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Overloaded function.</p>
+<ol class="arabic simple">
+<li><p>update(self: cc_sym.Values, index: index_t, other: cc_sym.Values) -&gt; None</p></li>
+</ol>
+<p>Efficiently update the keys given by this index from other into this. This purely copies slices of the data arrays, the index MUST be valid for both objects!</p>
+<ol class="arabic simple" start="2">
+<li><p>update(self: cc_sym.Values, index_this: index_t, index_other: index_t, other: cc_sym.Values) -&gt; None</p></li>
+</ol>
+<p>Efficiently update the keys from a different structured Values, given by this index and other index. This purely copies slices of the data arrays. index_this MUST be valid for this object; index_other MUST be valid for other object.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cc_sym.Values.update_or_set">
+<span class="sig-name descname"><span class="pre">update_or_set</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">index_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#cc_sym.Values.update_or_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update or add keys to this Values base on other Values of different structure.
+index MUST be valid for other.</p>
+<p>NOTE(alvin): it is less efficient than the Update methods below if index objects are created and cached. This method performs map lookup for each key of the index</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cc_sym.default_optimizer_params">
+<span class="sig-name descname"><span class="pre">default_optimizer_params</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">optimizer_params_t</span></span></span><a class="headerlink" href="#cc_sym.default_optimizer_params" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sensible default parameters for Optimizer.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cc_sym.optimize">
+<span class="sig-name descname"><span class="pre">optimize</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">params</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">optimizer_params_t</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">factors</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#cc_sym.Factor" title="cc_sym.Factor"><span class="pre">cc_sym.Factor</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#cc_sym.Values" title="cc_sym.Values"><span class="pre">cc_sym.Values</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">epsilon</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1e-09</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#cc_sym.OptimizationStats" title="cc_sym.OptimizationStats"><span class="pre">cc_sym.OptimizationStats</span></a></span></span><a class="headerlink" href="#cc_sym.optimize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple wrapper to make optimization one function call.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="cc_sym.set_log_level">
+<span class="sig-name descname"><span class="pre">set_log_level</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arg0</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#cc_sym.set_log_level" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/symforce.cc_sym.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

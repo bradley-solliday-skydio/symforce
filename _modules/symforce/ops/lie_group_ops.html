@@ -1,0 +1,314 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>symforce.ops.lie_group_ops &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for symforce.ops.lie_group_ops</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># SymForce - Copyright 2022, Skydio, Inc.</span>
+<span class="c1"># This source code is under the Apache 2.0 license found in the LICENSE file.</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">symforce.internal.symbolic</span> <span class="k">as</span> <span class="nn">sf</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">typing</span> <span class="k">as</span> <span class="n">T</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">from</span> <span class="nn">symforce.python_util</span> <span class="kn">import</span> <span class="n">get_type</span>
+
+<span class="kn">from</span> <span class="nn">.group_ops</span> <span class="kn">import</span> <span class="n">GroupOps</span>
+
+<span class="k">if</span> <span class="n">T</span><span class="o">.</span><span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">geo</span>
+
+
+<div class="viewcode-block" id="LieGroupOps"><a class="viewcode-back" href="../../../api/symforce.ops.lie_group_ops.html#symforce.ops.lie_group_ops.LieGroupOps">[docs]</a><span class="k">class</span> <span class="nc">LieGroupOps</span><span class="p">(</span><span class="n">GroupOps</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    API for Lie groups.</span>
+
+<span class="sd">    A Lie group is a group that is also a differentiable manifold, with the property that the</span>
+<span class="sd">    group operations are compatible with the smooth structure.</span>
+
+<span class="sd">    A manifold is a topological space that locally resembles Euclidean space near</span>
+<span class="sd">    each point. More precisely, each point of an n-dimensional manifold has a neighbourhood that</span>
+<span class="sd">    is homeomorphic to the Euclidean space of dimension n.</span>
+
+<span class="sd">    A differentiable manifold is a type of manifold that is locally similar enough to a linear</span>
+<span class="sd">    space to allow one to do calculus. Any manifold can be described by a collection of charts,</span>
+<span class="sd">    also known as an atlas. One may then apply ideas from calculus while working within the</span>
+<span class="sd">    individual charts, since each chart lies within a linear space to which the usual rules of</span>
+<span class="sd">    calculus apply. If the charts are suitably compatible (namely, the transition from one chart</span>
+<span class="sd">    to another is differentiable), then computations done in one chart are valid in any other</span>
+<span class="sd">    differentiable chart.</span>
+
+<span class="sd">    References:</span>
+
+<span class="sd">        * https://en.wikipedia.org/wiki/Manifold</span>
+<span class="sd">        * https://en.wikipedia.org/wiki/Differentiable_manifold</span>
+<span class="sd">        * https://en.wikipedia.org/wiki/Lie_group</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="LieGroupOps.tangent_dim"><a class="viewcode-back" href="../../../api/symforce.ops.lie_group_ops.html#symforce.ops.lie_group_ops.LieGroupOps.tangent_dim">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">tangent_dim</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">ElementOrType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Size of the element&#39;s tangent space, aka the degrees of freedom it represents. The</span>
+<span class="sd">        storage_dim is the higher dimensional space in which this manifold is embedded. For</span>
+<span class="sd">        example SO3 could be a tangent_dim of 3 with a storage_dim of 4 if storing quaternions,</span>
+<span class="sd">        or 9 if storing rotation matrices. For vector spaces they are equal.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">LieGroupOps</span><span class="o">.</span><span class="n">implementation</span><span class="p">(</span><span class="n">get_type</span><span class="p">(</span><span class="n">a</span><span class="p">))</span><span class="o">.</span><span class="n">tangent_dim</span><span class="p">(</span><span class="n">a</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LieGroupOps.from_tangent"><a class="viewcode-back" href="../../../api/symforce.ops.lie_group_ops.html#symforce.ops.lie_group_ops.LieGroupOps.from_tangent">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">from_tangent</span><span class="p">(</span>
+        <span class="n">a</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">ElementOrType</span><span class="p">,</span> <span class="n">vec</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">],</span> <span class="n">epsilon</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Scalar</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">epsilon</span><span class="p">()</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Element</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Mapping from the tangent space approximation at identity into a group element of type a.</span>
+<span class="sd">        For most manifold types this is implemented as the exponential map.</span>
+
+<span class="sd">        This method does not rely on the value of a, only the type.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a:</span>
+<span class="sd">            vec: Tangent space perturbation</span>
+<span class="sd">            epsilon: Small number to avoid singularity</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Element: Valid group element that approximates vec around identity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">LieGroupOps</span><span class="o">.</span><span class="n">implementation</span><span class="p">(</span><span class="n">get_type</span><span class="p">(</span><span class="n">a</span><span class="p">))</span><span class="o">.</span><span class="n">from_tangent</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">vec</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LieGroupOps.to_tangent"><a class="viewcode-back" href="../../../api/symforce.ops.lie_group_ops.html#symforce.ops.lie_group_ops.LieGroupOps.to_tangent">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">to_tangent</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Element</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Scalar</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">epsilon</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Mapping from this element to the tangent space approximation at identity.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a:</span>
+<span class="sd">            epsilon: Small number to avoid singularity</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: Tangent space perturbation around identity that approximates a.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">type_a</span> <span class="o">=</span> <span class="n">get_type</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">LieGroupOps</span><span class="o">.</span><span class="n">implementation</span><span class="p">(</span><span class="n">type_a</span><span class="p">)</span><span class="o">.</span><span class="n">to_tangent</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LieGroupOps.retract"><a class="viewcode-back" href="../../../api/symforce.ops.lie_group_ops.html#symforce.ops.lie_group_ops.LieGroupOps.retract">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">retract</span><span class="p">(</span>
+        <span class="n">a</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Element</span><span class="p">,</span> <span class="n">vec</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">],</span> <span class="n">epsilon</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Scalar</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">epsilon</span><span class="p">()</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Element</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply a tangent space perturbation vec to the group element a. Often used in optimization</span>
+<span class="sd">        to update nonlinear values from an update step in the tangent space.</span>
+
+<span class="sd">        Implementation is simply `compose(a, from_tangent(vec))`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a:</span>
+<span class="sd">            vec:</span>
+<span class="sd">            epsilon: Small number to avoid singularity</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Element: Group element that conceptually represents &quot;a + vec&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">LieGroupOps</span><span class="o">.</span><span class="n">implementation</span><span class="p">(</span><span class="n">get_type</span><span class="p">(</span><span class="n">a</span><span class="p">))</span><span class="o">.</span><span class="n">retract</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">vec</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LieGroupOps.local_coordinates"><a class="viewcode-back" href="../../../api/symforce.ops.lie_group_ops.html#symforce.ops.lie_group_ops.LieGroupOps.local_coordinates">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">local_coordinates</span><span class="p">(</span>
+        <span class="n">a</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Element</span><span class="p">,</span> <span class="n">b</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Element</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Scalar</span> <span class="o">=</span> <span class="n">sf</span><span class="o">.</span><span class="n">epsilon</span><span class="p">()</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes a tangent space perturbation around a to produce b. Often used in optimization</span>
+<span class="sd">        to minimize the distance between two group elements.</span>
+
+<span class="sd">        Implementation is simply `to_tangent(between(a, b))`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            a:</span>
+<span class="sd">            b:</span>
+<span class="sd">            epsilon: Small number to avoid singularity</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: Tangent space perturbation that conceptually represents &quot;b - a&quot;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">LieGroupOps</span><span class="o">.</span><span class="n">implementation</span><span class="p">(</span><span class="n">get_type</span><span class="p">(</span><span class="n">a</span><span class="p">))</span><span class="o">.</span><span class="n">local_coordinates</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">epsilon</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="LieGroupOps.storage_D_tangent"><a class="viewcode-back" href="../../../api/symforce.ops.lie_group_ops.html#symforce.ops.lie_group_ops.LieGroupOps.storage_D_tangent">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">storage_D_tangent</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Element</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">geo</span><span class="o">.</span><span class="n">Matrix</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the jacobian of the storage space of an element with respect to the tangent space around</span>
+<span class="sd">        that element.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">LieGroupOps</span><span class="o">.</span><span class="n">implementation</span><span class="p">(</span><span class="n">get_type</span><span class="p">(</span><span class="n">a</span><span class="p">))</span><span class="o">.</span><span class="n">storage_D_tangent</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">NotImplementedError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;storage_D_tangent not implemented for </span><span class="si">{}</span><span class="s2">; use storage_D_tangent.ipynb to compute&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">get_type</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">raise</span></div>
+
+<div class="viewcode-block" id="LieGroupOps.tangent_D_storage"><a class="viewcode-back" href="../../../api/symforce.ops.lie_group_ops.html#symforce.ops.lie_group_ops.LieGroupOps.tangent_D_storage">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">tangent_D_storage</span><span class="p">(</span><span class="n">a</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Element</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">geo</span><span class="o">.</span><span class="n">Matrix</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Computes the jacobian of the tangent space around an element with respect to the storage space of</span>
+<span class="sd">        that element.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">LieGroupOps</span><span class="o">.</span><span class="n">implementation</span><span class="p">(</span><span class="n">get_type</span><span class="p">(</span><span class="n">a</span><span class="p">))</span><span class="o">.</span><span class="n">tangent_D_storage</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">NotImplementedError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s2">&quot;tangent_D_storage not implemented for </span><span class="si">{}</span><span class="s2">; use tangent_D_storage.ipynb to compute&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                    <span class="n">get_type</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">raise</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  <li><a href="../../symforce.html">symforce</a><ul>
+  <li><a href="../ops.html">symforce.ops</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

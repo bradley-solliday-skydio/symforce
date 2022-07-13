@@ -1,0 +1,5 @@
+Struct sym::scalar::StorageOps
+==============================
+
+.. doxygenstruct:: sym::scalar::StorageOps
+   :project: api-gen-cpp

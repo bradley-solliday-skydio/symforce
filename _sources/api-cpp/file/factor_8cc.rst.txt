@@ -1,0 +1,5 @@
+File factor.cc
+==============
+
+.. doxygenfile:: factor.cc
+   :project: api-cpp

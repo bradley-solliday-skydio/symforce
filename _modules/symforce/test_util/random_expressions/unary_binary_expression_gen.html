@@ -1,0 +1,403 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>symforce.test_util.random_expressions.unary_binary_expression_gen &#8212; symforce 0.5.0 documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/alabaster.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css" />
+    <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+    <script src="../../../../_static/jquery.js"></script>
+    <script src="../../../../_static/underscore.js"></script>
+    <script src="../../../../_static/doctools.js"></script>
+    <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <link rel="shortcut icon" href="../../../../_static/favicon.ico"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for symforce.test_util.random_expressions.unary_binary_expression_gen</h1><div class="highlight"><pre>
+<span></span><span class="c1"># ----------------------------------------------------------------------------</span>
+<span class="c1"># SymForce - Copyright 2022, Skydio, Inc.</span>
+<span class="c1"># This source code is under the Apache 2.0 license found in the LICENSE file.</span>
+<span class="c1"># ----------------------------------------------------------------------------</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">logger</span>
+<span class="kn">import</span> <span class="nn">symforce.symbolic</span> <span class="k">as</span> <span class="nn">sf</span>
+<span class="kn">from</span> <span class="nn">symforce</span> <span class="kn">import</span> <span class="n">typing</span> <span class="k">as</span> <span class="n">T</span>
+<span class="kn">from</span> <span class="nn">symforce.test_util.random_expressions.op_probabilities</span> <span class="kn">import</span> <span class="n">OpProbability</span>
+<span class="kn">from</span> <span class="nn">symforce.test_util.random_expressions.op_probabilities</span> <span class="kn">import</span> <span class="n">DEFAULT_UNARY_OPS</span>
+<span class="kn">from</span> <span class="nn">symforce.test_util.random_expressions.op_probabilities</span> <span class="kn">import</span> <span class="n">DEFAULT_BINARY_OPS</span>
+<span class="kn">from</span> <span class="nn">symforce.test_util.random_expressions.op_probabilities</span> <span class="kn">import</span> <span class="n">DEFAULT_LEAVES</span>
+
+<span class="c1"># Import numba if installed.  This is not required, but significantly speeds up generate_D</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">numba</span> <span class="kn">import</span> <span class="n">njit</span>
+
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+        <span class="s2">&quot;Unable to import numba for UnaryBinaryExpressionGen; may be slow for large expressions&quot;</span>
+    <span class="p">)</span>
+
+<div class="viewcode-block" id="njit"><a class="viewcode-back" href="../../../../api/symforce.test_util.random_expressions.unary_binary_expression_gen.html#symforce.test_util.random_expressions.unary_binary_expression_gen.njit">[docs]</a>    <span class="k">def</span> <span class="nf">njit</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Callable</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">f</span></div>
+
+
+<div class="viewcode-block" id="UnaryBinaryExpressionGen"><a class="viewcode-back" href="../../../../api/symforce.test_util.random_expressions.unary_binary_expression_gen.html#symforce.test_util.random_expressions.unary_binary_expression_gen.UnaryBinaryExpressionGen">[docs]</a><span class="k">class</span> <span class="nc">UnaryBinaryExpressionGen</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Helper to generate random symbolic expressions composed of a set of given unary and</span>
+<span class="sd">    binary operators. The user provides these operators, each with an assigned probability.</span>
+<span class="sd">    Then they can sample expressions given a target number of operations.</span>
+
+<span class="sd">    Takes care to sample uniformly from the space of all such possible expressions. This isn&#39;t</span>
+<span class="sd">    necessarily important for many use cases, but seems as good as any single strategy, with the</span>
+<span class="sd">    downside that the distributions become slow to compute for large expressions.</span>
+
+<span class="sd">    Note that probabilities of unary and binary ops are completely independent. The sampling of</span>
+<span class="sd">    unary vs binary ops is given by the variable D.</span>
+
+<span class="sd">    Implementation reference (Appendix C):</span>
+<span class="sd">        Deep Learning for Symbolic Mathematics (https://arxiv.org/abs/1912.01412)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="UnaryBinaryExpressionGen.__init__"><a class="viewcode-back" href="../../../../api/symforce.test_util.random_expressions.unary_binary_expression_gen.html#symforce.test_util.random_expressions.unary_binary_expression_gen.UnaryBinaryExpressionGen.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">unary_ops</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">OpProbability</span><span class="p">],</span>
+        <span class="n">binary_ops</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">OpProbability</span><span class="p">],</span>
+        <span class="n">leaves</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">],</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unary_ops</span> <span class="o">=</span> <span class="n">unary_ops</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">binary_ops</span> <span class="o">=</span> <span class="n">binary_ops</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">leaves</span> <span class="o">=</span> <span class="n">leaves</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ops</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unary_ops</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">binary_ops</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ops_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">op</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">op</span> <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ops</span><span class="p">}</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">unary_ops_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">op</span><span class="o">.</span><span class="n">prob</span> <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">unary_ops</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unary_ops_probs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unary_ops_probs</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unary_ops_probs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">binary_ops_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">op</span><span class="o">.</span><span class="n">prob</span> <span class="k">for</span> <span class="n">op</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">binary_ops</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">binary_ops_probs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">binary_ops_probs</span> <span class="o">/</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">binary_ops_probs</span><span class="p">)</span>
+
+        <span class="c1"># D[e][n] represents the number of different binary trees with n nodes</span>
+        <span class="c1"># that can be generated from e empty nodes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Optional</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span></div>
+
+    <span class="nd">@staticmethod</span>
+    <span class="nd">@njit</span>
+    <span class="k">def</span> <span class="nf">_next_row_of_D</span><span class="p">(</span>
+        <span class="n">num_leaves</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">max_ops</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">prev_row</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">p1</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">p2</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute a row of D (actually D.T) from the previous row</span>
+
+<span class="sd">        This is much faster when jitted with Numba, and we keep it outside of generate_D so it only</span>
+<span class="sd">        has to be compiled once</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">2</span> <span class="o">*</span> <span class="n">max_ops</span> <span class="o">-</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">max_ops</span> <span class="o">-</span> <span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>  <span class="c1"># number of empty nodes</span>
+            <span class="n">s</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">=</span> <span class="n">num_leaves</span> <span class="o">*</span> <span class="n">s</span><span class="p">[</span><span class="n">e</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">p1</span> <span class="o">*</span> <span class="n">prev_row</span><span class="p">[</span><span class="n">e</span><span class="p">]</span> <span class="o">+</span> <span class="n">p2</span> <span class="o">*</span> <span class="n">prev_row</span><span class="p">[</span><span class="n">e</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+<div class="viewcode-block" id="UnaryBinaryExpressionGen.generate_D"><a class="viewcode-back" href="../../../../api/symforce.test_util.random_expressions.unary_binary_expression_gen.html#symforce.test_util.random_expressions.unary_binary_expression_gen.UnaryBinaryExpressionGen.generate_D">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">generate_D</span><span class="p">(</span>
+        <span class="n">max_ops</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_leaves</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">p1</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">p2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Enumerate the number of possible unary-binary trees that can be generated from empty nodes.</span>
+<span class="sd">        D[e][n] represents the number of different binary trees with n nodes that</span>
+<span class="sd">        can be generated from e empty nodes, using the following recursion:</span>
+<span class="sd">            D(0, n) = 0</span>
+<span class="sd">            D(e, 0) = L ** e</span>
+<span class="sd">            D(e, n) = L * D(e - 1, n) + p_1 * D(e, n - 1) + p_2 * D(e + 1, n - 1)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># enumerate possible trees</span>
+        <span class="c1"># first generate the tranposed version of D, then transpose it</span>
+
+        <span class="n">D</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="p">([</span><span class="n">num_leaves</span> <span class="o">**</span> <span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">max_ops</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]))]</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_ops</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>  <span class="c1"># number of operators</span>
+            <span class="n">D</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">UnaryBinaryExpressionGen</span><span class="o">.</span><span class="n">_next_row_of_D</span><span class="p">(</span><span class="n">num_leaves</span><span class="p">,</span> <span class="n">max_ops</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">D</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span><span class="p">))</span>
+
+        <span class="k">assert</span> <span class="nb">all</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">e</span><span class="p">])</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">e</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">D_transpose</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">D</span><span class="p">[</span><span class="n">e</span><span class="p">][</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="p">))</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">D</span><span class="p">[</span><span class="n">e</span><span class="p">])])</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">D</span><span class="p">))</span>
+        <span class="p">]</span>
+
+        <span class="k">return</span> <span class="n">D_transpose</span></div>
+
+<div class="viewcode-block" id="UnaryBinaryExpressionGen.sample_next_pos"><a class="viewcode-back" href="../../../../api/symforce.test_util.random_expressions.unary_binary_expression_gen.html#symforce.test_util.random_expressions.unary_binary_expression_gen.UnaryBinaryExpressionGen.sample_next_pos">[docs]</a>    <span class="k">def</span> <span class="nf">sample_next_pos</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">nb_empty</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">nb_ops</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_leaves</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">p1</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">p2</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sample the position of the next node (unary-binary case).</span>
+<span class="sd">        Sample a position in {0, ..., `nb_empty` - 1}, along with an arity.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">nb_empty</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="n">nb_ops</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="n">probs</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_empty</span><span class="p">):</span>
+            <span class="n">probs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">num_leaves</span> <span class="o">**</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">p1</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">[</span><span class="n">nb_empty</span> <span class="o">-</span> <span class="n">i</span><span class="p">][</span><span class="n">nb_ops</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nb_empty</span><span class="p">):</span>
+            <span class="n">probs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">num_leaves</span> <span class="o">**</span> <span class="n">i</span><span class="p">)</span> <span class="o">*</span> <span class="n">p2</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">[</span><span class="n">nb_empty</span> <span class="o">-</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">][</span><span class="n">nb_ops</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
+
+        <span class="n">np_probs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">[</span><span class="n">nb_empty</span><span class="p">][</span><span class="n">nb_ops</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">probs</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="n">e</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">nb_empty</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="n">np_probs</span><span class="p">)</span>
+        <span class="n">arity</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">e</span> <span class="o">&lt;</span> <span class="n">nb_empty</span> <span class="k">else</span> <span class="mi">2</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">e</span> <span class="o">%</span> <span class="n">nb_empty</span>
+
+        <span class="k">return</span> <span class="n">e</span><span class="p">,</span> <span class="n">arity</span></div>
+
+<div class="viewcode-block" id="UnaryBinaryExpressionGen.build_tree_sequence"><a class="viewcode-back" href="../../../../api/symforce.test_util.random_expressions.unary_binary_expression_gen.html#symforce.test_util.random_expressions.unary_binary_expression_gen.UnaryBinaryExpressionGen.build_tree_sequence">[docs]</a>    <span class="k">def</span> <span class="nf">build_tree_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_ops_target</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a prefix notation sequence of the expression tree.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">num_ops_target</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">D</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">D</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">generate_D</span><span class="p">(</span><span class="n">num_ops_target</span><span class="p">)</span>
+
+        <span class="c1"># Number of empty nodes</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="mi">1</span>
+
+        <span class="n">l_leaves</span> <span class="o">=</span> <span class="mi">0</span>  <span class="c1"># left leaves - None states reserved for leaves</span>
+        <span class="n">t_leaves</span> <span class="o">=</span> <span class="mi">1</span>  <span class="c1"># total number of leaves (just used for sanity check)</span>
+
+        <span class="n">stack</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+
+        <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_ops_target</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">arity</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sample_next_pos</span><span class="p">(</span><span class="n">e</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">p1</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">p2</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># The annotations in numpy are wrong, and don&#39;t include the Sequence[Any] overload</span>
+            <span class="k">if</span> <span class="n">arity</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">op</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">unary_ops</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">unary_ops_probs</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">op</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">binary_ops</span><span class="p">,</span> <span class="n">p</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">binary_ops_probs</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+            <span class="n">e</span> <span class="o">+=</span> <span class="n">arity</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">-</span> <span class="n">k</span>  <span class="c1"># created empty nodes - skipped future leaves</span>
+            <span class="n">t_leaves</span> <span class="o">+=</span> <span class="n">arity</span> <span class="o">-</span> <span class="mi">1</span>  <span class="c1"># update number of total leaves</span>
+            <span class="n">l_leaves</span> <span class="o">+=</span> <span class="n">k</span>  <span class="c1"># update number of left leaves</span>
+
+            <span class="c1"># update tree</span>
+            <span class="n">pos</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stack</span><span class="p">)</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">][</span><span class="n">l_leaves</span><span class="p">]</span>
+            <span class="n">stack</span> <span class="o">=</span> <span class="n">stack</span><span class="p">[:</span><span class="n">pos</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">op</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="kc">None</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">arity</span><span class="p">)]</span> <span class="o">+</span> <span class="n">stack</span><span class="p">[</span><span class="n">pos</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
+
+        <span class="c1"># sanity check</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">([</span><span class="mi">1</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">stack</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ops_dict</span><span class="p">])</span> <span class="o">==</span> <span class="n">num_ops_target</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">([</span><span class="mi">1</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">stack</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">])</span> <span class="o">==</span> <span class="n">t_leaves</span>
+
+        <span class="c1"># insert leaves into tree</span>
+        <span class="n">leaves</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">leaves</span><span class="p">)</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">t_leaves</span><span class="p">)]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">stack</span><span class="p">)):</span>  <span class="c1"># pylint: disable=consider-using-enumerate</span>
+            <span class="k">if</span> <span class="n">stack</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">stack</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">leaves</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">leaves</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
+
+        <span class="k">return</span> <span class="n">stack</span></div>
+
+<div class="viewcode-block" id="UnaryBinaryExpressionGen.seq_to_expr"><a class="viewcode-back" href="../../../../api/symforce.test_util.random_expressions.unary_binary_expression_gen.html#symforce.test_util.random_expressions.unary_binary_expression_gen.UnaryBinaryExpressionGen.seq_to_expr">[docs]</a>    <span class="k">def</span> <span class="nf">seq_to_expr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seq</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Expr</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a prefix notation sequence into a sympy expression.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">_seq_to_expr</span><span class="p">(</span>
+            <span class="n">seq</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]]</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="o">.</span><span class="n">Tuple</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]]]:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="n">t</span> <span class="o">=</span> <span class="n">seq</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ops_dict</span><span class="p">:</span>
+                <span class="n">op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ops_dict</span><span class="p">[</span><span class="n">T</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">t</span><span class="p">)]</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">l1</span> <span class="o">=</span> <span class="n">seq</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">op</span><span class="o">.</span><span class="n">arity</span><span class="p">):</span>
+                    <span class="n">i1</span><span class="p">,</span> <span class="n">l1</span> <span class="o">=</span> <span class="n">_seq_to_expr</span><span class="p">(</span><span class="n">l1</span><span class="p">)</span>
+                    <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i1</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">op</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">),</span> <span class="n">l1</span>
+            <span class="k">elif</span> <span class="n">t</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">leaves</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">T</span><span class="o">.</span><span class="n">cast</span><span class="p">(</span><span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">,</span> <span class="n">t</span><span class="p">),</span> <span class="n">seq</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="sa">f</span><span class="s2">&quot;Unknown: </span><span class="si">{</span><span class="n">t</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="p">[]</span>  <span class="c1"># Just for mypy..</span>
+
+        <span class="k">return</span> <span class="n">_seq_to_expr</span><span class="p">(</span><span class="n">seq</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="UnaryBinaryExpressionGen.build_expr"><a class="viewcode-back" href="../../../../api/symforce.test_util.random_expressions.unary_binary_expression_gen.html#symforce.test_util.random_expressions.unary_binary_expression_gen.UnaryBinaryExpressionGen.build_expr">[docs]</a>    <span class="k">def</span> <span class="nf">build_expr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_ops_target</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return an expression with the given op target.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">seq</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">build_tree_sequence</span><span class="p">(</span><span class="n">num_ops_target</span><span class="o">=</span><span class="n">num_ops_target</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">seq_to_expr</span><span class="p">(</span><span class="n">seq</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="UnaryBinaryExpressionGen.build_expr_vec"><a class="viewcode-back" href="../../../../api/symforce.test_util.random_expressions.unary_binary_expression_gen.html#symforce.test_util.random_expressions.unary_binary_expression_gen.UnaryBinaryExpressionGen.build_expr_vec">[docs]</a>    <span class="k">def</span> <span class="nf">build_expr_vec</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">num_ops_target</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">num_exprs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sf</span><span class="o">.</span><span class="n">M</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return a vector of expressions with the total given op target. If no num_exprs</span>
+<span class="sd">        is provided, uses an approximate square root of the num_ops_target.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Empirical fudge factor for simplifications</span>
+        <span class="n">num_ops_target</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mf">1.1</span> <span class="o">*</span> <span class="n">num_ops_target</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">num_exprs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">num_exprs</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">num_ops_target</span><span class="p">)))</span>
+        <span class="n">target_per_expr</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_ops_target</span> <span class="o">/</span> <span class="n">num_exprs</span><span class="p">)</span>
+
+        <span class="n">exprs</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">List</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">exprs</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">num_exprs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">exprs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">build_expr</span><span class="p">(</span><span class="n">target_per_expr</span><span class="p">))</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">ZeroDivisionError</span><span class="p">,</span> <span class="ne">RuntimeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Skipping.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sf</span><span class="o">.</span><span class="n">M</span><span class="p">(</span><span class="n">exprs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="UnaryBinaryExpressionGen.default"><a class="viewcode-back" href="../../../../api/symforce.test_util.random_expressions.unary_binary_expression_gen.html#symforce.test_util.random_expressions.unary_binary_expression_gen.UnaryBinaryExpressionGen.default">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">unary_ops</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">OpProbability</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_UNARY_OPS</span><span class="p">,</span>
+        <span class="n">binary_ops</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">OpProbability</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_BINARY_OPS</span><span class="p">,</span>
+        <span class="n">leaves</span><span class="p">:</span> <span class="n">T</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">sf</span><span class="o">.</span><span class="n">Scalar</span><span class="p">]</span> <span class="o">=</span> <span class="n">DEFAULT_LEAVES</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">UnaryBinaryExpressionGen</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Construct with a reasonable default op distribution.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">unary_ops</span><span class="o">=</span><span class="n">unary_ops</span><span class="p">,</span> <span class="n">binary_ops</span><span class="o">=</span><span class="n">binary_ops</span><span class="p">,</span> <span class="n">leaves</span><span class="o">=</span><span class="n">leaves</span><span class="p">)</span></div></div>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../../index.html">symforce</a></h1>
+
+
+
+<p class="blurb">Fast symbolic computation, code generation, and nonlinear optimization for robotics</p>
+
+
+
+
+<p>
+<iframe src="https://ghbtns.com/github-btn.html?user=symforce-org&repo=symforce&type=star&count=true&size=large&v=2"
+  allowtransparency="true" frameborder="0" scrolling="0" width="200px" height="35px"></iframe>
+</p>
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development.html">Development Guide</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Tutorials</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/sympy_tutorial.html">SymPy Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/geometry_tutorial.html">Geometry Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/ops_tutorial.html">Ops Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/cameras_tutorial.html">Cameras Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/values_tutorial.html">Values Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/codegen_tutorial.html">Codegen Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/optimization_tutorial.html">Optimization Tutorial</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../tutorials/epsilon_tutorial.html">Epsilon Tutorial</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Examples</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/bundle_adjustment/README.html">Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/bundle_adjustment_fixed_size/README.html">Fixed Size Bundle Adjustment</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/bundle_adjustment_in_the_large/README.html">Bundle-Adjustment-in-the-Large</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/custom_factor_generation/README.html">Custom Factor Generation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/robot_2d_localization/README.html">Robot 2D Localization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../examples/robot_3d_localization/README.html">Robot 3D Localization</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">symforce Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api/symforce.html">symforce package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym Python Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api-gen-py/sym.html">sym package</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">sym C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api-gen-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api-gen-cpp/filelist.html">File list</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">opt C++ Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api-cpp/classlist.html">Class list</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../api-cpp/filelist.html">File list</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../../index.html">Module code</a><ul>
+  <li><a href="../../../symforce.html">symforce</a><ul>
+  </ul></li>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2022, Skydio, Inc.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 4.5.0</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

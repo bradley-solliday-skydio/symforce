@@ -1,0 +1,32 @@
+symforce.ops.impl package
+=========================
+
+.. automodule:: symforce.ops.impl
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   symforce.ops.impl.abstract_storage_ops
+   symforce.ops.impl.abstract_vector_group_ops
+   symforce.ops.impl.abstract_vector_lie_group_ops
+   symforce.ops.impl.array_lie_group_ops
+   symforce.ops.impl.array_storage_ops
+   symforce.ops.impl.class_group_ops
+   symforce.ops.impl.class_lie_group_ops
+   symforce.ops.impl.class_storage_ops
+   symforce.ops.impl.databuffer_storage_ops
+   symforce.ops.impl.dataclass_group_ops
+   symforce.ops.impl.dataclass_lie_group_ops
+   symforce.ops.impl.dataclass_storage_ops
+   symforce.ops.impl.nonetype_lie_group_ops
+   symforce.ops.impl.scalar_lie_group_ops
+   symforce.ops.impl.sequence_group_ops
+   symforce.ops.impl.sequence_lie_group_ops
+   symforce.ops.impl.sequence_storage_ops
+   symforce.ops.impl.vector_class_lie_group_ops

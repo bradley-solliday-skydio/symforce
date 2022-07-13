@@ -1,0 +1,7 @@
+symforce.codegen.similarity\_index module
+=========================================
+
+.. automodule:: symforce.codegen.similarity_index
+   :members:
+   :undoc-members:
+   :show-inheritance:

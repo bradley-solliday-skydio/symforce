@@ -1,0 +1,7 @@
+sym.atan\_camera\_cal module
+============================
+
+.. automodule:: sym.atan_camera_cal
+   :members:
+   :undoc-members:
+   :show-inheritance:

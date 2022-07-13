@@ -1,0 +1,5 @@
+File linear_camera_cal.cc
+=========================
+
+.. doxygenfile:: linear_camera_cal.cc
+   :project: api-gen-cpp

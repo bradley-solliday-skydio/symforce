@@ -1,0 +1,7 @@
+symforce.ops.group\_ops module
+==============================
+
+.. automodule:: symforce.ops.group_ops
+   :members:
+   :undoc-members:
+   :show-inheritance:

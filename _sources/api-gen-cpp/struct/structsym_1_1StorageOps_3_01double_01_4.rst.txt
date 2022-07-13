@@ -1,0 +1,5 @@
+Struct sym::StorageOps< double >
+================================
+
+.. doxygenstruct:: sym::StorageOps< double >
+   :project: api-gen-cpp

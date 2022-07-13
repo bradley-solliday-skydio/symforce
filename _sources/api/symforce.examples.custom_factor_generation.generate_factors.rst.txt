@@ -1,0 +1,7 @@
+symforce.examples.custom\_factor\_generation.generate\_factors module
+=====================================================================
+
+.. automodule:: symforce.examples.custom_factor_generation.generate_factors
+   :members:
+   :undoc-members:
+   :show-inheritance:

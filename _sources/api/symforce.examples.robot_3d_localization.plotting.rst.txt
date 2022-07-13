@@ -1,0 +1,7 @@
+symforce.examples.robot\_3d\_localization.plotting module
+=========================================================
+
+.. automodule:: symforce.examples.robot_3d_localization.plotting
+   :members:
+   :undoc-members:
+   :show-inheritance:

@@ -1,0 +1,5 @@
+File atan_camera_cal.h
+======================
+
+.. doxygenfile:: atan_camera_cal.h
+   :project: api-gen-cpp

@@ -1,0 +1,5 @@
+File lie_group_ops.h
+====================
+
+.. doxygenfile:: lie_group_ops.h
+   :project: api-gen-cpp

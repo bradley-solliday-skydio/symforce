@@ -1,0 +1,5 @@
+Namespace sym::@30
+==================
+
+.. doxygennamespace:: sym::@30
+   :project: api-cpp

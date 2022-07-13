@@ -1,0 +1,5 @@
+Struct sym::function_traits
+===========================
+
+.. doxygenstruct:: sym::function_traits
+   :project: api-cpp

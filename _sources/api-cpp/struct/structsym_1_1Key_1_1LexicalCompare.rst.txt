@@ -1,0 +1,5 @@
+Struct sym::Key::LexicalCompare
+===============================
+
+.. doxygenstruct:: sym::Key::LexicalCompare
+   :project: api-cpp

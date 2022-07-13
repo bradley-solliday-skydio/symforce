@@ -1,0 +1,5 @@
+Struct sym::GroupOps< Eigen::Matrix< ScalarType, Rows, Cols > >
+===============================================================
+
+.. doxygenstruct:: sym::GroupOps< Eigen::Matrix< ScalarType, Rows, Cols > >
+   :project: api-gen-cpp

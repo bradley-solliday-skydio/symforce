@@ -1,0 +1,5 @@
+Struct sym::LieGroupOps< float >
+================================
+
+.. doxygenstruct:: sym::LieGroupOps< float >
+   :project: api-gen-cpp

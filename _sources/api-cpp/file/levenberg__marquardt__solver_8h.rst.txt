@@ -1,0 +1,5 @@
+File levenberg_marquardt_solver.h
+=================================
+
+.. doxygenfile:: levenberg_marquardt_solver.h
+   :project: api-cpp

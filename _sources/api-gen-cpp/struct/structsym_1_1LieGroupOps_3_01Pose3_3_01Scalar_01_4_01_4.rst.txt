@@ -1,0 +1,5 @@
+Struct sym::LieGroupOps< Pose3< Scalar > >
+==========================================
+
+.. doxygenstruct:: sym::LieGroupOps< Pose3< Scalar > >
+   :project: api-gen-cpp

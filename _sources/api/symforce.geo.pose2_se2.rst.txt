@@ -1,0 +1,7 @@
+symforce.geo.pose2\_se2 module
+==============================
+
+.. automodule:: symforce.geo.pose2_se2
+   :members:
+   :undoc-members:
+   :show-inheritance:

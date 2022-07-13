@@ -1,0 +1,5 @@
+Struct sym::GroupOps< float >
+=============================
+
+.. doxygenstruct:: sym::GroupOps< float >
+   :project: api-gen-cpp

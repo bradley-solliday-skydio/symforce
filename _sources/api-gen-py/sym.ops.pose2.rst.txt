@@ -1,0 +1,16 @@
+sym.ops.pose2 package
+=====================
+
+.. automodule:: sym.ops.pose2
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   sym.ops.pose2.group_ops
+   sym.ops.pose2.lie_group_ops

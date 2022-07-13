@@ -1,0 +1,5 @@
+Class sym::EquirectangularCameraCal
+===================================
+
+.. doxygenclass:: sym::EquirectangularCameraCal
+   :project: api-gen-cpp

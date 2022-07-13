@@ -1,0 +1,7 @@
+symforce.codegen.backends.cpp.cpp\_code\_printer module
+=======================================================
+
+.. automodule:: symforce.codegen.backends.cpp.cpp_code_printer
+   :members:
+   :undoc-members:
+   :show-inheritance:

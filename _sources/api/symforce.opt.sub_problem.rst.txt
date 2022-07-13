@@ -1,0 +1,7 @@
+symforce.opt.sub\_problem module
+================================
+
+.. automodule:: symforce.opt.sub_problem
+   :members:
+   :undoc-members:
+   :show-inheritance:

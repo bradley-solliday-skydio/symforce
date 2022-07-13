@@ -1,0 +1,5 @@
+Struct sym::SparseSchurSolver::FactorizationData
+================================================
+
+.. doxygenstruct:: sym::SparseSchurSolver::FactorizationData
+   :project: api-cpp

@@ -1,0 +1,7 @@
+symforce.values.attr\_accessor module
+=====================================
+
+.. automodule:: symforce.values.attr_accessor
+   :members:
+   :undoc-members:
+   :show-inheritance:

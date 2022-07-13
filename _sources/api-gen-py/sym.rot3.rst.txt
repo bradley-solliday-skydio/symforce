@@ -1,0 +1,7 @@
+sym.rot3 module
+===============
+
+.. automodule:: sym.rot3
+   :members:
+   :undoc-members:
+   :show-inheritance:

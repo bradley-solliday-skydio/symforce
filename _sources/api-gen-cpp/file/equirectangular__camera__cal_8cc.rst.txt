@@ -1,0 +1,5 @@
+File equirectangular_camera_cal.cc
+==================================
+
+.. doxygenfile:: equirectangular_camera_cal.cc
+   :project: api-gen-cpp

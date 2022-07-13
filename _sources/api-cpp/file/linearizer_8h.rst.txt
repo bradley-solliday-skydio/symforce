@@ -1,0 +1,5 @@
+File linearizer.h
+=================
+
+.. doxygenfile:: linearizer.h
+   :project: api-cpp

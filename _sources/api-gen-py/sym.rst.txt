@@ -1,0 +1,32 @@
+sym package
+===========
+
+.. automodule:: sym
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   sym.ops
+
+Submodules
+----------
+
+.. toctree::
+   :maxdepth: 4
+
+   sym.atan_camera_cal
+   sym.double_sphere_camera_cal
+   sym.equirectangular_camera_cal
+   sym.linear_camera_cal
+   sym.polynomial_camera_cal
+   sym.pose2
+   sym.pose3
+   sym.rot2
+   sym.rot3
+   sym.spherical_camera_cal

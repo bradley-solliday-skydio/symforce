@@ -1,0 +1,7 @@
+sym.ops.rot2.group\_ops module
+==============================
+
+.. automodule:: sym.ops.rot2.group_ops
+   :members:
+   :undoc-members:
+   :show-inheritance:

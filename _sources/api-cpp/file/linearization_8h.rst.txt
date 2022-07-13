@@ -1,0 +1,5 @@
+File linearization.h
+====================
+
+.. doxygenfile:: linearization.h
+   :project: api-cpp

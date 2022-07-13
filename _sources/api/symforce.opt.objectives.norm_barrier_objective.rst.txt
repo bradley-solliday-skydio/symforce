@@ -1,0 +1,7 @@
+symforce.opt.objectives.norm\_barrier\_objective module
+=======================================================
+
+.. automodule:: symforce.opt.objectives.norm_barrier_objective
+   :members:
+   :undoc-members:
+   :show-inheritance:

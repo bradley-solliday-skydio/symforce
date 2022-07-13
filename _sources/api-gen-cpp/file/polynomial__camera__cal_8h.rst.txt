@@ -1,0 +1,5 @@
+File polynomial_camera_cal.h
+============================
+
+.. doxygenfile:: polynomial_camera_cal.h
+   :project: api-gen-cpp

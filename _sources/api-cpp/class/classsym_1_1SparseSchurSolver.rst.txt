@@ -1,0 +1,5 @@
+Class sym::SparseSchurSolver
+============================
+
+.. doxygenclass:: sym::SparseSchurSolver
+   :project: api-cpp

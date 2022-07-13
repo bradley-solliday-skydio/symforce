@@ -1,0 +1,44 @@
+name: docs
+
+on: push
+
+jobs:
+  update-docs:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            build-essential \
+            doxygen \
+            libgmp-dev \
+            pandoc
+
+      - name: Install python dependencies
+        run: pip install -r dev_requirements.txt
+
+      - name: Run cmake build
+        run: |
+          cmake -B build \
+            -DSYMFORCE_BUILD_OPT=ON \
+            -DSYMFORCE_BUILD_CC_SYM=ON \
+            -DSYMFORCE_BUILD_EXAMPLES=OFF \
+            -DSYMFORCE_BUILD_TESTS=OFF \
+            -DSYMFORCE_BUILD_SYMENGINE=ON \
+            -DSYMFORCE_GENERATE_MANIFEST=ON \
+            -DSYMFORCE_BUILD_BENCHMARKS=OFF
+          cmake --build build -j $(nproc)
+
+      - name: Build docs
+        run: |
+          pip install build/lcmtypes/python2.7
+          make docs
+
+      - name: Deploy docs
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: build/docs

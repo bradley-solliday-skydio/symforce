@@ -25,47 +25,48 @@ void OdometryFactor(const sym::Pose2<Scalar>& pose_a, const sym::Pose2<Scalar>& 
                     Eigen::Matrix<Scalar, 1, 6>* const jacobian = nullptr,
                     Eigen::Matrix<Scalar, 6, 6>* const hessian = nullptr,
                     Eigen::Matrix<Scalar, 6, 1>* const rhs = nullptr) {
-  // Total ops: 25
+  // Total ops: 31
 
   // Input arrays
   const Eigen::Matrix<Scalar, 4, 1>& _pose_a = pose_a.Data();
   const Eigen::Matrix<Scalar, 4, 1>& _pose_b = pose_b.Data();
 
-  // Intermediate terms (17)
-  const Scalar _tmp0 = -_pose_a[3] + _pose_b[3];
-  const Scalar _tmp1 = std::pow(_tmp0, Scalar(2));
-  const Scalar _tmp2 = -_pose_a[2] + _pose_b[2];
+  // Intermediate terms (16)
+  const Scalar _tmp0 =
+      -dist + std::sqrt(Scalar(epsilon + std::pow(Scalar(-_pose_a[2] + _pose_b[2]), Scalar(2)) +
+                               std::pow(Scalar(-_pose_a[3] + _pose_b[3]), Scalar(2))));
+  const Scalar _tmp1 = _pose_a[2] - _pose_b[2];
+  const Scalar _tmp2 = _pose_a[3] - _pose_b[3];
   const Scalar _tmp3 = std::pow(_tmp2, Scalar(2));
-  const Scalar _tmp4 = _tmp1 + _tmp3 + epsilon;
-  const Scalar _tmp5 = std::sqrt(_tmp4);
-  const Scalar _tmp6 = _tmp5 - dist;
-  const Scalar _tmp7 = Scalar(1.0) / (_tmp5);
-  const Scalar _tmp8 = _tmp2 * _tmp7;
-  const Scalar _tmp9 = _tmp0 * _tmp7;
-  const Scalar _tmp10 = Scalar(1.0) / (_tmp4);
-  const Scalar _tmp11 = _tmp10 * _tmp3;
-  const Scalar _tmp12 = _tmp0 * _tmp10 * _tmp2;
-  const Scalar _tmp13 = -_tmp12;
-  const Scalar _tmp14 = _tmp1 * _tmp10;
-  const Scalar _tmp15 = _tmp6 * _tmp8;
-  const Scalar _tmp16 = _tmp6 * _tmp9;
+  const Scalar _tmp4 = std::pow(_tmp1, Scalar(2));
+  const Scalar _tmp5 = _tmp3 + _tmp4 + epsilon;
+  const Scalar _tmp6 = std::pow(_tmp5, Scalar(Scalar(-1) / Scalar(2)));
+  const Scalar _tmp7 = _tmp1 * _tmp6;
+  const Scalar _tmp8 = _tmp2 * _tmp6;
+  const Scalar _tmp9 = Scalar(1.0) / (_tmp5);
+  const Scalar _tmp10 = _tmp4 * _tmp9;
+  const Scalar _tmp11 = _tmp1 * _tmp2 * _tmp9;
+  const Scalar _tmp12 = -_tmp11;
+  const Scalar _tmp13 = _tmp3 * _tmp9;
+  const Scalar _tmp14 = _tmp0 * _tmp7;
+  const Scalar _tmp15 = _tmp0 * _tmp8;
 
   // Output terms (4)
   if (res != nullptr) {
     Eigen::Matrix<Scalar, 1, 1>& _res = (*res);
 
-    _res(0, 0) = _tmp6;
+    _res(0, 0) = _tmp0;
   }
 
   if (jacobian != nullptr) {
     Eigen::Matrix<Scalar, 1, 6>& _jacobian = (*jacobian);
 
     _jacobian(0, 0) = 0;
-    _jacobian(0, 1) = -_tmp8;
-    _jacobian(0, 2) = -_tmp9;
+    _jacobian(0, 1) = _tmp7;
+    _jacobian(0, 2) = _tmp8;
     _jacobian(0, 3) = 0;
-    _jacobian(0, 4) = _tmp8;
-    _jacobian(0, 5) = _tmp9;
+    _jacobian(0, 4) = -_tmp7;
+    _jacobian(0, 5) = -_tmp8;
   }
 
   if (hessian != nullptr) {
@@ -73,27 +74,27 @@ void OdometryFactor(const sym::Pose2<Scalar>& pose_a, const sym::Pose2<Scalar>& 
 
     _hessian.setZero();
 
-    _hessian(1, 1) = _tmp11;
-    _hessian(2, 1) = _tmp12;
-    _hessian(4, 1) = -_tmp11;
-    _hessian(5, 1) = _tmp13;
-    _hessian(2, 2) = _tmp14;
-    _hessian(4, 2) = _tmp13;
-    _hessian(5, 2) = -_tmp14;
-    _hessian(4, 4) = _tmp11;
-    _hessian(5, 4) = _tmp12;
-    _hessian(5, 5) = _tmp14;
+    _hessian(1, 1) = _tmp10;
+    _hessian(2, 1) = _tmp11;
+    _hessian(4, 1) = -_tmp10;
+    _hessian(5, 1) = _tmp12;
+    _hessian(2, 2) = _tmp13;
+    _hessian(4, 2) = _tmp12;
+    _hessian(5, 2) = -_tmp13;
+    _hessian(4, 4) = _tmp10;
+    _hessian(5, 4) = _tmp11;
+    _hessian(5, 5) = _tmp13;
   }
 
   if (rhs != nullptr) {
     Eigen::Matrix<Scalar, 6, 1>& _rhs = (*rhs);
 
     _rhs(0, 0) = 0;
-    _rhs(1, 0) = -_tmp15;
-    _rhs(2, 0) = -_tmp16;
+    _rhs(1, 0) = _tmp14;
+    _rhs(2, 0) = _tmp15;
     _rhs(3, 0) = 0;
-    _rhs(4, 0) = _tmp15;
-    _rhs(5, 0) = _tmp16;
+    _rhs(4, 0) = -_tmp14;
+    _rhs(5, 0) = -_tmp15;
   }
 }  // NOLINT(readability/fn_size)
 

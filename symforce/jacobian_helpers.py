@@ -85,7 +85,9 @@ def tangent_jacobians_first_order(
         result = infinitesimal_local_coordinates(expr, expr_perturbed)
         arg_jacobian = result.jacobian(xi).subs(xi, xi.zero())
 
-        jacobians.append(arg_jacobian)
+        factored_jacobian = arg_jacobian.from_flat_list([sf.factor_coefs(x) for x in arg_jacobian.mat])
+
+        jacobians.append(factored_jacobian)
 
     return jacobians
 

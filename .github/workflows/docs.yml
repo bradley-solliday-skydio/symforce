@@ -1,9 +1,15 @@
 name: docs
 
-on: push
+on:
+  push:
+    branches:
+     - 'main'
+     - 'bradley/auto_deploy_docs'
+     - 'bradley/auto_deploy_docs_test_on_fork'
 
 jobs:
   update-docs:
+    if: github.repository == 'symforce-org/symforce'
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
@@ -44,8 +50,8 @@ jobs:
           SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
         with:
           source-directory: build/docs
-          destination-github-username: 'bradley-solliday-skydio' # This would change to symforce-org
-          destination-repository-name: 'temporary-target-repo'
+          destination-github-username: 'symforce-org'
+          destination-repository-name: 'symforce-org.github.io'
           user-email: bradley.solliday@skydio.com
           commit-message: Regenerate docs from $GITHUB_REF
-          target-branch: main
+          target-branch: bradley/test-doc-deploy

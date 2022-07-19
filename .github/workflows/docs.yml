@@ -16,7 +16,7 @@ jobs:
       - name: Mock docs
         run: |
           mkdir -p build/docs
-          echo "doc contents" > build/docs/the_docs.txt
+          echo "doc contents with update" > build/docs/the_docs.txt
 
       - name: Deploy docs
         uses: cpina/github-action-push-to-another-repository@v1.5

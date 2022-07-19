@@ -1,11 +1,10 @@
 name: docs
 
 on:
-  pull_request:
-    types: [opened, synchronize]
   push:
     branches:
      - 'main'
+     - 'bradley/test_auto_deploy_docs_2'
 
 jobs:
   update-docs:

@@ -4,10 +4,10 @@ on:
   push:
     branches:
      - 'main'
+     - 'bradley/test_auto_deploy_docs_1'
 
 jobs:
   update-docs:
-    if: github.repository == 'symforce-org/symforce'
     runs-on: ubuntu-20.04
     steps:
       - name: Checkout
@@ -55,11 +55,11 @@ jobs:
       - name: Deploy docs
         uses: cpina/github-action-push-to-another-repository@v1.5
         env:
-          SSH_DEPLOY_KEY: ${{ secrets.SSH_DOCUMENTATION_DEPLOY_KEY }}
+          SSH_DEPLOY_KEY: ${{ secrets.SSH_DEPLOY_KEY }}
         with:
           source-directory: build/docs
-          destination-github-username: 'symforce-org'
-          destination-repository-name: 'symforce-org.github.io'
+          destination-github-username: 'bradley-solliday-skydio'
+          destination-repository-name: 'temporary-target-repo'
           user-email: bradley.solliday@skydio.com
-          commit-message: Regenerate docs from $GITHUB_REF
+          commit-message: Regenerate docs from ${{ github.sha }}
           target-branch: main

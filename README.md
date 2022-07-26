@@ -7,6 +7,7 @@
 <!-- /DARK_MODE_ONLY -->
 
 <p align="center">
+<img src="https://github.com/bradley-solliday-skydio/symforce/actions/workflows/ci.yml/badge.svg?branch=bradley/draft4-run-tests" />
 <a href="https://symforce.org"><img alt="Documentation" src="https://img.shields.io/badge/api-docs-blue" /></a>
 <a href="https://github.com/symforce-org/symforce"><img alt="Source Code" src="https://img.shields.io/badge/source-code-blue" /></a>
 <a href="https://github.com/symforce-org/symforce/issues"><img alt="Issues" src="https://img.shields.io/badge/issue-tracker-blue" /></a>

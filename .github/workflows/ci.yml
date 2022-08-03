@@ -6,6 +6,12 @@ on:
       - 'main'
   pull_request:
     types: [opened, synchronize]
+  workflow_dispatch:
+    inputs:
+      debug_enabled:
+        description: 'Run the build with tmate debugging enabled (https://github.com/marketplace/actions/debugging-with-tmate)'
+        required: false
+        default: false
 
 jobs:
   test-on-ubuntu:
@@ -22,6 +28,10 @@ jobs:
           ]},
           {C: gcc-11, CXX: g++-11, repos: ['"ppa:ubuntu-toolchain-r/test"']}]
     steps:
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.debug_enabled }}
+
       - name: Checkout
         uses: actions/checkout@v3
 

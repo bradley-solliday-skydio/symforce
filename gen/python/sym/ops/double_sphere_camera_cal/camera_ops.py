@@ -153,12 +153,12 @@ class CameraOps(object):
             pixel_D_point: Derivative of pixel with respect to point
         """
 
-        # Total ops: 137
+        # Total ops: 157
 
         # Input arrays
         _self = self.data
 
-        # Intermediate terms (41)
+        # Intermediate terms (46)
         _tmp0 = epsilon ** 2 + point[0] ** 2 + point[1] ** 2
         _tmp1 = math.sqrt(_tmp0 + point[2] ** 2)
         _tmp2 = _self[4] * _tmp1 + point[2]
@@ -180,31 +180,39 @@ class CameraOps(object):
         _tmp18 = _self[4] ** 2
         _tmp19 = _tmp17 ** 2 / _tmp16 ** 2
         _tmp20 = _tmp18 * _tmp19 - _tmp18 + 1
-        _tmp21 = _tmp6 / _tmp3
-        _tmp22 = _tmp2 * _tmp21
-        _tmp23 = _tmp1 * _tmp22 + _tmp1 * _tmp8
-        _tmp24 = (
-            (1.0 / 2.0)
-            * ((0.0 if _tmp10 - epsilon == 0 else math.copysign(1, _tmp10 - epsilon)) + 1)
+        _tmp21 = _self[5] - 2 * epsilon * (_tmp4 + 1.0 / 2.0)
+        _tmp22 = _tmp21 - 1
+        _tmp23 = _tmp2 * _tmp22 - _tmp21 * _tmp3
+        _tmp24 = abs(_tmp23)
+        _tmp25 = max(_tmp24, epsilon)
+        _tmp26 = _tmp25 ** (-1)
+        _tmp27 = (1.0 / 2.0) * _self[0] * point[0]
+        _tmp28 = _tmp3 ** (-1)
+        _tmp29 = _tmp2 * _tmp28
+        _tmp30 = (
+            ((0.0 if -_tmp24 + epsilon == 0 else math.copysign(1, -_tmp24 + epsilon)) - 1)
+            * (0.0 if _tmp23 == 0 else math.copysign(1, _tmp23))
+            / _tmp25 ** 2
+        )
+        _tmp31 = _tmp30 * (-_tmp1 * _tmp21 * _tmp29 + _tmp1 * _tmp22)
+        _tmp32 = (1.0 / 2.0) * _self[1] * point[1]
+        _tmp33 = _tmp30 * (_tmp2 - _tmp3)
+        _tmp34 = _tmp1 ** (-1)
+        _tmp35 = _self[4] * _tmp34
+        _tmp36 = _tmp35 * _tmp8
+        _tmp37 = 2 * point[0]
+        _tmp38 = _tmp2 * _tmp35
+        _tmp39 = (1.0 / 2.0) * _tmp28 * _tmp6
+        _tmp40 = (
+            ((0.0 if _tmp10 - epsilon == 0 else math.copysign(1, _tmp10 - epsilon)) + 1)
             * (0.0 if _tmp9 == 0 else math.copysign(1, _tmp9))
             / _tmp11 ** 2
         )
-        _tmp25 = _self[0] * point[0]
-        _tmp26 = _tmp24 * _tmp25
-        _tmp27 = _self[1] * point[1]
-        _tmp28 = _tmp24 * _tmp27
-        _tmp29 = _tmp24 * (-_tmp2 + _tmp3)
-        _tmp30 = _tmp1 ** (-1)
-        _tmp31 = _self[4] * _tmp30
-        _tmp32 = _tmp31 * _tmp8
-        _tmp33 = 2 * point[0]
-        _tmp34 = _tmp2 * _tmp31
-        _tmp35 = (1.0 / 2.0) * _tmp21
-        _tmp36 = _tmp32 * point[0] + _tmp35 * (_tmp33 * _tmp34 + _tmp33)
-        _tmp37 = 2 * point[1]
-        _tmp38 = _tmp32 * point[1] + _tmp35 * (_tmp34 * _tmp37 + _tmp37)
-        _tmp39 = _tmp15 * _tmp30 + 1
-        _tmp40 = _tmp22 * _tmp39 + _tmp39 * _tmp8
+        _tmp41 = _tmp40 * (_tmp36 * point[0] + _tmp39 * (_tmp37 * _tmp38 + _tmp37))
+        _tmp42 = 2 * point[1]
+        _tmp43 = _tmp40 * (_tmp36 * point[1] + _tmp39 * (_tmp38 * _tmp42 + _tmp42))
+        _tmp44 = _tmp15 * _tmp34 + 1
+        _tmp45 = _tmp40 * (_tmp29 * _tmp44 * _tmp6 + _tmp44 * _tmp8)
 
         # Output terms
         _pixel = [0.0] * 2
@@ -248,25 +256,25 @@ class CameraOps(object):
             ),
         )
         _pixel_D_cal = numpy.zeros((2, 6))
-        _pixel_D_cal[0, 0] = _tmp12 * point[0]
+        _pixel_D_cal[0, 0] = _tmp26 * point[0]
         _pixel_D_cal[1, 0] = 0
         _pixel_D_cal[0, 1] = 0
-        _pixel_D_cal[1, 1] = _tmp12 * point[1]
+        _pixel_D_cal[1, 1] = _tmp26 * point[1]
         _pixel_D_cal[0, 2] = 1
         _pixel_D_cal[1, 2] = 0
         _pixel_D_cal[0, 3] = 0
         _pixel_D_cal[1, 3] = 1
-        _pixel_D_cal[0, 4] = -_tmp23 * _tmp26
-        _pixel_D_cal[1, 4] = -_tmp23 * _tmp28
-        _pixel_D_cal[0, 5] = -_tmp25 * _tmp29
-        _pixel_D_cal[1, 5] = -_tmp27 * _tmp29
+        _pixel_D_cal[0, 4] = _tmp27 * _tmp31
+        _pixel_D_cal[1, 4] = _tmp31 * _tmp32
+        _pixel_D_cal[0, 5] = _tmp27 * _tmp33
+        _pixel_D_cal[1, 5] = _tmp32 * _tmp33
         _pixel_D_point = numpy.zeros((2, 3))
-        _pixel_D_point[0, 0] = _tmp13 - _tmp26 * _tmp36
-        _pixel_D_point[1, 0] = -_tmp28 * _tmp36
-        _pixel_D_point[0, 1] = -_tmp26 * _tmp38
-        _pixel_D_point[1, 1] = _tmp14 - _tmp28 * _tmp38
-        _pixel_D_point[0, 2] = -_tmp26 * _tmp40
-        _pixel_D_point[1, 2] = -_tmp28 * _tmp40
+        _pixel_D_point[0, 0] = _tmp13 - _tmp27 * _tmp41
+        _pixel_D_point[1, 0] = -_tmp32 * _tmp41
+        _pixel_D_point[0, 1] = -_tmp27 * _tmp43
+        _pixel_D_point[1, 1] = _tmp14 - _tmp32 * _tmp43
+        _pixel_D_point[0, 2] = -_tmp27 * _tmp45
+        _pixel_D_point[1, 2] = -_tmp32 * _tmp45
         return _pixel, _is_valid, _pixel_D_cal, _pixel_D_point
 
     @staticmethod
@@ -327,12 +335,12 @@ class CameraOps(object):
             point_D_pixel: Derivation of point with respect to pixel
         """
 
-        # Total ops: 297
+        # Total ops: 394
 
         # Input arrays
         _self = self.data
 
-        # Intermediate terms (111)
+        # Intermediate terms (146)
         _tmp0 = -_self[2] + pixel[0]
         _tmp1 = _self[0] ** (-1)
         _tmp2 = -_self[3] + pixel[1]
@@ -342,152 +350,224 @@ class CameraOps(object):
         _tmp6 = _self[0] ** (-2)
         _tmp7 = _tmp3 * _tmp4 + _tmp5 * _tmp6
         _tmp8 = _self[5] ** 2
-        _tmp9 = -_tmp7 * _tmp8 + 1
-        _tmp10 = _tmp9 ** 2
-        _tmp11 = 2 * _self[5]
-        _tmp12 = _tmp11 - 1
-        _tmp13 = -_tmp12 * _tmp7 + 1
-        _tmp14 = math.sqrt(max(_tmp13, epsilon))
-        _tmp15 = _self[5] * _tmp14 - _self[5] + 1
-        _tmp16 = _tmp15 + epsilon * (
-            2 * min(0, (0.0 if _tmp15 == 0 else math.copysign(1, _tmp15))) + 1
+        _tmp9 = _tmp7 * _tmp8
+        _tmp10 = 1 - _tmp9
+        _tmp11 = _tmp10 ** 2
+        _tmp12 = 2 * _self[5]
+        _tmp13 = _tmp12 - 1
+        _tmp14 = -_tmp13 * _tmp7 + 1
+        _tmp15 = math.sqrt(max(_tmp14, epsilon))
+        _tmp16 = 1 - _self[5]
+        _tmp17 = _self[5] * _tmp15 + _tmp16
+        _tmp18 = _tmp17 + epsilon * (
+            2 * min(0, (0.0 if _tmp17 == 0 else math.copysign(1, _tmp17))) + 1
         )
-        _tmp17 = _tmp16 ** (-2)
-        _tmp18 = _tmp10 * _tmp17
-        _tmp19 = _tmp18 + _tmp7
-        _tmp20 = _tmp19 + epsilon * (
-            2 * min(0, (0.0 if _tmp19 == 0 else math.copysign(1, _tmp19))) + 1
+        _tmp19 = _tmp18 ** (-2)
+        _tmp20 = _tmp11 * _tmp19
+        _tmp21 = _tmp20 + _tmp7
+        _tmp22 = _tmp21 + epsilon * (
+            2 * min(0, (0.0 if _tmp21 == 0 else math.copysign(1, _tmp21))) + 1
         )
-        _tmp21 = _tmp20 ** (-1)
-        _tmp22 = _tmp16 ** (-1)
-        _tmp23 = _tmp22 * _tmp9
-        _tmp24 = 1 - _self[4] ** 2
-        _tmp25 = _tmp18 + _tmp24 * _tmp7
-        _tmp26 = math.sqrt(max(_tmp25, epsilon))
-        _tmp27 = _self[4] * _tmp23 + _tmp26
-        _tmp28 = _tmp21 * _tmp27
-        _tmp29 = _tmp1 * _tmp28
-        _tmp30 = _self[1] ** (-1)
-        _tmp31 = _tmp28 * _tmp30
-        _tmp32 = _tmp0 * _tmp6
-        _tmp33 = _tmp28 * _tmp32
-        _tmp34 = _tmp0 * _tmp1
-        _tmp35 = _tmp5 / _self[0] ** 3
-        _tmp36 = 2 * _tmp35
-        _tmp37 = _tmp17 * _tmp9
-        _tmp38 = 4 * _tmp37
-        _tmp39 = _tmp38 * _tmp8
-        _tmp40 = _tmp10 / _tmp16 ** 3
+        _tmp23 = _tmp22 ** (-1)
+        _tmp24 = _tmp18 ** (-1)
+        _tmp25 = _tmp10 * _tmp24
+        _tmp26 = _self[4] ** 2
+        _tmp27 = 1 - _tmp26
+        _tmp28 = _tmp20 + _tmp27 * _tmp7
+        _tmp29 = math.sqrt(max(_tmp28, epsilon))
+        _tmp30 = _self[4] * _tmp25 + _tmp29
+        _tmp31 = _tmp23 * _tmp30
+        _tmp32 = _tmp1 * _tmp31
+        _tmp33 = _self[1] ** (-1)
+        _tmp34 = _tmp31 * _tmp33
+        _tmp35 = _tmp26 - 1
+        _tmp36 = _tmp5 / _self[0] ** 3
+        _tmp37 = 2 * _tmp36
+        _tmp38 = _self[5] - 1.0 / 2.0
+        _tmp39 = _tmp38 * _tmp7
+        _tmp40 = math.sqrt(max(epsilon, 1 - 2 * _tmp39))
         _tmp41 = -epsilon
         _tmp42 = (
-            _self[5]
-            * ((0.0 if _tmp13 + _tmp41 == 0 else math.copysign(1, _tmp13 + _tmp41)) + 1)
-            / _tmp14
+            (0.0 if -2 * _tmp39 + _tmp41 + 1 == 0 else math.copysign(1, -2 * _tmp39 + _tmp41 + 1))
+            + 1
+        ) / _tmp40
+        _tmp43 = _tmp38 * _tmp42
+        _tmp44 = _tmp36 * _tmp43
+        _tmp45 = _tmp9 - 1
+        _tmp46 = _tmp45 ** 2
+        _tmp47 = _self[5] * _tmp40
+        _tmp48 = 2 * epsilon
+        _tmp49 = (
+            _tmp16
+            + _tmp47
+            + _tmp48
+            * (
+                min(
+                    0,
+                    -(
+                        0.0
+                        if _self[5] - _tmp47 - 1 == 0
+                        else math.copysign(1, _self[5] - _tmp47 - 1)
+                    ),
+                )
+                + 1.0 / 2.0
+            )
         )
-        _tmp43 = _tmp12 * _tmp42
-        _tmp44 = _tmp40 * _tmp43
-        _tmp45 = _tmp35 * _tmp39 - _tmp35 * _tmp44
-        _tmp46 = _tmp27 / _tmp20 ** 2
-        _tmp47 = _tmp46 * (-_tmp36 + _tmp45)
-        _tmp48 = (1.0 / 2.0) * _tmp37 * _tmp43
-        _tmp49 = _self[4] * _tmp48
-        _tmp50 = _self[4] * _tmp22
-        _tmp51 = _tmp50 * _tmp8
-        _tmp52 = ((0.0 if _tmp25 + _tmp41 == 0 else math.copysign(1, _tmp25 + _tmp41)) + 1) / _tmp26
-        _tmp53 = (1.0 / 4.0) * _tmp52
-        _tmp54 = -_tmp35 * _tmp49 + _tmp36 * _tmp51 + _tmp53 * (-_tmp24 * _tmp36 + _tmp45)
-        _tmp55 = _tmp21 * _tmp54
-        _tmp56 = _tmp2 * _tmp30
-        _tmp57 = _tmp22 * _tmp28
-        _tmp58 = _tmp57 * _tmp8
-        _tmp59 = _tmp28 * _tmp48
-        _tmp60 = _tmp21 * _tmp23
-        _tmp61 = _tmp3 / _self[1] ** 3
-        _tmp62 = 2 * _tmp61
-        _tmp63 = _tmp39 * _tmp61 - _tmp44 * _tmp61
-        _tmp64 = _tmp46 * (-_tmp62 + _tmp63)
-        _tmp65 = -_tmp49 * _tmp61 + _tmp51 * _tmp62 + _tmp53 * (-_tmp24 * _tmp62 + _tmp63)
-        _tmp66 = _tmp21 * _tmp65
-        _tmp67 = _tmp2 * _tmp4
-        _tmp68 = _tmp28 * _tmp67
-        _tmp69 = _tmp32 * _tmp49
-        _tmp70 = 2 * _tmp32
-        _tmp71 = _tmp51 * _tmp70
-        _tmp72 = _tmp24 * _tmp70
-        _tmp73 = _tmp32 * _tmp39
-        _tmp74 = _tmp32 * _tmp44
-        _tmp75 = _tmp73 - _tmp74
-        _tmp76 = _tmp53 * (-_tmp72 + _tmp75) - _tmp69 + _tmp71
-        _tmp77 = _tmp21 * _tmp76
-        _tmp78 = _tmp46 * (-_tmp70 + _tmp75)
-        _tmp79 = _tmp58 * _tmp70
-        _tmp80 = _tmp33 * _tmp48
-        _tmp81 = 2 * _tmp67
-        _tmp82 = _tmp51 * _tmp81
-        _tmp83 = _tmp49 * _tmp67
-        _tmp84 = _tmp24 * _tmp81
-        _tmp85 = _tmp39 * _tmp67
-        _tmp86 = _tmp44 * _tmp67
-        _tmp87 = _tmp85 - _tmp86
-        _tmp88 = _tmp53 * (-_tmp84 + _tmp87) + _tmp82 - _tmp83
-        _tmp89 = _tmp21 * _tmp88
-        _tmp90 = _tmp46 * (-_tmp81 + _tmp87)
-        _tmp91 = _tmp48 * _tmp68
-        _tmp92 = _tmp58 * _tmp81
-        _tmp93 = (1.0 / 2.0) * _tmp7
-        _tmp94 = -_self[4] * _tmp52 * _tmp93 + _tmp23
-        _tmp95 = _tmp21 * _tmp94
-        _tmp96 = _tmp14 - _tmp42 * _tmp93 - 1
-        _tmp97 = -_self[5] * _tmp38 * _tmp7 - 2 * _tmp40 * _tmp96
-        _tmp98 = _tmp46 * _tmp97
-        _tmp99 = _tmp37 * _tmp96
-        _tmp100 = _tmp11 * _tmp7
-        _tmp101 = -_self[4] * _tmp99 - _tmp100 * _tmp50 + _tmp53 * _tmp97
-        _tmp102 = _tmp101 * _tmp21
-        _tmp103 = -_tmp73 + _tmp74
-        _tmp104 = _tmp53 * (_tmp103 + _tmp72) + _tmp69 - _tmp71
-        _tmp105 = _tmp104 * _tmp21
-        _tmp106 = _tmp46 * (_tmp103 + _tmp70)
-        _tmp107 = -_tmp85 + _tmp86
-        _tmp108 = _tmp53 * (_tmp107 + _tmp84) - _tmp82 + _tmp83
-        _tmp109 = _tmp108 * _tmp21
-        _tmp110 = _tmp46 * (_tmp107 + _tmp81)
+        _tmp50 = _tmp46 / _tmp49 ** 3
+        _tmp51 = _tmp12 * _tmp50
+        _tmp52 = _tmp49 ** (-2)
+        _tmp53 = _tmp45 * _tmp52
+        _tmp54 = 4 * _tmp53
+        _tmp55 = _tmp54 * _tmp8
+        _tmp56 = -_tmp36 * _tmp55 - _tmp44 * _tmp51
+        _tmp57 = _tmp46 * _tmp52
+        _tmp58 = -_tmp35 * _tmp7 + _tmp57
+        _tmp59 = math.sqrt(max(_tmp58, epsilon))
+        _tmp60 = ((0.0 if _tmp41 + _tmp58 == 0 else math.copysign(1, _tmp41 + _tmp58)) + 1) / _tmp59
+        _tmp61 = (1.0 / 4.0) * _tmp60
+        _tmp62 = _tmp49 ** (-1)
+        _tmp63 = _self[4] * _tmp8
+        _tmp64 = _tmp62 * _tmp63
+        _tmp65 = _self[4] * _self[5]
+        _tmp66 = _tmp53 * _tmp65
+        _tmp67 = _tmp37 * _tmp64 + _tmp44 * _tmp66 + _tmp61 * (_tmp35 * _tmp37 + _tmp56)
+        _tmp68 = _tmp57 + _tmp7
+        _tmp69 = (
+            _tmp48 * (min(0, (0.0 if _tmp68 == 0 else math.copysign(1, _tmp68))) + 1.0 / 2.0)
+            + _tmp68
+        )
+        _tmp70 = _tmp69 ** (-1)
+        _tmp71 = _tmp0 * _tmp1
+        _tmp72 = _tmp70 * _tmp71
+        _tmp73 = _tmp0 * _tmp6
+        _tmp74 = _tmp45 * _tmp62
+        _tmp75 = -_self[4] * _tmp74 + _tmp59
+        _tmp76 = _tmp70 * _tmp75
+        _tmp77 = _tmp73 * _tmp76
+        _tmp78 = -_tmp37 + _tmp56
+        _tmp79 = _tmp75 / _tmp69 ** 2
+        _tmp80 = _tmp71 * _tmp79
+        _tmp81 = _tmp2 * _tmp33
+        _tmp82 = _tmp70 * _tmp81
+        _tmp83 = _tmp79 * _tmp81
+        _tmp84 = _self[5] * _tmp76
+        _tmp85 = _tmp70 * _tmp74
+        _tmp86 = _tmp74 * _tmp79
+        _tmp87 = _tmp62 * _tmp76
+        _tmp88 = _tmp8 * _tmp87
+        _tmp89 = _tmp3 / _self[1] ** 3
+        _tmp90 = 2 * _tmp89
+        _tmp91 = _tmp43 * _tmp89
+        _tmp92 = -_tmp51 * _tmp91 - _tmp55 * _tmp89
+        _tmp93 = _tmp61 * (_tmp35 * _tmp90 + _tmp92) + _tmp64 * _tmp90 + _tmp66 * _tmp91
+        _tmp94 = _tmp70 * _tmp93
+        _tmp95 = -_tmp90 + _tmp92
+        _tmp96 = _tmp2 * _tmp4
+        _tmp97 = _tmp76 * _tmp96
+        _tmp98 = _tmp43 * _tmp53
+        _tmp99 = 2 * _tmp73
+        _tmp100 = _tmp43 * _tmp51
+        _tmp101 = -_tmp100 * _tmp73 - _tmp55 * _tmp73
+        _tmp102 = _self[5] * _tmp73
+        _tmp103 = _self[4] * _tmp98
+        _tmp104 = _tmp102 * _tmp103 + _tmp61 * (_tmp101 + _tmp35 * _tmp99) + _tmp64 * _tmp99
+        _tmp105 = _tmp104 * _tmp70
+        _tmp106 = _tmp101 - _tmp99
+        _tmp107 = _self[5] * _tmp98
+        _tmp108 = _tmp8 * _tmp99
+        _tmp109 = 2 * _tmp96
+        _tmp110 = -_tmp100 * _tmp96 - _tmp55 * _tmp96
+        _tmp111 = _self[5] * _tmp96
+        _tmp112 = _tmp103 * _tmp111 + _tmp109 * _tmp64 + _tmp61 * (_tmp109 * _tmp35 + _tmp110)
+        _tmp113 = _tmp112 * _tmp70
+        _tmp114 = -_tmp109 + _tmp110
+        _tmp115 = _self[4] * _tmp7
+        _tmp116 = -1.0 / 2.0 * _tmp115 * _tmp60 - _tmp74
+        _tmp117 = _self[5] * _tmp7
+        _tmp118 = -1.0 / 2.0 * _tmp117 * _tmp42 + _tmp40 - 1
+        _tmp119 = _tmp117 * _tmp54 - 2 * _tmp118 * _tmp50
+        _tmp120 = _tmp118 * _tmp53
+        _tmp121 = _tmp12 * _tmp62
+        _tmp122 = _self[4] * _tmp120 - _tmp115 * _tmp121 + _tmp119 * _tmp61
+        _tmp123 = _tmp122 * _tmp70
+        _tmp124 = _tmp10 * _tmp19
+        _tmp125 = _tmp124 * _tmp73
+        _tmp126 = (
+            _tmp13
+            * ((0.0 if _tmp14 + _tmp41 == 0 else math.copysign(1, _tmp14 + _tmp41)) + 1)
+            / _tmp15
+        )
+        _tmp127 = (1.0 / 2.0) * _tmp126
+        _tmp128 = _tmp127 * _tmp65
+        _tmp129 = _tmp24 * _tmp63
+        _tmp130 = 4 * _tmp8
+        _tmp131 = _tmp11 * _tmp126 / _tmp18 ** 3
+        _tmp132 = _tmp102 * _tmp131 - _tmp125 * _tmp130
+        _tmp133 = (
+            (1.0 / 4.0)
+            * ((0.0 if _tmp28 + _tmp41 == 0 else math.copysign(1, _tmp28 + _tmp41)) + 1)
+            / _tmp29
+        )
+        _tmp134 = _tmp125 * _tmp128 - _tmp129 * _tmp99 + _tmp133 * (_tmp132 + _tmp27 * _tmp99)
+        _tmp135 = _tmp134 * _tmp23
+        _tmp136 = _tmp30 / _tmp22 ** 2
+        _tmp137 = _tmp136 * (_tmp132 + _tmp99)
+        _tmp138 = _tmp24 * _tmp31
+        _tmp139 = _self[5] * _tmp127 * _tmp31
+        _tmp140 = _tmp23 * _tmp25
+        _tmp141 = _tmp124 * _tmp96
+        _tmp142 = _tmp111 * _tmp131 - _tmp130 * _tmp141
+        _tmp143 = -_tmp109 * _tmp129 + _tmp128 * _tmp141 + _tmp133 * (_tmp109 * _tmp27 + _tmp142)
+        _tmp144 = _tmp143 * _tmp23
+        _tmp145 = _tmp136 * (_tmp109 + _tmp142)
 
         # Output terms
         _camera_ray = [0.0] * 3
-        _camera_ray[0] = _tmp0 * _tmp29
-        _camera_ray[1] = _tmp2 * _tmp31
-        _camera_ray[2] = -_self[4] + _tmp23 * _tmp28
+        _camera_ray[0] = _tmp0 * _tmp32
+        _camera_ray[1] = _tmp2 * _tmp34
+        _camera_ray[2] = -_self[4] + _tmp25 * _tmp31
         _is_valid = min(
-            1 - max(0, -(0.0 if _tmp13 == 0 else math.copysign(1, _tmp13))),
-            1 - max(0, -(0.0 if _tmp25 == 0 else math.copysign(1, _tmp25))),
+            1 - max(0, -(0.0 if _tmp14 == 0 else math.copysign(1, _tmp14))),
+            1 - max(0, -(0.0 if _tmp28 == 0 else math.copysign(1, _tmp28))),
         )
         _point_D_cal = numpy.zeros((3, 6))
-        _point_D_cal[0, 0] = -_tmp33 - _tmp34 * _tmp47 + _tmp34 * _tmp55
-        _point_D_cal[1, 0] = -_tmp47 * _tmp56 + _tmp55 * _tmp56
-        _point_D_cal[2, 0] = -_tmp23 * _tmp47 - _tmp35 * _tmp59 + _tmp36 * _tmp58 + _tmp54 * _tmp60
-        _point_D_cal[0, 1] = -_tmp34 * _tmp64 + _tmp34 * _tmp66
-        _point_D_cal[1, 1] = -_tmp56 * _tmp64 + _tmp56 * _tmp66 - _tmp68
-        _point_D_cal[2, 1] = -_tmp23 * _tmp64 + _tmp58 * _tmp62 - _tmp59 * _tmp61 + _tmp60 * _tmp65
-        _point_D_cal[0, 2] = -_tmp29 + _tmp34 * _tmp77 - _tmp34 * _tmp78
-        _point_D_cal[1, 2] = _tmp56 * _tmp77 - _tmp56 * _tmp78
-        _point_D_cal[2, 2] = -_tmp23 * _tmp78 + _tmp60 * _tmp76 + _tmp79 - _tmp80
-        _point_D_cal[0, 3] = _tmp34 * _tmp89 - _tmp34 * _tmp90
-        _point_D_cal[1, 3] = -_tmp31 + _tmp56 * _tmp89 - _tmp56 * _tmp90
-        _point_D_cal[2, 3] = -_tmp23 * _tmp90 + _tmp60 * _tmp88 - _tmp91 + _tmp92
-        _point_D_cal[0, 4] = _tmp34 * _tmp95
-        _point_D_cal[1, 4] = _tmp56 * _tmp95
-        _point_D_cal[2, 4] = _tmp60 * _tmp94 - 1
-        _point_D_cal[0, 5] = _tmp102 * _tmp34 - _tmp34 * _tmp98
-        _point_D_cal[1, 5] = _tmp102 * _tmp56 - _tmp56 * _tmp98
+        _point_D_cal[0, 0] = _tmp67 * _tmp72 - _tmp77 - _tmp78 * _tmp80
+        _point_D_cal[1, 0] = _tmp67 * _tmp82 - _tmp78 * _tmp83
+        _point_D_cal[2, 0] = (
+            _tmp37 * _tmp88 + _tmp44 * _tmp53 * _tmp84 - _tmp67 * _tmp85 + _tmp78 * _tmp86
+        )
+        _point_D_cal[0, 1] = _tmp71 * _tmp94 - _tmp80 * _tmp95
+        _point_D_cal[1, 1] = _tmp81 * _tmp94 - _tmp83 * _tmp95 - _tmp97
+        _point_D_cal[2, 1] = (
+            _tmp84 * _tmp89 * _tmp98 - _tmp85 * _tmp93 + _tmp86 * _tmp95 + _tmp88 * _tmp90
+        )
+        _point_D_cal[0, 2] = -_tmp1 * _tmp76 + _tmp105 * _tmp71 - _tmp106 * _tmp80
+        _point_D_cal[1, 2] = _tmp105 * _tmp81 - _tmp106 * _tmp83
+        _point_D_cal[2, 2] = (
+            -_tmp104 * _tmp85 + _tmp106 * _tmp86 + _tmp107 * _tmp77 + _tmp108 * _tmp87
+        )
+        _point_D_cal[0, 3] = _tmp113 * _tmp71 - _tmp114 * _tmp80
+        _point_D_cal[1, 3] = _tmp113 * _tmp81 - _tmp114 * _tmp83 - _tmp33 * _tmp76
+        _point_D_cal[2, 3] = (
+            _tmp107 * _tmp97 + _tmp109 * _tmp88 - _tmp112 * _tmp85 + _tmp114 * _tmp86
+        )
+        _point_D_cal[0, 4] = _tmp116 * _tmp72
+        _point_D_cal[1, 4] = _tmp116 * _tmp82
+        _point_D_cal[2, 4] = -_tmp116 * _tmp85 - 1
+        _point_D_cal[0, 5] = -_tmp119 * _tmp80 + _tmp123 * _tmp71
+        _point_D_cal[1, 5] = -_tmp119 * _tmp83 + _tmp123 * _tmp81
         _point_D_cal[2, 5] = (
-            -_tmp100 * _tmp57 + _tmp101 * _tmp60 - _tmp23 * _tmp98 - _tmp28 * _tmp99
+            _tmp119 * _tmp86 + _tmp120 * _tmp76 - _tmp121 * _tmp7 * _tmp76 - _tmp122 * _tmp85
         )
         _point_D_pixel = numpy.zeros((3, 2))
-        _point_D_pixel[0, 0] = _tmp105 * _tmp34 - _tmp106 * _tmp34 + _tmp29
-        _point_D_pixel[1, 0] = _tmp105 * _tmp56 - _tmp106 * _tmp56
-        _point_D_pixel[2, 0] = _tmp104 * _tmp60 - _tmp106 * _tmp23 - _tmp79 + _tmp80
-        _point_D_pixel[0, 1] = _tmp109 * _tmp34 - _tmp110 * _tmp34
-        _point_D_pixel[1, 1] = _tmp109 * _tmp56 - _tmp110 * _tmp56 + _tmp31
-        _point_D_pixel[2, 1] = _tmp108 * _tmp60 - _tmp110 * _tmp23 + _tmp91 - _tmp92
+        _point_D_pixel[0, 0] = _tmp135 * _tmp71 - _tmp137 * _tmp71 + _tmp32
+        _point_D_pixel[1, 0] = _tmp135 * _tmp81 - _tmp137 * _tmp81
+        _point_D_pixel[2, 0] = (
+            -_tmp108 * _tmp138 + _tmp125 * _tmp139 + _tmp134 * _tmp140 - _tmp137 * _tmp25
+        )
+        _point_D_pixel[0, 1] = _tmp144 * _tmp71 - _tmp145 * _tmp71
+        _point_D_pixel[1, 1] = _tmp144 * _tmp81 - _tmp145 * _tmp81 + _tmp34
+        _point_D_pixel[2, 1] = (
+            -_tmp109 * _tmp138 * _tmp8 + _tmp139 * _tmp141 + _tmp140 * _tmp143 - _tmp145 * _tmp25
+        )
         return _camera_ray, _is_valid, _point_D_cal, _point_D_pixel

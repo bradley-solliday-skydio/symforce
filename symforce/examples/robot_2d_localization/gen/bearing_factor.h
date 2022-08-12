@@ -25,74 +25,82 @@ void BearingFactor(const sym::Pose2<Scalar>& pose, const Eigen::Matrix<Scalar, 2
                    Eigen::Matrix<Scalar, 1, 3>* const jacobian = nullptr,
                    Eigen::Matrix<Scalar, 3, 3>* const hessian = nullptr,
                    Eigen::Matrix<Scalar, 3, 1>* const rhs = nullptr) {
-  // Total ops: 66
+  // Total ops: 79
 
   // Input arrays
   const Eigen::Matrix<Scalar, 4, 1>& _pose = pose.Data();
 
-  // Intermediate terms (24)
-  const Scalar _tmp0 = _pose[1] * _pose[2];
-  const Scalar _tmp1 = _pose[0] * _pose[3];
-  const Scalar _tmp2 = _pose[0] * landmark(1, 0) - _pose[1] * landmark(0, 0);
-  const Scalar _tmp3 = _tmp0 - _tmp1 + _tmp2;
-  const Scalar _tmp4 = _pose[0] * _pose[2] + _pose[1] * _pose[3];
-  const Scalar _tmp5 = _pose[1] * landmark(1, 0);
-  const Scalar _tmp6 = _pose[0] * landmark(0, 0);
-  const Scalar _tmp7 = -_tmp4 + _tmp5 + _tmp6;
-  const Scalar _tmp8 = _tmp7 + epsilon * ((((_tmp7) > 0) - ((_tmp7) < 0)) + Scalar(0.5));
-  const Scalar _tmp9 = -angle + std::atan2(_tmp3, _tmp8);
+  // Intermediate terms (30)
+  const Scalar _tmp0 = _pose[0] * _pose[3] - _pose[1] * _pose[2];
+  const Scalar _tmp1 = _pose[1] * landmark(0, 0);
+  const Scalar _tmp2 = _pose[0] * landmark(1, 0);
+  const Scalar _tmp3 = _pose[0] * _pose[2];
+  const Scalar _tmp4 = _pose[1] * _pose[3];
+  const Scalar _tmp5 = _tmp3 + _tmp4;
+  const Scalar _tmp6 = _pose[1] * landmark(1, 0);
+  const Scalar _tmp7 = _pose[0] * landmark(0, 0);
+  const Scalar _tmp8 = _tmp6 + _tmp7;
+  const Scalar _tmp9 = -_tmp5 + _tmp8;
   const Scalar _tmp10 =
-      _tmp9 - 2 * Scalar(M_PI) *
-                  std::floor((Scalar(1) / Scalar(2)) * (_tmp9 + Scalar(M_PI)) / Scalar(M_PI));
-  const Scalar _tmp11 = Scalar(1.0) / (_tmp8);
-  const Scalar _tmp12 = std::pow(_tmp8, Scalar(2));
-  const Scalar _tmp13 = _tmp3 / _tmp12;
-  const Scalar _tmp14 = _tmp11 * (_tmp4 - _tmp5 - _tmp6) - _tmp13 * (_tmp0 - _tmp1 + _tmp2);
-  const Scalar _tmp15 = _tmp12 + std::pow(_tmp3, Scalar(2));
-  const Scalar _tmp16 = _tmp12 / _tmp15;
-  const Scalar _tmp17 = _tmp14 * _tmp16;
-  const Scalar _tmp18 = _pose[0] * _tmp13 + _pose[1] * _tmp11;
-  const Scalar _tmp19 = _tmp16 * _tmp18;
-  const Scalar _tmp20 = -_pose[0] * _tmp11 + _pose[1] * _tmp13;
-  const Scalar _tmp21 = _tmp16 * _tmp20;
-  const Scalar _tmp22 = std::pow(_tmp8, Scalar(4)) / std::pow(_tmp15, Scalar(2));
-  const Scalar _tmp23 = _tmp18 * _tmp22;
+      -angle + std::atan2(-_tmp0 - _tmp1 + _tmp2,
+                          _tmp9 + epsilon * ((((_tmp9) > 0) - ((_tmp9) < 0)) + Scalar(0.5)));
+  const Scalar _tmp11 =
+      _tmp10 - 2 * Scalar(M_PI) *
+                   std::floor((Scalar(1) / Scalar(2)) * (_tmp10 + Scalar(M_PI)) / Scalar(M_PI));
+  const Scalar _tmp12 = _tmp5 - _tmp6 - _tmp7;
+  const Scalar _tmp13 = _tmp12 + epsilon * ((((_tmp12) > 0) - ((_tmp12) < 0)) + Scalar(-0.5));
+  const Scalar _tmp14 = Scalar(1.0) / (_tmp13);
+  const Scalar _tmp15 = _tmp0 + _tmp1 - _tmp2;
+  const Scalar _tmp16 = std::pow(_tmp15, Scalar(2));
+  const Scalar _tmp17 = std::pow(_tmp13, Scalar(2));
+  const Scalar _tmp18 = Scalar(1.0) / (_tmp17);
+  const Scalar _tmp19 = _tmp14 * (-_tmp3 - _tmp4 + _tmp8) - _tmp16 * _tmp18;
+  const Scalar _tmp20 = _tmp16 + _tmp17;
+  const Scalar _tmp21 = _tmp17 / _tmp20;
+  const Scalar _tmp22 = _tmp19 * _tmp21;
+  const Scalar _tmp23 = _tmp15 * _tmp18;
+  const Scalar _tmp24 = _pose[0] * _tmp23 + _pose[1] * _tmp14;
+  const Scalar _tmp25 = _tmp21 * _tmp24;
+  const Scalar _tmp26 = -_pose[0] * _tmp14 + _pose[1] * _tmp23;
+  const Scalar _tmp27 = _tmp21 * _tmp26;
+  const Scalar _tmp28 = std::pow(_tmp13, Scalar(4)) / std::pow(_tmp20, Scalar(2));
+  const Scalar _tmp29 = _tmp19 * _tmp28;
 
   // Output terms (4)
   if (res != nullptr) {
     Eigen::Matrix<Scalar, 1, 1>& _res = (*res);
 
-    _res(0, 0) = _tmp10;
+    _res(0, 0) = _tmp11;
   }
 
   if (jacobian != nullptr) {
     Eigen::Matrix<Scalar, 1, 3>& _jacobian = (*jacobian);
 
-    _jacobian(0, 0) = _tmp17;
-    _jacobian(0, 1) = _tmp19;
-    _jacobian(0, 2) = _tmp21;
+    _jacobian(0, 0) = _tmp22;
+    _jacobian(0, 1) = -_tmp25;
+    _jacobian(0, 2) = -_tmp27;
   }
 
   if (hessian != nullptr) {
     Eigen::Matrix<Scalar, 3, 3>& _hessian = (*hessian);
 
-    _hessian(0, 0) = std::pow(_tmp14, Scalar(2)) * _tmp22;
-    _hessian(1, 0) = _tmp14 * _tmp23;
-    _hessian(2, 0) = _tmp14 * _tmp20 * _tmp22;
+    _hessian(0, 0) = std::pow(_tmp19, Scalar(2)) * _tmp28;
+    _hessian(1, 0) = -_tmp24 * _tmp29;
+    _hessian(2, 0) = -_tmp26 * _tmp29;
     _hessian(0, 1) = 0;
-    _hessian(1, 1) = std::pow(_tmp18, Scalar(2)) * _tmp22;
-    _hessian(2, 1) = _tmp20 * _tmp23;
+    _hessian(1, 1) = std::pow(_tmp24, Scalar(2)) * _tmp28;
+    _hessian(2, 1) = _tmp24 * _tmp26 * _tmp28;
     _hessian(0, 2) = 0;
     _hessian(1, 2) = 0;
-    _hessian(2, 2) = std::pow(_tmp20, Scalar(2)) * _tmp22;
+    _hessian(2, 2) = std::pow(_tmp26, Scalar(2)) * _tmp28;
   }
 
   if (rhs != nullptr) {
     Eigen::Matrix<Scalar, 3, 1>& _rhs = (*rhs);
 
-    _rhs(0, 0) = _tmp10 * _tmp17;
-    _rhs(1, 0) = _tmp10 * _tmp19;
-    _rhs(2, 0) = _tmp10 * _tmp21;
+    _rhs(0, 0) = _tmp11 * _tmp22;
+    _rhs(1, 0) = -_tmp11 * _tmp25;
+    _rhs(2, 0) = -_tmp11 * _tmp27;
   }
 }  // NOLINT(readability/fn_size)
 

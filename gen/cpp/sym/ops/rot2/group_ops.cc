@@ -166,35 +166,33 @@ sym::Rot2<Scalar> GroupOps<Rot2<Scalar>>::ComposeWithJacobians(const sym::Rot2<S
                                                                const sym::Rot2<Scalar>& b,
                                                                SelfJacobian* const res_D_a,
                                                                SelfJacobian* const res_D_b) {
-  // Total ops: 11
+  // Total ops: 9
 
   // Input arrays
   const Eigen::Matrix<Scalar, 2, 1>& _a = a.Data();
   const Eigen::Matrix<Scalar, 2, 1>& _b = b.Data();
 
-  // Intermediate terms (5)
+  // Intermediate terms (3)
   const Scalar _tmp0 = _a[0] * _b[0] - _a[1] * _b[1];
-  const Scalar _tmp1 = _a[0] * _b[1];
-  const Scalar _tmp2 = _a[1] * _b[0];
-  const Scalar _tmp3 = _tmp1 + _tmp2;
-  const Scalar _tmp4 = std::pow(_tmp0, Scalar(2)) - _tmp3 * (-_tmp1 - _tmp2);
+  const Scalar _tmp1 = _a[0] * _b[1] + _a[1] * _b[0];
+  const Scalar _tmp2 = std::pow(_tmp0, Scalar(2)) + std::pow(_tmp1, Scalar(2));
 
   // Output terms (3)
   Eigen::Matrix<Scalar, 2, 1> _res;
 
   _res[0] = _tmp0;
-  _res[1] = _tmp3;
+  _res[1] = _tmp1;
 
   if (res_D_a != nullptr) {
     Eigen::Matrix<Scalar, 1, 1>& _res_D_a = (*res_D_a);
 
-    _res_D_a(0, 0) = _tmp4;
+    _res_D_a(0, 0) = _tmp2;
   }
 
   if (res_D_b != nullptr) {
     Eigen::Matrix<Scalar, 1, 1>& _res_D_b = (*res_D_b);
 
-    _res_D_b(0, 0) = _tmp4;
+    _res_D_b(0, 0) = _tmp2;
   }
 
   return sym::Rot2<Scalar>(_res);
@@ -216,36 +214,33 @@ sym::Rot2<Scalar> GroupOps<Rot2<Scalar>>::BetweenWithJacobians(const sym::Rot2<S
                                                                const sym::Rot2<Scalar>& b,
                                                                SelfJacobian* const res_D_a,
                                                                SelfJacobian* const res_D_b) {
-  // Total ops: 15
+  // Total ops: 10
 
   // Input arrays
   const Eigen::Matrix<Scalar, 2, 1>& _a = a.Data();
   const Eigen::Matrix<Scalar, 2, 1>& _b = b.Data();
 
-  // Intermediate terms (6)
-  const Scalar _tmp0 = _a[0] * _b[0];
-  const Scalar _tmp1 = _a[1] * _b[1];
-  const Scalar _tmp2 = _tmp0 + _tmp1;
-  const Scalar _tmp3 = _a[0] * _b[1];
-  const Scalar _tmp4 = _a[1] * _b[0];
-  const Scalar _tmp5 = _tmp3 - _tmp4;
+  // Intermediate terms (3)
+  const Scalar _tmp0 = _a[0] * _b[0] + _a[1] * _b[1];
+  const Scalar _tmp1 = _a[0] * _b[1] - _a[1] * _b[0];
+  const Scalar _tmp2 = std::pow(_tmp0, Scalar(2)) + std::pow(_tmp1, Scalar(2));
 
   // Output terms (3)
   Eigen::Matrix<Scalar, 2, 1> _res;
 
-  _res[0] = _tmp2;
-  _res[1] = _tmp5;
+  _res[0] = _tmp0;
+  _res[1] = _tmp1;
 
   if (res_D_a != nullptr) {
     Eigen::Matrix<Scalar, 1, 1>& _res_D_a = (*res_D_a);
 
-    _res_D_a(0, 0) = _tmp2 * (-_tmp0 - _tmp1) - std::pow(_tmp5, Scalar(2));
+    _res_D_a(0, 0) = -_tmp2;
   }
 
   if (res_D_b != nullptr) {
     Eigen::Matrix<Scalar, 1, 1>& _res_D_b = (*res_D_b);
 
-    _res_D_b(0, 0) = std::pow(_tmp2, Scalar(2)) - _tmp5 * (-_tmp3 + _tmp4);
+    _res_D_b(0, 0) = _tmp2;
   }
 
   return sym::Rot2<Scalar>(_res);

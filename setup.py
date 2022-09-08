@@ -67,6 +67,18 @@ class CMakeBuild(build_ext):
             f"-DPYTHON_EXECUTABLE={sys.executable}",
         ]
 
+        if self.editable_mode:
+            # NOTE(brad): If in editable mode (i.e., building with pip install -e), we
+            # place and expect cc_sym.so in the top-level of SOURCE_DIR. Since cc_sym needs
+            # to be dynamically linked to its dependencies (libsymforce_gen.so
+            # & libsymforce_opt.so) which it finds via the RPATH, we set the RPATH to
+            # $ORIGIN (a keyword) which is just the directory of the lib at runtime. We will
+            # later place the dependencies of cc_sym.so in the same directory so that they
+            # will be found.
+            # NOTE(brad): For macos, $ORIGIN should be @rpath, and on windows there is no
+            # rpath, but shared libraries are looked for in the same directory anyway.
+            cmake_args.append("-DCMAKE_BUILD_RPATH=$ORIGIN")
+
         cfg = "Debug" if self.debug else "Release"
         build_args = ["--config", cfg]
 
@@ -98,6 +110,44 @@ class CMakeBuild(build_ext):
         print("-" * 10, "Building extensions", "-" * 40)
         cmake_cmd = ["cmake", "--build", "."] + self.build_args
         subprocess.run(cmake_cmd, cwd=self.build_temp, check=True)
+
+        if (self.editable_mode):
+            # NOTE(brad) When installed in editable mode, python expects to find symengine
+            # in the symenginepy/symengine source directory. Everything is already there
+            # except the compiled symengine_wrapper extension module, so we copy that there
+            # as well.
+            self.copy_file(
+                build_temp_path
+                / "symengine_install"
+                / "lib"
+                / f"python{sys.version_info.major}.{sys.version_info.minor}"
+                / "site-packages"
+                / "symengine"
+                / "lib"
+                / self.get_ext_filename("symengine_wrapper"),
+                SOURCE_DIR
+                / "third_party"
+                / "symenginepy"
+                / "symengine"
+                / "lib"
+                / self.get_ext_filename("symengine_wrapper"),
+            )
+
+            # NOTE(brad) By setting the RPATH of the generated binaries to include $ORIGIN,
+            # we told all binaries they can expect to find any shared libraries in the same
+            # directory they are already in. In particular, we told cc_sym.so it can find
+            # its dependencies (the below shared libraries) in SOURCE_DIR (where we put it).
+            # Thus, we need to copy the shared libaries there as well so that cc_sym.so will
+            # find them when it looks.
+            self.copy_file(
+                build_temp_path / "libsymforce_gen.so",
+                SOURCE_DIR / "libsymforce_gen.so"
+            )
+            self.copy_file(
+                build_temp_path / "libsymforce_opt.so",
+                SOURCE_DIR / "libsymforce_opt.so"
+            )
+
 
         # Move from build temp to final position
         for ext in self.extensions:

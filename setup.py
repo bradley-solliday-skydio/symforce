@@ -3,6 +3,7 @@
 # This source code is under the Apache 2.0 license found in the LICENSE file.
 # ----------------------------------------------------------------------------
 
+import distutils.errors
 import distutils.util
 import multiprocessing
 import os
@@ -16,6 +17,7 @@ from setuptools import Extension
 from setuptools import find_packages
 from setuptools import setup
 from setuptools.command.build_ext import build_ext
+from setuptools.command.develop import develop
 from setuptools.command.egg_info import egg_info
 from setuptools.command.install import install
 
@@ -43,6 +45,30 @@ class CMakeExtension(Extension):
         Extension.__init__(self, name, sources=[])
 
 
+class PatchDevelop(develop):
+    """
+    develop is the legacy command (pre setuptools==64.0.0, which implemented
+    the pep 660 hook build_editable) to build a package in editable mode.
+
+    This will be used by setuptools < 64.0.0, and not be used by
+    setuptools >= 64.0.0 during a normal `pip install -e .` run (of course,
+    you could still run `python setup.py develop` to run it with any version
+    of setuptols).
+    """
+
+    def run(self) -> None:
+        # NOTE(brad): In setuptools 64.0.0, the editable_mode field of the
+        # build_ext was added and is set to True during a pep 660 editable
+        # install.
+        # Since we want to use this field in our CMakeBuild extension of
+        # build_ext to identify if we're performing an editable install
+        # regardless of whether we're building with develop or build_editable,
+        # (both before and after version 64.0.0), we patch develop to add this
+        # field to build_ext and set it to True.
+        self.distribution.get_command_obj("build_ext").editable_mode = True
+        super().run()
+
+
 class CMakeBuild(build_ext):
     """
     Custom extension builder that runs CMake.
@@ -66,6 +92,22 @@ class CMakeBuild(build_ext):
             "-DCMAKE_SHARED_LINKER_FLAGS=-Wl,-rpath,'$ORIGIN/../..'",
             f"-DPYTHON_EXECUTABLE={sys.executable}",
         ]
+
+        # NOTE(brad): build_ext.editable_mode is not added until setuptools==64.0.0
+        editable_mode = self.editable_mode if hasattr(self, "editable_mode") else False
+
+        if editable_mode:
+            # NOTE(brad): If in editable mode (i.e., building with pip install -e), we
+            # place and expect cc_sym.so in the top-level of SOURCE_DIR. Since cc_sym needs
+            # to be dynamically linked to its dependencies (libsymforce_gen.so
+            # & libsymforce_opt.so) which it finds via the RPATH, we set the RPATH to
+            # $ORIGIN (a keyword) which is just the directory of the lib at runtime (the macos
+            # analog to $ORIGIN is @loader_path). We will later place the dependencies of
+            # cc_sym.so in the same directory so that they will be found.
+            if sys.platform == "linux" or sys.platform == "linux2":
+                cmake_args.append("-DCMAKE_BUILD_RPATH=$ORIGIN")
+            elif sys.platform == "darwin":
+                cmake_args.append("-DCMAKE_BUILD_RPATH=@loader_path")
 
         cfg = "Debug" if self.debug else "Release"
         build_args = ["--config", cfg]
@@ -98,6 +140,47 @@ class CMakeBuild(build_ext):
         print("-" * 10, "Building extensions", "-" * 40)
         cmake_cmd = ["cmake", "--build", "."] + self.build_args
         subprocess.run(cmake_cmd, cwd=self.build_temp, check=True)
+
+        if editable_mode:
+            # NOTE(brad) When installed in editable mode, python expects to find symengine
+            # in the symenginepy/symengine source directory. Everything is already there
+            # except the compiled symengine_wrapper extension module, so we copy that there
+            # as well.
+            # NOTE(brad) For some reason that I don't fully understand, the symengine_wrapper
+            # shared library is neither present in symengine_install nor needed in the source
+            # directory on macos sometimes (for example, on the github actions macos runner).
+            # So, if the copy fails (due to the file not being present, we just move on).
+            try:
+                self.copy_file(
+                    build_temp_path
+                    / "symengine_install"
+                    / "lib"
+                    / f"python{sys.version_info.major}.{sys.version_info.minor}"
+                    / "site-packages"
+                    / "symengine"
+                    / "lib"
+                    / self.get_ext_filename("symengine_wrapper"),
+                    SOURCE_DIR
+                    / "third_party"
+                    / "symenginepy"
+                    / "symengine"
+                    / "lib"
+                    / self.get_ext_filename("symengine_wrapper"),
+                )
+            except distutils.errors.DistutilsFileError:
+                pass
+
+            # NOTE(brad) By setting the RPATH of the generated binaries to include $ORIGIN,
+            # we told all binaries they can expect to find any shared libraries in the same
+            # directory they are already in. In particular, we told cc_sym.so it can find
+            # its dependencies (the below shared libraries) in SOURCE_DIR (where we put it).
+            # Thus, we need to copy the shared libaries there as well so that cc_sym.so will
+            # find them when it looks.
+            for cc_sym_dependency in build_temp_path.glob("libsymforce_*"):
+                self.copy_file(
+                    cc_sym_dependency,
+                    SOURCE_DIR / cc_sym_dependency.name,
+                )
 
         # Move from build temp to final position
         for ext in self.extensions:
@@ -252,7 +335,7 @@ docs_requirements = [
 ]
 
 cmdclass: T.Dict[str, T.Any] = dict(
-    build_ext=CMakeBuild, install=InstallWithExtras, egg_info=SymForceEggInfo
+    build_ext=CMakeBuild, install=InstallWithExtras, egg_info=SymForceEggInfo, develop=PatchDevelop,
 )
 
 

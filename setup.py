@@ -187,6 +187,21 @@ class CMakeBuild(build_ext):
             self.move_output(ext)
 
     def move_output(self, ext: CMakeExtension) -> None:
+        if ext.name == "lcmtypes":
+            build_temp_path = Path(self.build_temp)
+            # check to see that this would be before we grab the parent.
+            dest_path = Path(self.get_ext_fullpath(ext.name)).resolve().parent  # type: ignore[attr-defined]
+            if self.inplace: # means an editable install
+                self.copy_tree(
+                    str(build_temp_path / "lcmtypes" / "python2.7" / "lcmtypes"),
+                    str(dest_path / "lcmtypes_build" / "lcmtypes"),
+                )
+            else: # means a non-editable install
+                self.copy_tree(
+                    str(build_temp_path / "lcmtypes" / "python2.7" / "lcmtypes"),
+                    str(dest_path / "lcmtypes"),
+                )
+            return
         build_temp = Path(self.build_temp).resolve()
         extension_source_paths = {"cc_sym": build_temp / "pybind" / self.get_ext_filename("cc_sym")}
 
@@ -299,12 +314,6 @@ class InstallWithExtras(install):
             ["cmake", "--build", ".", "--target", "install"],
             cwd=build_dir,
             check=True,
-        )
-
-        # Install lcmtypes - this is kinda jank
-        self.copy_tree(
-            str(build_dir / "lcmtypes" / "python2.7" / "lcmtypes"),
-            str(Path.cwd() / self.install_platlib / "lcmtypes"),  # type: ignore[attr-defined]
         )
 
 
@@ -444,11 +453,12 @@ setup(
     package_dir={
         "symforce": "symforce",
         "symengine": "third_party/symenginepy/symengine",
+        "lcmtypes": "lcmtypes_build/lcmtypes",
     },
     # Override the extension builder with our cmake class
     cmdclass=cmdclass,
     # Build C++ extension module
-    ext_modules=[CMakeExtension("cc_sym")],
+    ext_modules=[CMakeExtension("cc_sym"), CMakeExtension("lcmtypes")],
     # Barebones packages needed to run symforce
     install_requires=[
         "black",

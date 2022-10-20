@@ -121,8 +121,12 @@ class GeoPackageTest(unittest.TestCase):
         element = geo_class.from_tangent(np.random.normal(size=tangent_dim))
 
         vector = np.random.normal(size=(2, 1))
+        vec_as_list = vector.flatten().tolist()
+        vec_as_tuple = tuple(vec_as_list)
         matrix = element.to_rotation_matrix()
         np.testing.assert_almost_equal(np.matmul(matrix, vector), element * vector)
+        np.testing.assert_almost_equal(np.matmul(matrix, vector), element * vec_as_list)
+        np.testing.assert_almost_equal(np.matmul(matrix, vector), element * vec_as_tuple)
 
         # Test constructor handles column vectors correctly
         col_data = np.random.normal(size=(geo_class.storage_dim(), 1))
@@ -226,8 +230,16 @@ class GeoPackageTest(unittest.TestCase):
         element = geo_class.from_tangent(np.random.normal(size=tangent_dim))
 
         vector = np.random.normal(size=(2, 1))
+        vec_as_list = vector.flatten().tolist()
+        vec_as_tuple = tuple(vec_as_list)
         vector_as_element = geo_class(t=vector.flatten().tolist())
         np.testing.assert_almost_equal(element * vector, (element * vector_as_element).position())
+        np.testing.assert_almost_equal(
+            element * vec_as_list, (element * vector_as_element).position()
+        )
+        np.testing.assert_almost_equal(
+            element * vec_as_tuple, (element * vector_as_element).position()
+        )
 
         # Test position/rotation accessors
         np.testing.assert_equal(element.position(), element.t)
@@ -344,8 +356,12 @@ class GeoPackageTest(unittest.TestCase):
         element = geo_class.from_tangent(np.random.normal(size=tangent_dim))
 
         vector = np.random.normal(size=(3, 1))
+        vec_as_list = vector.flatten().tolist()
+        vec_as_tuple = tuple(vec_as_list)
         matrix = element.to_rotation_matrix()
         np.testing.assert_almost_equal(np.matmul(matrix, vector), element * vector)
+        np.testing.assert_almost_equal(np.matmul(matrix, vector), element * vec_as_list)
+        np.testing.assert_almost_equal(np.matmul(matrix, vector), element * vec_as_tuple)
 
         # Test constructor handles column vectors correctly
         col_data = np.random.normal(size=(geo_class.storage_dim(), 1))
@@ -449,8 +465,16 @@ class GeoPackageTest(unittest.TestCase):
         element = geo_class.from_tangent(np.random.normal(size=tangent_dim))
 
         vector = np.random.normal(size=(3, 1))
+        vec_as_list = vector.flatten().tolist()
+        vec_as_tuple = tuple(vec_as_list)
         vector_as_element = geo_class(t=vector.flatten().tolist())
         np.testing.assert_almost_equal(element * vector, (element * vector_as_element).position())
+        np.testing.assert_almost_equal(
+            element * vec_as_list, (element * vector_as_element).position()
+        )
+        np.testing.assert_almost_equal(
+            element * vec_as_tuple, (element * vector_as_element).position()
+        )
 
         # Test position/rotation accessors
         np.testing.assert_equal(element.position(), element.t)

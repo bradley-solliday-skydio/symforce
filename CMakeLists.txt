@@ -168,7 +168,7 @@ endif()
 # catch2
 
 if(SYMFORCE_BUILD_BENCHMARKS OR SYMFORCE_BUILD_TESTS)
-  find_package(Catch2 3.1.1 QUIET)
+  find_package(Catch2 3 QUIET)
   if(NOT Catch2_FOUND)
     message(STATUS "Catch2 not found, adding with FetchContent")
     function(add_catch)

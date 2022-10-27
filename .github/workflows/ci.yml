@@ -98,6 +98,7 @@ jobs:
             -D CMAKE_C_COMPILER=${{ matrix.compiler.C }} \
             -D CMAKE_CXX_COMPILER=${{ matrix.compiler.CXX }} \
             -D SYMFORCE_PYTHON_OVERRIDE=${{ matrix.python }} \
+            -D PYTHON_EXECUTABLE=$(which ${{ matrix.python }}) \
             -D SYMFORCE_BUILD_BENCHMARKS=ON
           cmake --build build -j $(nproc)
 

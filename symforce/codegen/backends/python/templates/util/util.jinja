@@ -15,8 +15,9 @@
  #     is_input (bool): Is this an input argument or return value?
  #     available_classes (T.List[type]):  A list sym classes already available (meaning
  #       they should be referenced by just their name, and not, say, sym.Rot3).
+ #     sequence_vecs (bool): Can a sequence be a vector?
  #}
-{%- macro format_typename(T_or_value, name, is_input, available_classes = []) %}
+{%- macro format_typename(T_or_value, name, is_input, available_classes = [], sequence_vecs=False) %}
     {%- set T = typing_util.get_type(T_or_value) -%}
     {%- if T.__name__ == 'DataBuffer' -%}
         numpy.ndarray
@@ -25,7 +26,11 @@
     {%- elif T.__name__ == 'NoneType' -%}
         None
     {%- elif issubclass(T, Matrix) -%}
+        {%- if sequence_vecs and is_input and (T.SHAPE | min) == 1 -%}
+        T.Union[T.Sequence[float], numpy.ndarray]
+        {%- else -%}
         numpy.ndarray
+        {%- endif -%}
     {%- elif issubclass(T, Values) -%}
         {#- TODO(aaron): We don't currently know where to import lcmtypes from or what they should be
          # called, at some point we should fix this and do something like
@@ -34,7 +39,7 @@
         T.Any
     {%- elif is_sequence(T_or_value) -%}
         {%- if is_input -%}
-            T.Sequence[{{ format_typename(T_or_value[0], name, is_input) }}]
+            T.Sequence[{{ format_typename(T_or_value[0], name, is_input, available_classes) }}]
         {%- else -%}
             T.List[float]
         {%- endif -%}
@@ -111,12 +116,47 @@
 {%- if is_method and "self" not in spec.inputs -%}
 @staticmethod
 {% endif %}
+{# Only accept list as vector inputs if not numba and we reshape vecs into ndarrays #}
+{% set sequence_vecs = spec.config.reshape_vectors and not spec.config.use_numba %}
 def {{ function_name_and_args(spec) }}:
     # type: (
     {%- for name, type in spec.inputs.items() -%}
-    {{ format_typename(type, name, is_input=True, available_classes=available_classes) }}{% if not loop.last %}, {% endif %}
+    {{ format_typename(type, name, is_input=True, available_classes=available_classes, sequence_vecs=sequence_vecs) }}{% if not loop.last %}, {% endif %}
     {%- endfor -%}) -> {{ get_return_type(spec, available_classes=available_classes) }}
 {%- endmacro -%}
+
+{# ------------------------------------------------------------------------- #}
+
+{# Helper for expr_code. Checks that an input matrix called name has a valid shape,
+ # raises an IndexError if invalid, and reshapes to be a 2d ndarray.
+ #
+ # If use_numba=True, the IndexError message raised does not say what the size of the
+ # argument passed in was. This is because numba compatible code must have any error
+ # messages known at compile time. Similarly, the reshaping is always performed
+ # because numba compatible code cannot reshape an array in a conditional.
+ #
+ # Prints nothing if shape is not of the form (1, N) or (N, 1). This is because
+ # only row and column vectors might also be reasonably represented with (N,).
+ #
+ # Args:
+ #     name (str): The name of the array to be checked and resized. Should be a user
+ #       argument name, as it is used in the error message.
+ #     shape (T.Tuple[int, int]): The expected shape of name.
+ #     use_numba (bool): Whether the generated code should be numba compatible.
+ #}
+{% macro check_size_and_reshape(name, shape, use_numba) %}
+{% if 1 in shape %}
+    {% set size = shape | max %}
+    {% if use_numba %}
+    {# NOTE(brad): Numba will complain if we reshape name inside of a conditional #}
+if not ({{ name }}.shape == {{ shape }} or {{ name }}.shape == ({{ size }},)):
+    raise IndexError("{{ name }} is expected to have shape {{ shape }} or ({{ size }},)")
+{{ name }} = {{ name }}.reshape({{ shape }})
+    {% else %}
+{{ name }} = check_size_and_reshape({{ name }}, "{{ name }}", {{ shape }})
+    {% endif %}
+{% endif %}
+{% endmacro %}
 
 {# ------------------------------------------------------------------------- #}
 
@@ -134,16 +174,8 @@ def {{ function_name_and_args(spec) }}:
     {% for name, type in spec.inputs.items() %}
         {% set T = typing_util.get_type(type) %}
         {% if issubclass(T, Matrix) %}
-            {% if spec.config.reshape_vectors and (T.SHAPE[0] == 1 or T.SHAPE[1] == 1) %}
-                {% if spec.config.use_numba %}
-                {# NOTE(brad): Numba will complain if we reshape name inside of a conditional #}
-    if not ({{ name }}.shape == {{ T.SHAPE }} or {{ name }}.shape == ({{ T.SHAPE | max }},)):
-        raise IndexError("{{ name }} is expected to have shape {{ T.SHAPE }} or ({{ T.SHAPE | max }},)")
-    {{ name }} = {{ name }}.reshape({{ T.SHAPE }})
-                {% else %}
-    if len({{ name }}.shape) == 1:
-        {{ name }} = {{ name }}.reshape({{ T.SHAPE }})
-                {% endif %}
+            {% if spec.config.reshape_vectors %}
+    {{ check_size_and_reshape(name, T.SHAPE, spec.config.use_numba) | indent }}
             {% endif %}
         {% elif not issubclass(T, Values) and not is_symbolic(type) and not is_sequence(type) %}
     _{{ name }} = {{ name }}.data
@@ -217,3 +249,27 @@ def {{ function_name_and_args(spec) }}:
         {%- if not loop.last %}, {% endif %}
     {%- endfor -%}
 {% endmacro %}
+
+{# ------------------------------------------------------------------------- #}
+
+{# Macro to flatten an array if it's an ndarray and is a vector. Also, raises
+ # a ValueError if the length is not equal to size and the shape is not that of
+ # a vector.
+ #
+ # Args:
+ #     array (str): The name of an sequence that might be an ndarray we wish to flatten
+ #     size (int): The expected size of the array
+ #}
+{% macro flatten_if_ndarray(array, size) %}
+if isinstance({{ array }}, numpy.ndarray):
+    if {{ array }}.shape in [({{ size }}, 1), (1, {{ size }})]:
+        {{ array }} = {{ array }}.flatten()
+    elif {{ array }}.shape != ({{ size }},):
+        raise IndexError("Expected {{ array }} to be a vector of length {{ size }}; instead had shape {}".format({{ array }}.shape))
+elif len({{ array }}) != {{ size }}:
+    raise IndexError(
+        "Expected {{ array }} to be a sequence of length {{ size }}, was instead length {}.".format(
+            len({{ array }})
+        )
+    )
+{%- endmacro %}

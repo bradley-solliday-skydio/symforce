@@ -32,11 +32,23 @@ class Rot3(object):
     # --------------------------------------------------------------------------
 
     def __init__(self, q=None):
-        # type: (T.Sequence[float]) -> None
+        # type: (T.Union[T.Sequence[float], numpy.ndarray]) -> None
         if q is None:
             self.data = ops.GroupOps.identity().data  # type: T.List[float]
         else:
-            assert len(q) == self.storage_dim()
+            if isinstance(q, numpy.ndarray):
+                if q.shape in [(4, 1), (1, 4)]:
+                    q = q.flatten()
+                elif q.shape != (4,):
+                    raise IndexError(
+                        "Expected q to be a vector of length 4; instead had shape {}".format(
+                            q.shape
+                        )
+                    )
+            elif len(q) != 4:
+                raise IndexError(
+                    "Expected q to be a sequence of length 4, was instead length {}.".format(len(q))
+                )
             self.data = list(q)
 
     @classmethod
@@ -67,7 +79,7 @@ class Rot3(object):
     # --------------------------------------------------------------------------
 
     def compose_with_point(self, right):
-        # type: (Rot3, numpy.ndarray) -> numpy.ndarray
+        # type: (Rot3, T.Union[T.Sequence[float], numpy.ndarray]) -> numpy.ndarray
         """
         Left-multiplication. Either rotation concatenation or point transform.
         """
@@ -76,8 +88,20 @@ class Rot3(object):
 
         # Input arrays
         _self = self.data
-        if len(right.shape) == 1:
+        if not isinstance(right, numpy.ndarray):
+            if len(right) != 3:
+                raise IndexError(
+                    "right is expected to have length 3; instead had length {}".format(len(right))
+                )
+            right = numpy.array(right).reshape((3, 1))
+        elif right.shape == (3,):
             right = right.reshape((3, 1))
+        elif right.shape != (3, 1):
+            raise IndexError(
+                "right is expected to have shape (3, 1) or (3,); instead had shape {}".format(
+                    right.shape
+                )
+            )
 
         # Intermediate terms (11)
         _tmp0 = 2 * _self[0]
@@ -302,13 +326,7 @@ class Rot3(object):
 
     @classmethod
     def from_tangent(cls, vec, epsilon=1e-8):
-        # type: (numpy.ndarray, float) -> Rot3
-        if len(vec) != cls.tangent_dim():
-            raise ValueError(
-                "Vector dimension ({}) not equal to tangent space dimension ({}).".format(
-                    len(vec), cls.tangent_dim()
-                )
-            )
+        # type: (T.Union[T.Sequence[float], numpy.ndarray], float) -> Rot3
         return ops.LieGroupOps.from_tangent(vec, epsilon)
 
     def to_tangent(self, epsilon=1e-8):
@@ -316,13 +334,7 @@ class Rot3(object):
         return ops.LieGroupOps.to_tangent(self, epsilon)
 
     def retract(self, vec, epsilon=1e-8):
-        # type: (numpy.ndarray, float) -> Rot3
-        if len(vec) != self.tangent_dim():
-            raise ValueError(
-                "Vector dimension ({}) not equal to tangent space dimension ({}).".format(
-                    len(vec), self.tangent_dim()
-                )
-            )
+        # type: (T.Union[T.Sequence[float], numpy.ndarray], float) -> Rot3
         return ops.LieGroupOps.retract(self, vec, epsilon)
 
     def local_coordinates(self, b, epsilon=1e-8):
@@ -349,11 +361,23 @@ class Rot3(object):
         # type: (numpy.ndarray) -> numpy.ndarray
         pass
 
+    @T.overload
+    def __mul__(self, other):  # pragma: no cover
+        # type: (T.Sequence[float]) -> numpy.ndarray
+        pass
+
     def __mul__(self, other):
-        # type: (T.Union[Rot3, numpy.ndarray]) -> T.Union[Rot3, numpy.ndarray]
+        # type: (T.Union[Rot3, T.Sequence[float], numpy.ndarray]) -> T.Union[Rot3, numpy.ndarray]
         if isinstance(other, Rot3):
             return self.compose(other)
         elif isinstance(other, numpy.ndarray) and hasattr(self, "compose_with_point"):
             return self.compose_with_point(other).reshape(other.shape)
+        elif (
+            hasattr(self, "compose_with_point")
+            and hasattr(other, "__len__")
+            and hasattr(other, "__getitem__")
+            and not isinstance(other, str)
+        ):
+            return self.compose_with_point(other)
         else:
             raise NotImplementedError("Cannot compose {} with {}.".format(type(self), type(other)))

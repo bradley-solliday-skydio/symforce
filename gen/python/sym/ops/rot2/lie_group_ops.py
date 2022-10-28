@@ -19,13 +19,25 @@ class LieGroupOps(object):
 
     @staticmethod
     def from_tangent(vec, epsilon):
-        # type: (numpy.ndarray, float) -> sym.Rot2
+        # type: (T.Union[T.Sequence[float], numpy.ndarray], float) -> sym.Rot2
 
         # Total ops: 2
 
         # Input arrays
-        if len(vec.shape) == 1:
+        if not isinstance(vec, numpy.ndarray):
+            if len(vec) != 1:
+                raise IndexError(
+                    "vec is expected to have length 1; instead had length {}".format(len(vec))
+                )
+            vec = numpy.array(vec).reshape((1, 1))
+        elif vec.shape == (1,):
             vec = vec.reshape((1, 1))
+        elif vec.shape != (1, 1):
+            raise IndexError(
+                "vec is expected to have shape (1, 1) or (1,); instead had shape {}".format(
+                    vec.shape
+                )
+            )
 
         # Intermediate terms (0)
 
@@ -55,14 +67,26 @@ class LieGroupOps(object):
 
     @staticmethod
     def retract(a, vec, epsilon):
-        # type: (sym.Rot2, numpy.ndarray, float) -> sym.Rot2
+        # type: (sym.Rot2, T.Union[T.Sequence[float], numpy.ndarray], float) -> sym.Rot2
 
         # Total ops: 8
 
         # Input arrays
         _a = a.data
-        if len(vec.shape) == 1:
+        if not isinstance(vec, numpy.ndarray):
+            if len(vec) != 1:
+                raise IndexError(
+                    "vec is expected to have length 1; instead had length {}".format(len(vec))
+                )
+            vec = numpy.array(vec).reshape((1, 1))
+        elif vec.shape == (1,):
             vec = vec.reshape((1, 1))
+        elif vec.shape != (1, 1):
+            raise IndexError(
+                "vec is expected to have shape (1, 1) or (1,); instead had shape {}".format(
+                    vec.shape
+                )
+            )
 
         # Intermediate terms (2)
         _tmp0 = math.sin(vec[0, 0])

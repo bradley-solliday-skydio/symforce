@@ -52,22 +52,49 @@ class SphericalCameraCal(object):
         data = []  # type: T.List[float]
 
     def __init__(self, focal_length, principal_point, critical_theta, distortion_coeffs):
-        # type: (T.Sequence[float], T.Sequence[float], float, T.Sequence[float]) -> None
+        # type: (T.Union[T.Sequence[float], numpy.ndarray], T.Union[T.Sequence[float], numpy.ndarray], float, T.Union[T.Sequence[float], numpy.ndarray]) -> None
         self.data = []
-        if len(focal_length) != 2:
-            raise ValueError(
+        if isinstance(focal_length, numpy.ndarray):
+            if focal_length.shape in [(2, 1), (1, 2)]:
+                focal_length = focal_length.flatten()
+            elif focal_length.shape != (2,):
+                raise IndexError(
+                    "Expected focal_length to be a vector of length 2; instead had shape {}".format(
+                        focal_length.shape
+                    )
+                )
+        elif len(focal_length) != 2:
+            raise IndexError(
                 "Expected focal_length to be a sequence of length 2, was instead length {}.".format(
                     len(focal_length)
                 )
             )
-        if len(principal_point) != 2:
-            raise ValueError(
+        if isinstance(principal_point, numpy.ndarray):
+            if principal_point.shape in [(2, 1), (1, 2)]:
+                principal_point = principal_point.flatten()
+            elif principal_point.shape != (2,):
+                raise IndexError(
+                    "Expected principal_point to be a vector of length 2; instead had shape {}".format(
+                        principal_point.shape
+                    )
+                )
+        elif len(principal_point) != 2:
+            raise IndexError(
                 "Expected principal_point to be a sequence of length 2, was instead length {}.".format(
                     len(principal_point)
                 )
             )
-        if len(distortion_coeffs) != 4:
-            raise ValueError(
+        if isinstance(distortion_coeffs, numpy.ndarray):
+            if distortion_coeffs.shape in [(4, 1), (1, 4)]:
+                distortion_coeffs = distortion_coeffs.flatten()
+            elif distortion_coeffs.shape != (4,):
+                raise IndexError(
+                    "Expected distortion_coeffs to be a vector of length 4; instead had shape {}".format(
+                        distortion_coeffs.shape
+                    )
+                )
+        elif len(distortion_coeffs) != 4:
+            raise IndexError(
                 "Expected distortion_coeffs to be a sequence of length 4, was instead length {}.".format(
                     len(distortion_coeffs)
                 )
@@ -103,7 +130,7 @@ class SphericalCameraCal(object):
         return ops.CameraOps.principal_point(self)
 
     def pixel_from_camera_point(self, point, epsilon):
-        # type: (SphericalCameraCal, numpy.ndarray, float) -> T.Tuple[numpy.ndarray, float]
+        # type: (SphericalCameraCal, T.Union[T.Sequence[float], numpy.ndarray], float) -> T.Tuple[numpy.ndarray, float]
         """
         Project a 3D point in the camera frame into 2D pixel coordinates.
 
@@ -115,7 +142,7 @@ class SphericalCameraCal(object):
         return ops.CameraOps.pixel_from_camera_point(self, point, epsilon)
 
     def pixel_from_camera_point_with_jacobians(self, point, epsilon):
-        # type: (SphericalCameraCal, numpy.ndarray, float) -> T.Tuple[numpy.ndarray, float, numpy.ndarray, numpy.ndarray]
+        # type: (SphericalCameraCal, T.Union[T.Sequence[float], numpy.ndarray], float) -> T.Tuple[numpy.ndarray, float, numpy.ndarray, numpy.ndarray]
         """
         Project a 3D point in the camera frame into 2D pixel coordinates.
 
@@ -169,13 +196,7 @@ class SphericalCameraCal(object):
 
     @classmethod
     def from_tangent(cls, vec, epsilon=1e-8):
-        # type: (numpy.ndarray, float) -> SphericalCameraCal
-        if len(vec) != cls.tangent_dim():
-            raise ValueError(
-                "Vector dimension ({}) not equal to tangent space dimension ({}).".format(
-                    len(vec), cls.tangent_dim()
-                )
-            )
+        # type: (T.Union[T.Sequence[float], numpy.ndarray], float) -> SphericalCameraCal
         return ops.LieGroupOps.from_tangent(vec, epsilon)
 
     def to_tangent(self, epsilon=1e-8):
@@ -183,13 +204,7 @@ class SphericalCameraCal(object):
         return ops.LieGroupOps.to_tangent(self, epsilon)
 
     def retract(self, vec, epsilon=1e-8):
-        # type: (numpy.ndarray, float) -> SphericalCameraCal
-        if len(vec) != self.tangent_dim():
-            raise ValueError(
-                "Vector dimension ({}) not equal to tangent space dimension ({}).".format(
-                    len(vec), self.tangent_dim()
-                )
-            )
+        # type: (T.Union[T.Sequence[float], numpy.ndarray], float) -> SphericalCameraCal
         return ops.LieGroupOps.retract(self, vec, epsilon)
 
     def local_coordinates(self, b, epsilon=1e-8):

@@ -318,6 +318,38 @@ class SymforceCodegenTest(TestCase):
 
         # ---------------------------------------------------------------------
 
+        row_shape = (1, 5)
+        col_shape = (4, 1)
+        mat_shape = (2, 2)
+
+        for use_numba in [False, True]:
+            reshape_vectors = True
+            with self.subTest(
+                msg="If reshape_vectors=True, row vectors which are too large raise IndexErrors"
+                + f" [{use_numba=}]"
+            ):
+                assert_config_works(
+                    use_numba, reshape_vectors, row_shape, col_shape, mat_shape, IndexError
+                )
+
+        # ---------------------------------------------------------------------
+
+        row_shape = (1, 4)
+        col_shape = (5, 1)
+        mat_shape = (2, 2)
+
+        for use_numba in [False, True]:
+            reshape_vectors = True
+            with self.subTest(
+                msg="If reshape_vectors=True, column vectors which are too large raise IndexErrors"
+                + f" [{use_numba=}]"
+            ):
+                assert_config_works(
+                    use_numba, reshape_vectors, row_shape, col_shape, mat_shape, IndexError
+                )
+
+        # ---------------------------------------------------------------------
+
         row_shape = (1, 4)
         col_shape = (4, 1)
         mat_shape = (4,)
@@ -463,6 +495,36 @@ class SymforceCodegenTest(TestCase):
             assert_config_works(
                 use_numba, reshape_vectors, row_shape, col_shape, mat_shape, TypingError
             )
+
+        # ---------------------------------------------------------------------
+
+        with self.subTest(
+            msg="If reshape_vectors=True and use_numba=False, lists are accepted for vec args"
+        ):
+            generated_pass_matrices = gen_pass_matrices(use_numba=False, reshape_vectors=True)
+
+            row = [1, 2, 3, 4]
+            col = [5, 6, 7, 8]
+            mat = np.random.random((2, 2))
+
+            out_row, out_col, out_mat = generated_pass_matrices(row, col, mat)
+            self.assertEqual(out_row.shape, (1, 4))
+            np.testing.assert_array_equal(row, out_row.flatten())
+            self.assertEqual(out_col.shape, (4, 1))
+            np.testing.assert_array_equal(col, out_col.flatten())
+            np.testing.assert_array_equal(mat, out_mat)
+
+        # ---------------------------------------------------------------------
+
+        with self.subTest(msg="IndexError is raised if a list vector arg is too long"):
+            generated_pass_matrices = gen_pass_matrices(use_numba=False, reshape_vectors=True)
+
+            row = [1, 2, 3, 4, 5]
+            col = [5, 6, 7, 8]
+            mat = np.random.random((2, 2))
+
+            with self.assertRaises(IndexError):
+                generated_pass_matrices(row, col, mat)
 
     def test_sparse_output_python(self) -> None:
         """

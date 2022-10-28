@@ -19,13 +19,25 @@ class LieGroupOps(object):
 
     @staticmethod
     def from_tangent(vec, epsilon):
-        # type: (numpy.ndarray, float) -> sym.SphericalCameraCal
+        # type: (T.Union[T.Sequence[float], numpy.ndarray], float) -> sym.SphericalCameraCal
 
         # Total ops: 0
 
         # Input arrays
-        if len(vec.shape) == 1:
+        if not isinstance(vec, numpy.ndarray):
+            if len(vec) != 9:
+                raise IndexError(
+                    "vec is expected to have length 9; instead had length {}".format(len(vec))
+                )
+            vec = numpy.array(vec).reshape((9, 1))
+        elif vec.shape == (9,):
             vec = vec.reshape((9, 1))
+        elif vec.shape != (9, 1):
+            raise IndexError(
+                "vec is expected to have shape (9, 1) or (9,); instead had shape {}".format(
+                    vec.shape
+                )
+            )
 
         # Intermediate terms (0)
 
@@ -68,14 +80,26 @@ class LieGroupOps(object):
 
     @staticmethod
     def retract(a, vec, epsilon):
-        # type: (sym.SphericalCameraCal, numpy.ndarray, float) -> sym.SphericalCameraCal
+        # type: (sym.SphericalCameraCal, T.Union[T.Sequence[float], numpy.ndarray], float) -> sym.SphericalCameraCal
 
         # Total ops: 9
 
         # Input arrays
         _a = a.data
-        if len(vec.shape) == 1:
+        if not isinstance(vec, numpy.ndarray):
+            if len(vec) != 9:
+                raise IndexError(
+                    "vec is expected to have length 9; instead had length {}".format(len(vec))
+                )
+            vec = numpy.array(vec).reshape((9, 1))
+        elif vec.shape == (9,):
             vec = vec.reshape((9, 1))
+        elif vec.shape != (9, 1):
+            raise IndexError(
+                "vec is expected to have shape (9, 1) or (9,); instead had shape {}".format(
+                    vec.shape
+                )
+            )
 
         # Intermediate terms (0)
 

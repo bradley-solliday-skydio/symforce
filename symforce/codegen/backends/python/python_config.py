@@ -53,6 +53,8 @@ class PythonConfig(CodegenConfig):
         return [
             ("function/FUNCTION.py.jinja", f"{generated_file_name}.py"),
             ("function/__init__.py.jinja", "__init__.py"),
+            ("ops/__init__.py.jinja", "util/__init__.py"),
+            ("common.py.jinja", "util/common.py"),
         ]
 
     def printer(self) -> CodePrinter:

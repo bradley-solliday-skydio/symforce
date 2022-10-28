@@ -222,6 +222,12 @@ def generate(config: CodegenConfig, output_dir: str = None) -> str:
             data={},
         )
 
+        templates.add(
+            template_path=Path("common.py.jinja"),
+            output_path=package_dir / "util" / "common.py",
+            data={},
+        )
+
         # Package init
         templates.add(
             template_path=Path("geo_package", "__init__.py.jinja"),

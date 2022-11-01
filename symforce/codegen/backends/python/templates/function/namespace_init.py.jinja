@@ -2,3 +2,7 @@
  # SymForce - Copyright 2022, Skydio, Inc.
  # This source code is under the Apache 2.0 license found in the LICENSE file.
  # ---------------------------------------------------------------------------- #}
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore  # mypy issue #1422
+{% if pkg_namespace == "sym" %}
+from ._init import *
+{% endif %}

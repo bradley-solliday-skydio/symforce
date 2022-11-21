@@ -64,7 +64,7 @@ def integrate_state(
     Update the given preintegrated state with the given IMU measurement in body frame.
     """
     w_ij, p_ij, v_ij = state[0:3, 0], state[3:6, 0], state[6:9, 0]
-    dt22 = 0.5 * dt * sf.Abs(dt)
+    dt22 = 0.5 * dt * sf.Abs(dt) # Question by, Brad: why is  is this dt*|dt|? and not dt^2?
 
     R_ij = sf.Rot3.from_tangent(w_ij, epsilon=epsilon)
     R_ik = R_ij.retract(gyro * dt, epsilon=epsilon)

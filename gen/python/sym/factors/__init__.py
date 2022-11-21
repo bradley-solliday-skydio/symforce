@@ -4,4 +4,4 @@
 # Do NOT modify by hand.
 # -----------------------------------------------------------------------------
 
-from .imu_preintegration_update import imu_preintegration_update
+from .internal_imu_factor import internal_imu_factor

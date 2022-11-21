@@ -27,6 +27,7 @@ from symforce.codegen import slam_factors_codegen
 from symforce.codegen import sym_util_package_codegen
 from symforce.codegen import template_util
 from symforce.slam.imu_preintegration.generate import generate_imu_preintegration
+from symforce.slam.imu_preintegration.generate_manifold import generate_imu_manifold_preintegration
 from symforce.test_util import TestCase
 from symforce.test_util import symengine_only
 
@@ -98,6 +99,10 @@ class SymforceGenCodegenTest(TestCase):
                 config=config,
                 output_dir=Path(output_dir) / "sym" / "factors",
             )
+            generate_imu_manifold_preintegration(
+                config=config,
+                output_dir=Path(output_dir) / "sym" / "factors",
+            )
         template_util.render_template(
             template_dir=config.template_dir(),
             template_path="setup.py.jinja",
@@ -157,6 +162,10 @@ class SymforceGenCodegenTest(TestCase):
         geo_factors_codegen.generate(output_dir / "sym")
         slam_factors_codegen.generate(output_dir / "sym")
         generate_imu_preintegration(
+            config=config,
+            output_dir=output_dir / "sym" / "factors",
+        )
+        generate_imu_manifold_preintegration(
             config=config,
             output_dir=output_dir / "sym" / "factors",
         )

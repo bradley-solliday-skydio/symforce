@@ -286,6 +286,8 @@ if(SYMFORCE_BUILD_CC_SYM)
   add_subdirectory(symforce/pybind)
 endif()
 
+add_subdirectory(symforce/slam)
+
 
 # ==============================================================================
 # Examples, Benchmarks, and Tests

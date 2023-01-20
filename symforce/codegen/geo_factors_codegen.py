@@ -3,6 +3,8 @@
 # This source code is under the Apache 2.0 license found in the LICENSE file.
 # ----------------------------------------------------------------------------
 
+import functools
+import inspect
 from pathlib import Path
 
 import symforce.symbolic as sf
@@ -83,29 +85,162 @@ def prior_factor(
     return residual
 
 
+def get_arg_index(func: T.Callable, arg: str) -> int:
+    func_parameters = inspect.signature(func).parameters
+    try:
+        return list(func_parameters).index(arg)
+    except ValueError as error:
+        raise ValueError(f"{arg} is not an argument of {func}") from error
+
+
+def modify_argument(
+    core_func: T.Callable, arg_to_modify: str, new_arg_type: T.Type, modification: T.Callable
+) -> T.Callable:
+    arg_index = get_arg_index(core_func, arg_to_modify)
+
+    @functools.wraps(core_func)
+    def wrapper(*args: T.Any, **kwargs: T.Any) -> T.Any:
+        args_list = list(args)
+        if arg_index < len(args):
+            # Then arg_to_modify was passed in args
+            args_list[arg_index] = modification(args[arg_index])
+        else:
+            # arg_to_modify should have been passed in kwargs
+            try:
+                kwargs[arg_to_modify] = modification(kwargs[arg_to_modify])
+            except KeyError as error:
+                raise TypeError(f"{wrapper} missing required argument {arg_to_modify}") from error
+
+        return core_func(*args_list, **kwargs)
+
+    wrapper.__annotations__ = dict(wrapper.__annotations__, **{arg_to_modify: new_arg_type})
+
+    return wrapper
+
+
+def is_not_fixed_size_square_matrix(type_t: T.Type) -> bool:
+    return (
+        not issubclass(type_t, sf.Matrix)
+        or type_t == sf.Matrix
+        or type_t.SHAPE[0] != type_t.SHAPE[1]
+    )
+
+
+def _get_sqrt_info_dim(func: T.Callable) -> int:
+    if "sqrt_info" in func.__annotations__:
+        sqrt_info_type = func.__annotations__["sqrt_info"]
+        if is_not_fixed_size_square_matrix(sqrt_info_type):
+            raise ValueError(
+                f"""Expected sqrt_info to be annotated as a fixed size square matrix. Instead
+                found {sqrt_info_type}. Either fix annotation or explicitly pass in expected number
+                of dimensions of sqrt_info."""
+            )
+        return sqrt_info_type.SHAPE[0]
+    else:
+        raise ValueError(
+            "sqrt_info missing annotation. Either add one or explicitly pass in expected number of dimensions"
+        )
+
+
+def isotropic_sqrt_info_wrapper(func: T.Callable, sqrt_info_dim: int = None) -> T.Callable:
+    if sqrt_info_dim is None:
+        sqrt_info_dim = _get_sqrt_info_dim(func)
+
+    return modify_argument(
+        func,
+        "sqrt_info",
+        T.Scalar,
+        lambda sqrt_info: sqrt_info * sf.M.eye(sqrt_info_dim, sqrt_info_dim),
+    )
+
+
+def diagonal_sqrt_info_wrapper(func: T.Callable, sqrt_info_dim: int = None) -> T.Callable:
+    if sqrt_info_dim is None:
+        sqrt_info_dim = _get_sqrt_info_dim(func)
+
+    return modify_argument(
+        func,
+        "sqrt_info",
+        type(sf.M(sqrt_info_dim, 1)),
+        sf.M.diag,
+    )
+
+
+def generate_with_alternate_sqrt_infos(
+    output_dir: T.Openable,
+    func: T.Callable,
+    name: str,
+    which_args: T.Sequence[str],
+    input_types: T.Sequence[T.ElementOrType] = None,
+    sqrt_info_dim: int = None,
+    output_names: T.Sequence[str] = None,
+    docstring: str = None,
+) -> None:
+
+    common_header = Path(output_dir, name + ".h")
+    common_header.parent.mkdir(exist_ok=True, parents=True)
+
+    sqrt_info_index = get_arg_index(func, "sqrt_info")
+
+    for func_variant, variant_name in [
+        (func, f"{name}_square"),
+        (isotropic_sqrt_info_wrapper(func, sqrt_info_dim), f"{name}_isotropic"),
+        (diagonal_sqrt_info_wrapper(func, sqrt_info_dim), f"{name}_diagonal"),
+    ]:
+        if input_types is None:
+            variant_input_types = None
+        else:
+            sqrt_info_type = (
+                input_types[sqrt_info_index]
+                if func == func_variant
+                else func_variant.__annotations__["sqrt_info"]
+            )
+            variant_input_types = [
+                t if n != sqrt_info_index else sqrt_info_type for n, t in enumerate(input_types)
+            ]
+        Codegen.function(
+            func=func_variant,
+            input_types=variant_input_types,
+            output_names=output_names,
+            config=CppConfig(),
+            docstring=docstring,
+        ).with_linearization(name=name, which_args=which_args).generate_function(
+            Path(output_dir, name),
+            skip_directory_nesting=True,
+            generated_file_name=variant_name + ".h",
+        )
+
+        with common_header.open("a") as f:
+            f.write(f'#include "./{name}/{variant_name}.h"\n')
+
+
 def generate_between_factors(types: T.Sequence[T.Type], output_dir: T.Openable) -> None:
     """
     Generates between factors for each type in types into output_dir.
     """
     for cls in types:
         tangent_dim = ops.LieGroupOps.tangent_dim(cls)
-        between_codegen = Codegen.function(
+        generate_with_alternate_sqrt_infos(
+            output_dir,
             func=between_factor,
+            name=f"between_factor_{cls.__name__.lower()}",
+            which_args=["a", "b"],
             input_types=[cls, cls, cls, sf.M(tangent_dim, tangent_dim), sf.Symbol],
+            sqrt_info_dim=tangent_dim,
             output_names=["res"],
-            config=CppConfig(),
             docstring=get_between_factor_docstring("a_T_b"),
-        ).with_linearization(name=f"between_factor_{cls.__name__.lower()}", which_args=["a", "b"])
-        between_codegen.generate_function(output_dir, skip_directory_nesting=True)
+        )
 
-        prior_codegen = Codegen.function(
+        generate_with_alternate_sqrt_infos(
+            output_dir,
             func=prior_factor,
+            name=f"prior_factor_{cls.__name__.lower()}",
+            which_args=["value"],
             input_types=[cls, cls, sf.M(tangent_dim, tangent_dim), sf.Symbol],
+            sqrt_info_dim=tangent_dim,
             output_names=["res"],
-            config=CppConfig(),
             docstring=get_prior_docstring(),
-        ).with_linearization(name=f"prior_factor_{cls.__name__.lower()}", which_args=["value"])
-        prior_codegen.generate_function(output_dir, skip_directory_nesting=True)
+        )
 
 
 def generate_pose3_extra_factors(output_dir: T.Openable) -> None:
@@ -173,42 +308,49 @@ def generate_pose3_extra_factors(output_dir: T.Openable) -> None:
     ) -> sf.Matrix:
         return prior_factor(value.t, prior, sqrt_info, epsilon)
 
-    between_rotation_codegen = Codegen.function(
+    generate_with_alternate_sqrt_infos(
+        output_dir,
         func=between_factor_pose3_rotation,
+        name="between_factor_pose3_rotation",
+        which_args=["a", "b"],
         output_names=["res"],
-        config=CppConfig(),
         docstring=get_between_factor_docstring("a_R_b"),
-    ).with_linearization(name="between_factor_pose3_rotation", which_args=["a", "b"])
-    between_rotation_codegen.generate_function(output_dir, skip_directory_nesting=True)
+    )
 
-    between_position_codegen = Codegen.function(
+    generate_with_alternate_sqrt_infos(
+        output_dir,
         func=between_factor_pose3_position,
+        name="between_factor_pose3_position",
+        which_args=["a", "b"],
         output_names=["res"],
-        config=CppConfig(),
         docstring=get_between_factor_docstring("a_t_b"),
-    ).with_linearization(name="between_factor_pose3_position", which_args=["a", "b"])
-    between_position_codegen.generate_function(output_dir, skip_directory_nesting=True)
+    )
 
-    between_translation_norm_codegen = Codegen.function(
-        func=between_factor_pose3_translation_norm, output_names=["res"], config=CppConfig()
-    ).with_linearization(name="between_factor_pose3_translation_norm", which_args=["a", "b"])
-    between_translation_norm_codegen.generate_function(output_dir, skip_directory_nesting=True)
+    generate_with_alternate_sqrt_infos(
+        output_dir,
+        func=between_factor_pose3_translation_norm,
+        name="between_factor_pose3_translation_norm",
+        which_args=["a", "b"],
+        output_names=["res"],
+    )
 
-    prior_rotation_codegen = Codegen.function(
+    generate_with_alternate_sqrt_infos(
+        output_dir,
         func=prior_factor_pose3_rotation,
+        name="prior_factor_pose3_rotation",
         output_names=["res"],
-        config=CppConfig(),
+        which_args=["value"],
         docstring=get_prior_docstring(),
-    ).with_linearization(name="prior_factor_pose3_rotation", which_args=["value"])
-    prior_rotation_codegen.generate_function(output_dir, skip_directory_nesting=True)
+    )
 
-    prior_position_codegen = Codegen.function(
+    generate_with_alternate_sqrt_infos(
+        output_dir,
         func=prior_factor_pose3_position,
+        name="prior_factor_pose3_position",
         output_names=["res"],
-        config=CppConfig(),
+        which_args=["value"],
         docstring=get_prior_docstring(),
-    ).with_linearization(name="prior_factor_pose3_position", which_args=["value"])
-    prior_position_codegen.generate_function(output_dir, skip_directory_nesting=True)
+    )
 
 
 def generate(output_dir: Path) -> None:

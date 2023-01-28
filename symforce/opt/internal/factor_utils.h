@@ -224,7 +224,7 @@ struct JacobianDispatcher<false /* is_dynamic */, false /* is_sparse */, Scalar>
 // Struct to allow partial specialization based on whether matrices are dynamic and/or sparse
 // ------------------------------------------------------------------------------------------------
 
-template <bool IsDynamic, bool IsSparse, typename Scalar>
+template <bool IsMap, bool IsDynamic, bool IsSparse, typename Scalar>
 struct HessianDispatcher {
   template <typename Functor>
   Factor<Scalar> operator()(Functor&& func, const std::vector<Key>& keys_to_func,
@@ -306,7 +306,7 @@ Factor<Scalar> HessianDynamic(Functor&& func, const std::vector<Key>& keys_to_fu
 
 /** Specialize the dispatch mechanism */
 template <bool IsSparse, typename Scalar>
-struct HessianDispatcher<true /* is_dynamic */, IsSparse, Scalar> {
+struct HessianDispatcher<false /* is_map */, true /* is_dynamic */, IsSparse, Scalar> {
   template <typename Functor>
   Factor<Scalar> operator()(Functor&& func, const std::vector<Key>& keys_to_func,
                             const std::vector<Key>& keys_to_optimize) {
@@ -365,11 +365,78 @@ Factor<Scalar> HessianFixedDense(Functor&& func, const std::vector<Key>& keys_to
 
 /** Specialize the dispatch mechanism */
 template <typename Scalar>
-struct HessianDispatcher<false /* is_dynamic */, false /* is_sparse */, Scalar> {
+struct HessianDispatcher<false /* is_map */, false /* is_dynamic */, false /* is_sparse */,
+                         Scalar> {
   template <typename Functor>
   Factor<Scalar> operator()(Functor&& func, const std::vector<Key>& keys_to_func,
                             const std::vector<Key>& keys_to_optimize) {
     return HessianFixedDense<Scalar>(std::forward<Functor>(func), keys_to_func, keys_to_optimize);
+  }
+};
+
+template <typename Scalar, typename Functor>
+Factor<Scalar> HessianMapFixedDense(Functor&& func, const std::vector<Key>& keys_to_func,
+                                    const std::vector<Key>& keys_to_optimize) {
+  // Get matrix types from function signature
+  using JacobianMat = typename HessianFuncValuesExtractor<Scalar, Functor>::JacobianMat;
+  using FunctorType = std::decay_t<Functor>;
+
+  // Get dimensions (these have already been sanity checked in Factor::Hessian)
+  constexpr int M = JacobianMat::RowsAtCompileTime;
+  constexpr int N = JacobianMat::ColsAtCompileTime;
+
+  return Factor<Scalar>(
+      [func = std::forward<Functor>(func)](const Values<Scalar>& values,
+                                           const std::vector<index_entry_t>& keys_to_func,
+                                           VectorX<Scalar>* residual, MatrixX<Scalar>* jacobian,
+                                           MatrixX<Scalar>* hessian, VectorX<Scalar>* rhs) {
+        Eigen::Map<Eigen::Matrix<Scalar, M, 1>> residual_fixed_map(nullptr);
+        Eigen::Map<Eigen::Matrix<Scalar, M, 1>>* residual_fixed_map_ptr{nullptr};
+        Eigen::Map<Eigen::Matrix<Scalar, M, N>> jacobian_fixed_map(nullptr);
+        Eigen::Map<Eigen::Matrix<Scalar, M, N>>* jacobian_fixed_map_ptr{nullptr};
+        Eigen::Map<Eigen::Matrix<Scalar, N, N>> hessian_fixed_map(nullptr);
+        Eigen::Map<Eigen::Matrix<Scalar, N, N>>* hessian_fixed_map_ptr{nullptr};
+        Eigen::Map<Eigen::Matrix<Scalar, N, 1>> rhs_fixed_map(nullptr);
+        Eigen::Map<Eigen::Matrix<Scalar, N, 1>>* rhs_fixed_map_ptr{nullptr};
+        if (residual != nullptr) {
+          residual->resize(M, 1);
+          new (&residual_fixed_map) Eigen::Map<Eigen::Matrix<Scalar, M, 1>>(residual->data());
+          residual_fixed_map_ptr = &residual_fixed_map;
+        }
+
+        if (jacobian != nullptr) {
+          jacobian->resize(M, N);
+          new (&jacobian_fixed_map) Eigen::Map<Eigen::Matrix<Scalar, M, N>>(jacobian->data());
+          jacobian_fixed_map_ptr = &jacobian_fixed_map;
+        }
+
+        if (hessian != nullptr) {
+          hessian->resize(N, N);
+          new (&hessian_fixed_map) Eigen::Map<Eigen::Matrix<Scalar, N, N>>(hessian->data());
+          hessian_fixed_map_ptr = &hessian_fixed_map;
+        }
+
+        if (rhs != nullptr) {
+          rhs->resize(N, 1);
+          new (&rhs_fixed_map) Eigen::Map<Eigen::Matrix<Scalar, N, 1>>(rhs->data());
+          rhs_fixed_map_ptr = &rhs_fixed_map;
+        }
+
+        HessianFuncValuesExtractor<Scalar, FunctorType>::Invoke(
+            func, values, keys_to_func, residual_fixed_map_ptr, jacobian_fixed_map_ptr,
+            hessian_fixed_map_ptr, rhs_fixed_map_ptr);
+      },
+      keys_to_func, keys_to_optimize);
+}
+
+/** Specialize the dispatch mechanism */
+template <typename Scalar>
+struct HessianDispatcher<true /* is_map */, false /* is_dynamic */, false /* is_sparse */, Scalar> {
+  template <typename Functor>
+  Factor<Scalar> operator()(Functor&& func, const std::vector<Key>& keys_to_func,
+                            const std::vector<Key>& keys_to_optimize) {
+    return HessianMapFixedDense<Scalar>(std::forward<Functor>(func), keys_to_func,
+                                        keys_to_optimize);
   }
 };
 
@@ -412,7 +479,7 @@ Factor<Scalar> HessianFixedSparse(Functor&& func, const std::vector<Key>& keys_t
 
 /** Specialize the dispatch mechanism */
 template <typename Scalar>
-struct HessianDispatcher<false /* is_dynamic */, true /* is_sparse */, Scalar> {
+struct HessianDispatcher<false /* is_map */, false /* is_dynamic */, true /* is_sparse */, Scalar> {
   template <typename Functor>
   Factor<Scalar> operator()(Functor&& func, const std::vector<Key>& keys_to_func,
                             const std::vector<Key>& keys_to_optimize) {

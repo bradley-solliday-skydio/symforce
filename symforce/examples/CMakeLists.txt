@@ -33,3 +33,4 @@ target_include_directories(
 # ------------------------------------------------------------------------------
 
 add_subdirectory(bundle_adjustment_in_the_large)
+add_subdirectory(investigate_opt)

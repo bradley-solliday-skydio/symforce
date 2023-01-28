@@ -105,6 +105,19 @@ Factor<Scalar> Factor<Scalar>::Hessian(Functor&& func, const std::vector<Key>& k
   return Hessian(std::forward<Functor>(func), keys, keys);
 }
 
+template <typename EigenType>
+struct IsEigenMapTypeHelper {
+  static constexpr bool value = false;
+};
+
+template <typename InnerEigenType>
+struct IsEigenMapTypeHelper<Eigen::Map<InnerEigenType>> {
+  static constexpr bool value = true;
+};
+
+template <typename EigenType>
+constexpr bool kIsEigenMapType = IsEigenMapTypeHelper<EigenType>::value;
+
 template <typename Scalar>
 template <typename Functor>
 Factor<Scalar> Factor<Scalar>::Hessian(Functor&& func, const std::vector<Key>& keys_to_func,
@@ -151,8 +164,17 @@ Factor<Scalar> Factor<Scalar>::Hessian(Functor&& func, const std::vector<Key>& k
   constexpr bool is_fixed = (M != Eigen::Dynamic) && (N != Eigen::Dynamic);
   static_assert((is_dynamic || is_fixed), "Matrices cannot be mixed fixed and dynamic.");
 
+  constexpr bool res_is_map = kIsEigenMapType<ResidualVec>;
+  constexpr bool jac_is_map = kIsEigenMapType<JacobianMat>;
+  constexpr bool hes_is_map = kIsEigenMapType<HessianMat>;
+  constexpr bool rhs_is_map = kIsEigenMapType<RhsVec>;
+  constexpr bool is_map = res_is_map && jac_is_map && hes_is_map && rhs_is_map;
+  constexpr bool is_not_map = !res_is_map && !jac_is_map && !hes_is_map && !rhs_is_map;
+  static_assert((is_map || is_not_map), "Matrices cannot be mixed map and non-map");
+  static_assert((is_fixed || is_not_map), "Eigen::Map only supported for fixed matrices");
+
   // Dispatch to either the dynamic size or fixed size implementations
-  return internal::HessianDispatcher<is_dynamic, jacobian_is_sparse, Scalar>{}(
+  return internal::HessianDispatcher<is_map, is_dynamic, jacobian_is_sparse, Scalar>{}(
       std::forward<Functor>(func), keys_to_func, keys_to_optimize);
 }
 

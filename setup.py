@@ -491,6 +491,7 @@ setup(
             "pip-tools<6.11",
             "pybind11-stubgen",
             "pylint",
+            "lazy-object-proxy>=1.9.0",
             "types-jinja2",
             "types-pygments",
             "types-requests",

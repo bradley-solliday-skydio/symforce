@@ -21,6 +21,10 @@ jobs:
           - C: gcc-11
             CXX: g++-11
             repos: ['"ppa:ubuntu-toolchain-r/test"']
+        exclude:
+          # NOTE(brad): pip dependency installation issue for this combination
+          - os: ubuntu-18.04
+            python: python3.11
         include:
           # gcc 5
           - os: ubuntu-18.04

@@ -1,0 +1,32 @@
+name: pip3-ubuntu-build
+on: [push]
+jobs:
+  pip3-ubuntu-build:
+    runs-on: ubuntu-22.04
+    strategy:
+      matrix:
+        compiler: [{C: gcc-7, CXX: g++-7}, {C: gcc-11, CXX: g++-11}]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@v3
+      #- run: conda install -c conda-forge doxygen gmp pandoc
+      - name: Install some stuff
+        run: sudo apt-get install doxygen libgmp-dev pandoc ${{ matrix.compiler.C }} ${{ matrix.compiler.CXX }} -y
+      # pip must be at least version 20.3 to avoid issues with jinja2 in requirements.txt
+      - name: Install python dependencies
+        run: pip3 install -r requirements.txt
+      #  uses: py-actions/py-dependency-install@v3
+      - name: Run cmake build
+        run: |
+          mkdir build
+          cd build
+          cmake .. -D CMAKE_C_COMPILER=${{ matrix.compiler.C }} -D CMAKE_CXX_COMPILER=${{ matrix.compiler.CXX }}
+          make -j $(nproc)
+      - name: Run C++ tests
+        run: |
+          cd build
+          ctest
+      - name: Run python tests
+        run: |
+          pip3 install build/lcmtypes/python2.7
+          make -j2 test

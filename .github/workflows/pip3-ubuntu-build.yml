@@ -1,0 +1,10 @@
+name: pip3-ubuntu-build
+on: [push]
+jobs:
+  pip3-ubuntu-build:
+    runs-on: ubuntu-20.04
+    strategy:
+      matrix:
+        vals: [{x: 1, y: 10}, {x: 2, y: 20}, {x: 3, y: 30}]
+    steps:
+      - run: echo "${{ matrix.vals.x }} and ${{ matrix.vals.y }}"

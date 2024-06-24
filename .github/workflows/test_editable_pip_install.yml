@@ -22,6 +22,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: print pip version
+        run: python3 -m pip --version
+
+      - name: print python version
+        run: python3 --version
+
       - name: install dev_requirements.txt
         run: python3 -m pip install -r dev_requirements.txt
 
